@@ -1,0 +1,6 @@
+-Quitar error de lineas del campo que se muestran a lo lejos.
+-Crear red de portería curva.Crear red con cuerdas
+-Eliminar jitter de la flecha.
+-Añadir sonido cuando el balón golpee cosas
+-Pulir el movimiento de la camara cuando pierdes la posesión del balón(pej un disparo)
+-optimización de encontrar el primer jugador en alcanzar la trayectoria. No hace falta hacer calculos por encima de la altura máxima a la que saltan los jugadores.

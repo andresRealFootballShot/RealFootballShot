@@ -1,0 +1,1 @@
+Mirar al balón cuando supera un limite de la pantalla.
