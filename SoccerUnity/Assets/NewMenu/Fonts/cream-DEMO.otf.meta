@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 725bbf3130e58b6438c5d34a7908f781
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - cream
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 91aa06db2a1548c4294f8d8a8baa92ff, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

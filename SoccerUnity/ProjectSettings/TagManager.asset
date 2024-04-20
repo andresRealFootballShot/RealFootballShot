@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - BodyNet
+  - ComponentsPlayer
+  - Menu
+  - MyPlayerNet
+  - Rigid
+  - ObjectGoal
+  - Bullet
+  - Spawns
+  - Energy
+  - CenterScreenPoint
+  - TimerMatch
+  - ComponentsPortero
+  - MatchSequence
+  - SaqueDeBandaCtrl
+  - SaqueDeBanda
+  - ChooseTeam
+  - MatchData
+  - Teams
+  - TeamRed
+  - TeamBlue
+  - SpawnBall
+  - CornerCtrl
+  - FueraDeJuego
+  - Porteria
+  - Goal
+  - GoalKeeper
+  - TypeMatchData
+  - PosInitCamera
+  - MyPlayer
+  - Bot
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - MatchData
+  - GoalKeeper
+  - ObjectGoal
+  - GoalCollider
+  - PlayerWall
+  - NetObjectGoal
+  - Wall
+  - Body
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
