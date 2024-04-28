@@ -13,7 +13,7 @@ using System;
 [BurstCompile]
 public struct CullPassPointsJob : IJobEntityBatch
 {
-    [ReadOnly] public BufferTypeHandle<LonelyPointElement> lonelyPointsHandle;
+    public BufferTypeHandle<LonelyPointElement2> lonelyPointsHandle;
     [ReadOnly] public BufferTypeHandle<PlayerPositionElement> playerPositionElementHandle;
     [ReadOnly] public ComponentTypeHandle<CullPassPointsComponent> cullPassPointsParamsHandle;
     [ReadOnly] public ComponentTypeHandle<BallParamsComponent> BallParamsComponentHandle;
@@ -21,7 +21,7 @@ public struct CullPassPointsJob : IJobEntityBatch
     public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
     {
 
-        BufferAccessor<LonelyPointElement> lonelyPointsBuffer = batchInChunk.GetBufferAccessor(lonelyPointsHandle);
+        BufferAccessor<LonelyPointElement2> lonelyPointsBuffer = batchInChunk.GetBufferAccessor(lonelyPointsHandle);
         BufferAccessor<PlayerPositionElement> playerPositionElementBuffer = batchInChunk.GetBufferAccessor(playerPositionElementHandle);
         NativeArray<CullPassPointsComponent> cullPassPointsParamsBuffer = batchInChunk.GetNativeArray(cullPassPointsParamsHandle);
         NativeArray<BallParamsComponent> BallParamsComponentBuffer = batchInChunk.GetNativeArray(BallParamsComponentHandle);
@@ -32,7 +32,7 @@ public struct CullPassPointsJob : IJobEntityBatch
         for (int i = 0; i < lonelyPointsBuffer.Length; i++)
         {
 
-            DynamicBuffer<LonelyPointElement> lonelyPoints = lonelyPointsBuffer[i];
+            DynamicBuffer<LonelyPointElement2> lonelyPoints = lonelyPointsBuffer[i];
             DynamicBuffer<PlayerPositionElement> PlayerPositions = playerPositionElementBuffer[i];
             CullPassPointsComponent CullPassPointsParams = cullPassPointsParamsBuffer[i];
             BallParamsComponent BallParams = BallParamsComponentBuffer[i];
@@ -50,7 +50,7 @@ public struct CullPassPointsJob : IJobEntityBatch
             float vf = BallParams.g / BallParams.k;
             for (int j = 0; j < CullPassPointsParams.sizeLonelyPoints; j++)
             {
-                LonelyPointElement lonelyPoint = lonelyPoints[j];
+                LonelyPointElement2 lonelyPoint = lonelyPoints[j];
                 Vector3 lonelyPosition = new Vector3(lonelyPoint.position.x, 0, lonelyPoint.position.y);
                 int attackIndex = -1;
                 float reachTime = GetTimeToReachPosition(ref PlayerPositions, ref PlayerGenericParams, attackIndexStart, attackIndexEnd, lonelyPosition, ref attackIndex);
@@ -73,22 +73,26 @@ public struct CullPassPointsJob : IJobEntityBatch
                 TestResult.lonelyPosition = lonelyPosition;
                 TestResult.parabolicReachBall = true;
                 TestResult.straightReachBall = true;
+                lonelyPoint.parabolicReachBall = true;
+                lonelyPoint.straightReachBall = true;
                 if (minDistancePlayer_Ball > 0)
                 {
                     TestResult.straightReachBall = false;
+                    lonelyPoint.straightReachBall = false;
                     if (defenseReachTimeResult < getV0DOTSResult.ballReachTargetPositionTime)
                     {
                         
                         bool parabolicReachBall = getParabolicPass_isPosible(ref PlayerPositions, defenseIndexStart, defenseIndexEnd, playerIndexStraightPass, ref PlayerGenericParams, lonelyPosition, BallParams.BallPosition, reachTime, defenseReachTimeResult, BallParams.k, vf, ref VOParams, PlayerGenericParams.maxKickForce, ref TestResult);
                         TestResult.parabolicReachBall = parabolicReachBall;
+                        lonelyPoint.parabolicReachBall = parabolicReachBall;
                     }
                 }
                 else
                 {
                     //Debug.Log("aaaaa ballReachTargetPositionTime=" + getV0DOTSResult.ballReachTargetPositionTime + " defenseReachTime=" + defenseReachTimeResult);
                 }
-                
 
+                lonelyPoints[j] = lonelyPoint;
 
             }
             TestResultBuffer[i] = TestResult;

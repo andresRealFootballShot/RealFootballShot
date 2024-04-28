@@ -32,6 +32,26 @@ namespace FieldTriangleV2
             this.isBarycenter = isBarycenter;
         }
     }
+    public struct LonelyPointElement2 : IBufferElementData
+    {
+        public Vector2 position;
+        public int index;
+        public bool straightReachBall, parabolicReachBall;
+        public LonelyPointElement2(Vector2 position, int index)
+        {
+            this.position = position;
+            this.index = index;
+            straightReachBall = false;
+            parabolicReachBall = false;
+        }
+        public LonelyPointElement2(LonelyPointElement lonelyPointElement)
+        {
+            this.position = lonelyPointElement.position;
+            this.index = lonelyPointElement.index;
+            straightReachBall = false;
+            parabolicReachBall = false;
+        }
+    }
     public struct BufferSizeComponent : IComponentData
     {
         public Entity enity;

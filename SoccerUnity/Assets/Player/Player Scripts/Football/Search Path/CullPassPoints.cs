@@ -22,8 +22,8 @@ public class CullPassPoints : MonoBehaviour
     public SearchLonelyPointsManager SearchLonelyPointsManager;
     public string teamName_Defense = "Red";
     public string teamName_Attacker = "Blue";
-    public Transform testLonelyPoint;
-    public bool test,debug;
+    public List<Transform> testLonelyPoints;
+    public bool test,debug,debugPointResults,debugPassTest;
     public List<Entity> entities = new List<Entity>();
     EntityManager entityManager;
     List<PublicPlayerData> players = new List<PublicPlayerData>();
@@ -100,12 +100,12 @@ public class CullPassPoints : MonoBehaviour
     {
         for (int i = 0; i < cullPassPointsParams.entitySize; i++)
         {
-            EntityArchetype entityArchetype = entityManager.CreateArchetype(typeof(LonelyPointElement), typeof(CullPassPointsComponent), typeof(PlayerPositionElement), typeof(BallParamsComponent),typeof(TestResultComponent));
+            EntityArchetype entityArchetype = entityManager.CreateArchetype(typeof(LonelyPointElement2), typeof(CullPassPointsComponent), typeof(PlayerPositionElement), typeof(BallParamsComponent),typeof(TestResultComponent));
             Entity entity = entityManager.CreateEntity(entityArchetype);
-            DynamicBuffer<LonelyPointElement> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement>(entity);
+            DynamicBuffer<LonelyPointElement2> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement2>(entity);
             for (int j = 0; j < cullPassPointsParams.entityPointSize; j++)
             {
-                lonelyPointElements.Add(new LonelyPointElement());
+                lonelyPointElements.Add(new LonelyPointElement2());
             }
             entities.Add(entity);
         }
@@ -137,12 +137,15 @@ public class CullPassPoints : MonoBehaviour
     {
         foreach (var entity in entities)
         {
-            DynamicBuffer<LonelyPointElement> lonelyPointElements= entityManager.GetBuffer<LonelyPointElement>(entity);
+            DynamicBuffer<LonelyPointElement2> lonelyPointElements= entityManager.GetBuffer<LonelyPointElement2>(entity);
             CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
-            Vector2 position = new Vector2(testLonelyPoint.position.x, testLonelyPoint.position.z);
-            LonelyPointElement LonelyPointElement = new LonelyPointElement(position, 0, false);
-            lonelyPointElements[0]= LonelyPointElement;
-            CullPassPointsComponent.sizeLonelyPoints = 1;
+            for (int i = 0; i < testLonelyPoints.Count; i++)
+            {
+                Vector2 position = new Vector2(testLonelyPoints[i].position.x, testLonelyPoints[i].position.z);
+                LonelyPointElement2 LonelyPointElement = new LonelyPointElement2(position, 0);
+                lonelyPointElements[i] = LonelyPointElement;
+            }
+            CullPassPointsComponent.sizeLonelyPoints = testLonelyPoints.Count;
             entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
         }
     }
@@ -242,28 +245,59 @@ public class CullPassPoints : MonoBehaviour
         //yield return new WaitForSeconds(TestResultComponent.ballReachTargetPositionTime - TestResultComponent.attackReachTime);
         //print(MatchComponents.ballRigidbody.velocity.magnitude);
     }
-
+#if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         if (Application.isPlaying && debug)
         {
-            Entity entity = entities[0];
-            TestResultComponent TestResultComponent = entityManager.GetComponentData<TestResultComponent>(entity);
-            Gizmos.color = Color.green;
-            Gizmos.DrawSphere(TestResultComponent.closestPosition + Vector3.up * 0.5f, 0.1f);
-            
-#if UNITY_EDITOR
+
+
+            if (debugPassTest)
+            {
+                Entity entity = entities[0];
+                TestResultComponent TestResultComponent = entityManager.GetComponentData<TestResultComponent>(entity);
+                Gizmos.color = Color.green;
+                Gizmos.DrawSphere(TestResultComponent.closestPosition + Vector3.up * 0.5f, 0.1f);
+
                 GUIStyle style = new GUIStyle();
                 style.fontSize = 10;
                 style.normal.textColor = Color.yellow;
                 Handles.color = Color.green;
-            //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
-            string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime +" defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
-            //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
+                //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
+                string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
+                //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
                 Handles.Label(TestResultComponent.closestPosition + Vector3.up * 1.0f, text, style);
-#endif
+            }
+            if (debugPointResults)
+            {
+                foreach (var entity2 in entities)
+                {
+                    CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity2);
+
+                    DynamicBuffer<LonelyPointElement2> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement2>(entity2);
+                    for (int i = 0; i < CullPassPointsComponent.sizeLonelyPoints; i++)
+                    {
+                        
+
+                        LonelyPointElement2 lonelyPointElement = lonelyPointElements[i];
+                        if (lonelyPointElement.index != 0) continue;
+                        Vector3 pos = new Vector3(lonelyPointElements[i].position.x, 0, lonelyPointElements[i].position.y);
+                        Gizmos.color = lonelyPointElement.parabolicReachBall ? Color.green : Color.red;
+                        Gizmos.DrawSphere(pos + Vector3.up * 0.25f, 0.2f);
+                        GUIStyle style = new GUIStyle();
+                        style.fontSize = 10;
+                        style.normal.textColor = lonelyPointElement.parabolicReachBall ? Color.green : Color.red;
+                        //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
+                        string text = "straightReachBall=" + lonelyPointElement.straightReachBall + " parabolicReachBall=" + lonelyPointElement.parabolicReachBall + " i="+lonelyPointElement.index;
+                        //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
+                        Handles.Label(pos + Vector3.up * 0.5f, text, style);
+                    }
+                }
+            }
+
         }
     }
+#endif
     public void PlacePoints2()
     {
         Entity searchLonelyPointsEntity = SearchLonelyPointsManager.searchLonelyPointsEntitys[teamName_Defense];
@@ -277,20 +311,20 @@ public class CullPassPoints : MonoBehaviour
         int lonelyPointCount = 0;
         Entity entity = entities[entityIndex];
         CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
-        DynamicBuffer<LonelyPointElement> lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement>(entity);
-        lonelyPointElements2.Clear();
+        DynamicBuffer<LonelyPointElement2> lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
+        //lonelyPointElements2.Clear();
         for (int i = 0; i < bufferSizeComponent.lonelyPointsResultSize; i++)
         {
-            
 
+            LonelyPointElement2 lonelyPointElement2 = new LonelyPointElement2(lonelyPointElements[i]);
+            
+            lonelyPointElements2[lonelyPointCount] = lonelyPointElement2;
             lonelyPointCount++;
-            lonelyPointElements2.Add(lonelyPointElements[i]);
             if (lonelyPointCount>=cullPassPointsParams.entityPointSize)
             {
                 entityIndex++;
                 entity = entities[entityIndex];
-                lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement>(entity);
-                lonelyPointElements2.Clear();
+                lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
                 CullPassPointsComponent.sizeLonelyPoints = lonelyPointCount;
                 entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
                 lonelyPointCount = 0;
@@ -301,6 +335,7 @@ public class CullPassPoints : MonoBehaviour
         CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
         CullPassPointsComponent.sizeLonelyPoints = lonelyPointCount;
         entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
+        //lonelyPointElements.Clear();
     }
     private void TestPlayers()
     {

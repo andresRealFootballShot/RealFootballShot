@@ -16,7 +16,7 @@ public class CullPassPointsSystem : SystemBase
     {
         var description1 = new EntityQueryDesc()
         {
-            All = new ComponentType[] { typeof(LonelyPointElement), typeof(CullPassPointsComponent), typeof(PlayerPositionElement) }
+            All = new ComponentType[] { typeof(LonelyPointElement2), typeof(CullPassPointsComponent), typeof(PlayerPositionElement) }
         };
         cullPassPointsQuery = this.GetEntityQuery(description1);
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -41,7 +41,7 @@ public class CullPassPointsSystem : SystemBase
         }
         var CullPassPointsJob = new CullPassPointsJob();
 
-        CullPassPointsJob.lonelyPointsHandle = this.GetBufferTypeHandle<LonelyPointElement>(true);
+        CullPassPointsJob.lonelyPointsHandle = this.GetBufferTypeHandle<LonelyPointElement2>(false);
         CullPassPointsJob.playerPositionElementHandle = this.GetBufferTypeHandle<PlayerPositionElement>(true);
         CullPassPointsJob.cullPassPointsParamsHandle = this.GetComponentTypeHandle<CullPassPointsComponent>(true);
         CullPassPointsJob.BallParamsComponentHandle = this.GetComponentTypeHandle<BallParamsComponent>(true);
