@@ -216,7 +216,7 @@ namespace DOTS_ChaserDataCalculation
                 if (distance<= getV0Params.accuracy)
                 {
                     Vector3 vt = getVelocityAtTime(ref currentPath, t, v0);
-                    result = new GetV0DOTSResult(true, vt.magnitude, dir * centralV0,false,false,false,false);
+                    result = new GetV0DOTSResult(true, vt.magnitude, dir * centralV0,false,false,false,false,t,t);
                     return;
                 }
                 if (target < distance2)

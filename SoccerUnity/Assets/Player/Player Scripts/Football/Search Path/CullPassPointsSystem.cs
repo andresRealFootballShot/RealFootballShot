@@ -23,7 +23,7 @@ public class CullPassPointsSystem : SystemBase
     }
     protected override void OnUpdate()
     {
-        if (!CullPassPoints.test)
+        if (CullPassPoints.test)
         {
             //CullPassPoints.PlacePoints();
             CullPassPoints.PlaceTestLonelyPoint();

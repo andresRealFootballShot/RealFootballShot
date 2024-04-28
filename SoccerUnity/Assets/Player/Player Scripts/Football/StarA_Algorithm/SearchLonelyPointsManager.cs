@@ -127,7 +127,7 @@ namespace NextMove_Algorithm
             DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointsEntity);
             if (testingMode)
             {
-                for (int i = 0; i < pointTransforms.Count; i++)
+                for (int i = 4; i < pointTransforms.Count; i++)
                 {
                     PointElement pointElement = points[i];
                     pointElement.index = i;
@@ -146,13 +146,13 @@ namespace NextMove_Algorithm
                 if (Teams.teamsList.Exists(x => x.TeamName.Equals(teamName)))
                 {
                     Team team = Teams.teamsList.Find(x => x.TeamName.Equals(teamName));
-                    for (int i = 0; i < team.publicPlayerDatas.Count; i++)
+                    for (int i = 0; i < team.publicPlayerDatas.Count ; i++)
                     {
-                        PointElement pointElement = points[i];
-                        pointElement.index = i;
+                        PointElement pointElement = points[i + extraPoints];
+                        pointElement.index = i + extraPoints;
                         pointElement.position.x = team.publicPlayerDatas[i].position.x;
                         pointElement.position.y = team.publicPlayerDatas[i].position.z;
-                        points[i] = pointElement;
+                        points[i + extraPoints] = pointElement;
                     }
                     bufferSizeComponent.pointSize = team.publicPlayerDatas.Count + extraPoints;
                     bufferSizeComponent.edgesResultSize = 0;
@@ -173,7 +173,7 @@ namespace NextMove_Algorithm
             {
                 foreach (var searchLonelyPointsEntity in searchLonelyPointsEntitys.Values)
                 {
-                    int i = searchLonelyPointsParams.teamSize;
+                    int i = 0;
                     DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointsEntity);
                     foreach (var corner in MatchComponents.footballField.cornersComponents)
                     {

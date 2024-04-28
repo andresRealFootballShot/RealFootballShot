@@ -15,8 +15,16 @@ public static class MyFunctions
         {
             x1 = (-b + Mathf.Sqrt(sqrtpart)) / (2 * a);
             x2 = (-b - Mathf.Sqrt(sqrtpart)) / (2 * a);
-            result1 = x1;
-            result2 = x2;
+            if (x1 > x2)
+            {
+                result1 = x2;
+                result2 = x1;
+            }
+            else
+            {
+                result1 = x1;
+                result2 = x2;
+            }
             return true;
         }
         else if (sqrtpart < 0)
@@ -34,7 +42,7 @@ public static class MyFunctions
         }
 
     }
-    public static void RemoveListener(emptyDelegate listeners,emptyDelegate targetListener)
+    public static void RemoveListener(emptyDelegate listeners, emptyDelegate targetListener)
     {
         if (listeners != null)
         {
@@ -47,7 +55,7 @@ public static class MyFunctions
             }
         }
     }
-    public static List<T> DictionaryValuesToList<U,T>(Dictionary<U, T>.ValueCollection values)
+    public static List<T> DictionaryValuesToList<U, T>(Dictionary<U, T>.ValueCollection values)
     {
         List<T> list = new List<T>();
         list.AddRange(values);
@@ -111,7 +119,7 @@ public static class MyFunctions
             return false;
         }
     }
-    public static bool GetClosestPointOnFiniteLine(Vector3 point, Vector3 line_start, Vector3 line_end,out Vector3 result)
+    public static bool GetClosestPointOnFiniteLine(Vector3 point, Vector3 line_start, Vector3 line_end, out Vector3 result)
     {
         if (line_end == Vector3.positiveInfinity || line_end == Vector3.negativeInfinity || Vector3IsNan(line_end))
         {
@@ -187,7 +195,7 @@ public static class MyFunctions
     }
     public static Vector3 GetClosestPointOnFiniteLine(Vector3 point, Vector3 line_start, Vector3 line_end)
     {
-        if(line_end == Vector3.positiveInfinity || line_end == Vector3.negativeInfinity || Vector3IsNan(line_end))
+        if (line_end == Vector3.positiveInfinity || line_end == Vector3.negativeInfinity || Vector3IsNan(line_end))
         {
             return line_start;
         }
@@ -196,6 +204,18 @@ public static class MyFunctions
         line_direction.Normalize();
         float project_length = Mathf.Clamp(Vector3.Dot(point - line_start, line_direction), 0f, line_length);
         return line_start + line_direction * project_length;
+    }
+    public static float GetClosestLenghtOnFiniteLine(Vector3 point, Vector3 line_start, Vector3 line_end)
+    {
+        if (line_end == Vector3.positiveInfinity || line_end == Vector3.negativeInfinity || Vector3IsNan(line_end))
+        {
+            return 0;
+        }
+        Vector3 line_direction = line_end - line_start;
+        float line_length = line_direction.magnitude;
+        line_direction.Normalize();
+        float project_length = Mathf.Clamp(Vector3.Dot(point - line_start, line_direction), 0f, line_length);
+        return project_length;
     }
     public static float DistancePointAndFiniteLine(Vector3 point, Vector3 line_start, Vector3 line_end)
     {
@@ -215,7 +235,7 @@ public static class MyFunctions
     {
         return line_start + Vector3.Project(point - line_start, dirLine);
     }
-    public static List<GameObject> GetChilds(GameObject parent,bool includeParent)
+    public static List<GameObject> GetChilds(GameObject parent, bool includeParent)
     {
         List<GameObject> list = new List<GameObject>();
         if (includeParent)
@@ -232,7 +252,7 @@ public static class MyFunctions
         }
         return list;
     }
-    public static List<GameObject> GetChildsWithComponent<T>(GameObject parent,bool includeParent, bool onlyActives)
+    public static List<GameObject> GetChildsWithComponent<T>(GameObject parent, bool includeParent, bool onlyActives)
     {
         List<GameObject> list = new List<GameObject>();
         if (includeParent)
@@ -275,7 +295,7 @@ public static class MyFunctions
         }
         return list;
     }
-    public static List<T> GetComponentsInChilds<T>(GameObject parent,bool includeParent,bool onlyActives)
+    public static List<T> GetComponentsInChilds<T>(GameObject parent, bool includeParent, bool onlyActives)
     {
         List<T> list = new List<T>();
         if (includeParent)
@@ -340,7 +360,7 @@ public static class MyFunctions
                     return parent.gameObject.GetComponent<T>();
                 }
             }
-           T t = GetComponentInChilds<T>(child.gameObject, includeParent);
+            T t = GetComponentInChilds<T>(child.gameObject, includeParent);
             if (t != null)
             {
                 return t;
@@ -348,7 +368,7 @@ public static class MyFunctions
         }
         return null;
     }
-    public static GameObject FindChildContainsName(GameObject parent,string name, bool includeParent)
+    public static GameObject FindChildContainsName(GameObject parent, string name, bool includeParent)
     {
         if (includeParent)
         {
@@ -366,7 +386,7 @@ public static class MyFunctions
                     return child.gameObject;
                 }
             }
-            GameObject g = FindChildContainsName(child.gameObject,name, includeParent);
+            GameObject g = FindChildContainsName(child.gameObject, name, includeParent);
             if (g != null)
             {
                 return g;
@@ -374,7 +394,7 @@ public static class MyFunctions
         }
         return null;
     }
-    public static bool GetKeyByValue<T, W>(this Dictionary<T, W> dict, W val,out T result)
+    public static bool GetKeyByValue<T, W>(this Dictionary<T, W> dict, W val, out T result)
     {
         result = default;
         bool valueIsContained = false;
@@ -389,9 +409,9 @@ public static class MyFunctions
         }
         return valueIsContained;
     }
-    public static GameObject GetGameObjectWithValue<T>(GameObject parent,T value)
+    public static GameObject GetGameObjectWithValue<T>(GameObject parent, T value)
     {
-        List<MonoVariable<T>> list = MyFunctions.GetComponentsInChilds<MonoVariable<T>>(parent,true,true);
+        List<MonoVariable<T>> list = MyFunctions.GetComponentsInChilds<MonoVariable<T>>(parent, true, true);
         foreach (var item in list)
         {
             if (item.Value.Equals(value))
@@ -447,7 +467,7 @@ public static class MyFunctions
     }
     public static List<T> EnumToList<T>()
     {
-       List<T> list = Enum.GetValues(typeof(T)).Cast<T>().ToList();
+        List<T> list = Enum.GetValues(typeof(T)).Cast<T>().ToList();
         return list;
     }
     public static T RandomEnum<T>()
@@ -467,7 +487,7 @@ public static class MyFunctions
     {
         return float.IsNaN(value);
     }
-    public static Vector3 setYToVector3(Vector3 vector3 , float y)
+    public static Vector3 setYToVector3(Vector3 vector3, float y)
     {
         return new Vector3(vector3.x, y, vector3.z);
     }
@@ -475,13 +495,13 @@ public static class MyFunctions
     {
         return new Vector3(vector3.x, 0, vector3.z);
     }
-    public static Vector3 setYToVector3WithClamp(Vector3 vector3,float y, float min,float max)
+    public static Vector3 setYToVector3WithClamp(Vector3 vector3, float y, float min, float max)
     {
-        return new Vector3(vector3.x, Mathf.Clamp(y,min,max), vector3.z);
+        return new Vector3(vector3.x, Mathf.Clamp(y, min, max), vector3.z);
     }
     public static Vector3 setRandomRotateAxisY(Vector3 vector3, float range)
     {
         float angle = UnityEngine.Random.Range(-range, range);
-        return Quaternion.AngleAxis(angle,Vector3.up) * vector3;
+        return Quaternion.AngleAxis(angle, Vector3.up) * vector3;
     }
 }

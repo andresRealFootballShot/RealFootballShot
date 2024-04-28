@@ -26,7 +26,7 @@ public struct GetV0DOTSResult
     public bool noRivalReachTheTargetBeforeMe, noPartnerIsAhead;
     public float differenceTimeWithRival;
     public float receiverReachTargetPositionTime,ballReachTargetPositionTime;
-    public GetV0DOTSResult(bool foundedResult, float vt, Vector3 v0, bool maximumControlSpeedReached, bool maxKickForceReached, bool noRivalReachTheTargetBeforeMe,bool noPartnerIsAhead)
+    public GetV0DOTSResult(bool foundedResult, float vt, Vector3 v0, bool maximumControlSpeedReached, bool maxKickForceReached, bool noRivalReachTheTargetBeforeMe,bool noPartnerIsAhead,float ballReachTargetPositionTime,float receiverReachTargetPositionTime)
     {
         this.foundedResult = foundedResult;
         this.vt = vt;
@@ -37,8 +37,8 @@ public struct GetV0DOTSResult
         this.noPartnerIsAhead = noPartnerIsAhead;
         v0Magnitude = v0.magnitude;
         differenceTimeWithRival = 0;
-        receiverReachTargetPositionTime = Mathf.Infinity;
-        ballReachTargetPositionTime = Mathf.Infinity;
+        this.receiverReachTargetPositionTime = receiverReachTargetPositionTime;
+        this.ballReachTargetPositionTime = ballReachTargetPositionTime;
     }
 }
 [BurstCompile]

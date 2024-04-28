@@ -27,6 +27,17 @@ public class StraightXZDragPathDOTS
         //print("A=" + A + " | A0=" + A0);
         return Mathf.Clamp(t, 0, Mathf.Infinity);
     }
+    public static Vector3 getPositionAtTime(Vector3 Pos0,Vector3 V0,float k, float t)
+    {
+
+        Vector2 vx0 = new Vector2(V0.x, V0.z);
+        float ekt = Mathf.Exp(-k * t);
+        Vector2 x = (vx0 / k) * (1 - ekt);
+        //Debug.Log("t=" + t + " | y=" + y);
+        Vector3 endPosition = new Vector3(x.x, 0, x.y) + Pos0;
+        //Debug.Log("h "+ endPosition);
+        return endPosition;
+    }
     public static void getXZV0(ref GetV0DOTSResult result,float t, Vector3 Pos0, Vector3 Posf, float maxKickForce, ref GetStraightV0Params getV0Params,float k)
     {
         Vector3 pos0 = MyFunctions.setY0ToVector3(Pos0);

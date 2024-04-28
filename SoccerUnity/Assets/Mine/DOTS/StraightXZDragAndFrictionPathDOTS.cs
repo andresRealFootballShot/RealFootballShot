@@ -242,7 +242,7 @@ namespace DOTS_ChaserDataCalculation
                 //if (Mathf.Abs(distance - target) <= data.accuracy)
                 if (distance<= data.accuracy)
                 {
-                    data.result = new GetV0DOTSResult(true, vt.magnitude, dir * centralV0,false,false,false,false);
+                    data.result = new GetV0DOTSResult(true, vt.magnitude, dir * centralV0,false,false,false,false, data.t, data.t);
                     return;
                 }
                 if (target < distance)
