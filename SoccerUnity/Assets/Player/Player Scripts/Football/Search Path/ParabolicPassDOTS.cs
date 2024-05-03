@@ -112,7 +112,7 @@ public class ParabolicPassDOTS
         Vector3 vt = Vector3.zero;
         ParabolicWithDragDOTS.GetVelocityAtTime(t, v0, k, vfMagnitude, ref vt);
         result.ballReachTargetPositionTime = t;
-        if (false && (vt.magnitude >= maxControlSpeed || t == 0))
+        if ((vt.magnitude >= maxControlSpeed || t == 0))
         {
             Vector3 dir = (posf - pos0).normalized;
             Vector3 v02 = StraightXZDragPath.getV0ByVt(maxControlSpeed, dir, k, t);
@@ -128,7 +128,7 @@ public class ParabolicPassDOTS
             result.v0 = v0;
             result.v0Magnitude = v0.magnitude;
         }
-        if (false && result.v0Magnitude > maxKickForce)
+        if (result.v0Magnitude > maxKickForce)
         {
             result.v0 = result.v0.normalized * maxKickForce;
             result.v0Magnitude = maxKickForce;

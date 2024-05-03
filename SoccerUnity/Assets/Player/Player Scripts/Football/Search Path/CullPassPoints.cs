@@ -24,6 +24,7 @@ public class CullPassPoints : MonoBehaviour
     public string teamName_Attacker = "Blue";
     public List<Transform> testLonelyPoints;
     public bool test,debug,debugPointResults,debugPassTest;
+    public int lonelyPointIndexPassTest;
     public List<Entity> entities = new List<Entity>();
     EntityManager entityManager;
     List<PublicPlayerData> players = new List<PublicPlayerData>();
@@ -197,12 +198,21 @@ public class CullPassPoints : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Entity entity = entities[0];
-            TestResultComponent TestResultComponent = entityManager.GetComponentData<TestResultComponent>(entity);
-            MatchComponents.ballRigidbody.velocity = TestResultComponent.straightReachBall ? TestResultComponent.GetV0DOTSResult1.v0 : TestResultComponent.GetV0DOTSResult2.v0;
-
-            StartCoroutine(TestCoroutine(TestResultComponent));
-            StartCoroutine(TestCoroutine2(TestResultComponent));
+            foreach (var entity in entities)
+            {
+                TestResultComponent TestResultComponent = entityManager.GetComponentData<TestResultComponent>(entity);
+                DynamicBuffer<LonelyPointElement2> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement2>(entity);
+                foreach (var lonelyPointElement in lonelyPointElements)
+                {
+                    if (lonelyPointElement.index == lonelyPointIndexPassTest)
+                    {
+                        MatchComponents.ballRigidbody.velocity = TestResultComponent.straightReachBall ? TestResultComponent.GetV0DOTSResult1.v0 : TestResultComponent.GetV0DOTSResult2.v0;
+                        StartCoroutine(TestCoroutine(TestResultComponent));
+                        StartCoroutine(TestCoroutineDefenseLonleyPosition(TestResultComponent));
+                        return;
+                    }
+                }
+            }
         }
         
     }
@@ -224,7 +234,7 @@ public class CullPassPoints : MonoBehaviour
         yield return new WaitForSeconds(TestResultComponent.ballReachTargetPositionTime - TestResultComponent.attackReachTime);
         print(MatchComponents.ballRigidbody.velocity.magnitude);
     }
-    IEnumerator TestCoroutine2(TestResultComponent TestResultComponent)
+    IEnumerator TestCoroutineDefenseClosestPosition(TestResultComponent TestResultComponent)
     {
         float t = 0;
         Vector3 defensePosition = players[TestResultComponent.defenseLonelyPointReachIndex].bodyTransform.position;
@@ -233,6 +243,27 @@ public class CullPassPoints : MonoBehaviour
         Transform defenseTransform = players[TestResultComponent.defenseLonelyPointReachIndex].bodyTransform;
         print(TestResultComponent.closestDistanceDefenseBall);
         while (t < TestResultComponent.defenseClosestReachTime)
+        {
+            t += Time.deltaTime;
+            defenseTransform.position += defense_LonelyPositionDir * 10.5f * Time.deltaTime;
+
+            yield return null;
+        }
+        Vector3 defensePos = defenseTransform.position;
+        defensePos.y = MatchComponents.ballRigidbody.position.y;
+        print(Vector3.Distance(defensePos, MatchComponents.ballRigidbody.position));
+        //yield return new WaitForSeconds(TestResultComponent.ballReachTargetPositionTime - TestResultComponent.attackReachTime);
+        //print(MatchComponents.ballRigidbody.velocity.magnitude);
+    }
+    IEnumerator TestCoroutineDefenseLonleyPosition(TestResultComponent TestResultComponent)
+    {
+        float t = 0;
+        Vector3 defensePosition = players[TestResultComponent.defenseLonelyPointReachIndex].bodyTransform.position;
+        Vector3 defense_LonelyPositionDir = TestResultComponent.lonelyPosition - defensePosition;
+        defense_LonelyPositionDir.Normalize();
+        Transform defenseTransform = players[TestResultComponent.defenseLonelyPointReachIndex].bodyTransform;
+        print(TestResultComponent.defenseLonelyPointReachTime);
+        while (t < TestResultComponent.defenseLonelyPointReachTime)
         {
             t += Time.deltaTime;
             defenseTransform.position += defense_LonelyPositionDir * 10.5f * Time.deltaTime;
@@ -280,7 +311,6 @@ public class CullPassPoints : MonoBehaviour
                         
 
                         LonelyPointElement2 lonelyPointElement = lonelyPointElements[i];
-                        if (lonelyPointElement.index != 0) continue;
                         Vector3 pos = new Vector3(lonelyPointElements[i].position.x, 0, lonelyPointElements[i].position.y);
                         Gizmos.color = lonelyPointElement.parabolicReachBall ? Color.green : Color.red;
                         Gizmos.DrawSphere(pos + Vector3.up * 0.25f, 0.2f);
@@ -322,11 +352,12 @@ public class CullPassPoints : MonoBehaviour
             lonelyPointCount++;
             if (lonelyPointCount>=cullPassPointsParams.entityPointSize)
             {
+
+                CullPassPointsComponent.sizeLonelyPoints = lonelyPointCount;
+                entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
                 entityIndex++;
                 entity = entities[entityIndex];
                 lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
-                CullPassPointsComponent.sizeLonelyPoints = lonelyPointCount;
-                entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
                 lonelyPointCount = 0;
             }
             
