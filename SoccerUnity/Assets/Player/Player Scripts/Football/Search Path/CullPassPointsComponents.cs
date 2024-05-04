@@ -32,11 +32,12 @@ namespace CullPositionPoint
         public float maxSpeedRotation;
         public float scope;
         public float heightJump;
+        public float heightBallControl;
     }
     public struct TestResultComponent : IComponentData
     {
         public Vector3 closestPosition, lonelyPosition;
-        public float ballReachTargetPositionTime, defenseLonelyPointReachTime, closestDistanceDefenseBall, attackReachTime, defenseClosestReachTime;
+        public float defenseLonelyPointReachTime, closestDistanceDefenseBall, attackReachTime, defenseClosestReachTime;
         public GetV0DOTSResult GetV0DOTSResult1, GetV0DOTSResult2;
         public float defenseParabolicDifferenceTime;
         public int defenseLonelyPointReachIndex, attackLonelyPointReachIndex;

@@ -207,7 +207,8 @@ public class CullPassPoints : MonoBehaviour
                     if (lonelyPointElement.index == lonelyPointIndexPassTest)
                     {
                         MatchComponents.ballRigidbody.velocity = TestResultComponent.straightReachBall ? TestResultComponent.GetV0DOTSResult1.v0 : TestResultComponent.GetV0DOTSResult2.v0;
-                        StartCoroutine(TestCoroutine(TestResultComponent));
+                        GetV0DOTSResult GetV0DOTSResult = TestResultComponent.straightReachBall ? TestResultComponent.GetV0DOTSResult1 : TestResultComponent.GetV0DOTSResult2;
+                        StartCoroutine(TestCoroutine(TestResultComponent, GetV0DOTSResult));
                         StartCoroutine(TestCoroutineDefenseLonleyPosition(TestResultComponent));
                         return;
                     }
@@ -216,14 +217,16 @@ public class CullPassPoints : MonoBehaviour
         }
         
     }
-    IEnumerator TestCoroutine(TestResultComponent TestResultComponent)
+    IEnumerator TestCoroutine(TestResultComponent TestResultComponent, GetV0DOTSResult GetV0DOTSResult)
     {
         float t = 0;
         Vector3 attackPosition = players[TestResultComponent.attackLonelyPointReachIndex].bodyTransform.position;
         Vector3 attack_LonelyPositionDir = TestResultComponent.lonelyPosition - attackPosition;
         attack_LonelyPositionDir.Normalize();
         Transform attackTransform = players[TestResultComponent.attackLonelyPointReachIndex].bodyTransform;
-        
+        float s1, s2;
+        ParabolicWithDragDOTS.timeToReachHeightParabolicNoDrag(0, 9.8f, GetV0DOTSResult.v0.y, 0, out s1, out s2);
+        print("v=" + GetV0DOTSResult.v0);
         while (t< TestResultComponent.attackReachTime)
         {
             t += Time.deltaTime;
@@ -231,8 +234,8 @@ public class CullPassPoints : MonoBehaviour
 
             yield return null;
         }
-        yield return new WaitForSeconds(TestResultComponent.ballReachTargetPositionTime - TestResultComponent.attackReachTime);
-        print(MatchComponents.ballRigidbody.velocity.magnitude);
+        yield return new WaitForSeconds(s2 - TestResultComponent.attackReachTime);
+        print("velocity=" + MatchComponents.ballRigidbody.velocity.magnitude);
     }
     IEnumerator TestCoroutineDefenseClosestPosition(TestResultComponent TestResultComponent)
     {
@@ -241,7 +244,7 @@ public class CullPassPoints : MonoBehaviour
         Vector3 defense_LonelyPositionDir = TestResultComponent.closestPosition - defensePosition;
         defense_LonelyPositionDir.Normalize();
         Transform defenseTransform = players[TestResultComponent.defenseLonelyPointReachIndex].bodyTransform;
-        print(TestResultComponent.closestDistanceDefenseBall);
+        print("closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall);
         while (t < TestResultComponent.defenseClosestReachTime)
         {
             t += Time.deltaTime;
@@ -251,7 +254,7 @@ public class CullPassPoints : MonoBehaviour
         }
         Vector3 defensePos = defenseTransform.position;
         defensePos.y = MatchComponents.ballRigidbody.position.y;
-        print(Vector3.Distance(defensePos, MatchComponents.ballRigidbody.position));
+        print("Distance(defense,ball)=" + Vector3.Distance(defensePos, MatchComponents.ballRigidbody.position));
         //yield return new WaitForSeconds(TestResultComponent.ballReachTargetPositionTime - TestResultComponent.attackReachTime);
         //print(MatchComponents.ballRigidbody.velocity.magnitude);
     }
@@ -262,7 +265,7 @@ public class CullPassPoints : MonoBehaviour
         Vector3 defense_LonelyPositionDir = TestResultComponent.lonelyPosition - defensePosition;
         defense_LonelyPositionDir.Normalize();
         Transform defenseTransform = players[TestResultComponent.defenseLonelyPointReachIndex].bodyTransform;
-        print(TestResultComponent.defenseLonelyPointReachTime);
+        print("defenseLonelyPointReachTime="+TestResultComponent.defenseLonelyPointReachTime);
         while (t < TestResultComponent.defenseLonelyPointReachTime)
         {
             t += Time.deltaTime;
@@ -295,7 +298,7 @@ public class CullPassPoints : MonoBehaviour
                 style.normal.textColor = Color.yellow;
                 Handles.color = Color.green;
                 //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
-                string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
+                string text = "defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
                 //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
                 Handles.Label(TestResultComponent.closestPosition + Vector3.up * 1.0f, text, style);
             }

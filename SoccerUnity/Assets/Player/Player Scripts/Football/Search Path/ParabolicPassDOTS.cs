@@ -104,6 +104,31 @@ public class ParabolicPassDOTS
         float vy0 = ((distanceY + vf * t) * k / e) - vf;
         return new Vector3(vxz0.x, vy0, vxz0.y);
     }
+    public static float ParabolaWithDrag_GetVY0(float t, Vector3 pos0, Vector3 posf, float k, float g)
+    {
+        float e = (1 - Mathf.Exp(-k * t));
+        float distanceY = posf.y - pos0.y;
+        float vf = g / k;
+        float vy0 = ((distanceY + vf * t) * k / e) - vf;
+        return vy0;
+    }
+    public static Vector3 getV0ByVt(float vt, Vector3 dir, float k, float t,float vf)
+    {
+        float ekt = Mathf.Exp(-k * t);
+        float vx0 = vt / ekt;
+        float vy0 = ((vt + vf) / ekt) - vf;
+        Vector3 dirxz = new Vector3(dir.x, 0, dir.z);
+        Vector3 diry = Vector3.up;
+        return dirxz * vx0 + diry*vy0;
+    }
+    public static Vector3 getV0ByVt(float vt, Vector3 pos0, Vector3 posf, float k)
+    {
+        Vector3 XZ0 = new Vector3(pos0.x, 0, pos0.z);
+        Vector3 XZf = new Vector3(posf.x, 0, posf.z);
+        Vector3 dir = XZf - XZ0;
+        float distanceXZ = Vector3.Distance(XZ0, XZf);
+        return dir.normalized * (distanceXZ * k + vt);
+    }
     public static void getV0(Vector3 pos0,Vector3 posf, ref GetV0DOTSResult result, float maxKickForce, float maxControlSpeed,float maxControlSpeedLerpDistance, float t,float k,float vfMagnitude)
     {
         float d = Vector3.Distance(pos0, MyFunctions.setYToVector3(posf, pos0.y));
@@ -115,10 +140,14 @@ public class ParabolicPassDOTS
         if ((vt.magnitude >= maxControlSpeed || t == 0))
         {
             Vector3 dir = (posf - pos0).normalized;
-            Vector3 v02 = StraightXZDragPath.getV0ByVt(maxControlSpeed, dir, k, t);
-            v02.y = v0.y;
+            //Vector3 v02 = getV0ByVt(maxControlSpeed, dir, k, t,vfMagnitude);
+            Vector3 v02 = StraightXZDragPathDOTS.getV0ByVt(maxControlSpeed, pos0, posf, k);
             result.v0 = v02;
-            result.v0Magnitude = v02.magnitude;
+            Vector3 v03 = new Vector3(result.v0.x,0, result.v0.z);
+            float t2 = StraightXZDragPathDOTS.getT(pos0, posf, v03.magnitude, k);
+            result.v0.y= ParabolaWithDrag_GetVY0(t2, pos0, posf, k, 9.8f);
+            result.v0.y = Mathf.Clamp(result.v0.y, 0, maxControlSpeed+0.5f);
+            result.v0Magnitude = result.v0.magnitude;
             result.maximumControlSpeedReached = true;
             result.vt = maxControlSpeed;
             result.foundedResult = true;
@@ -137,7 +166,9 @@ public class ParabolicPassDOTS
         result.maximumControlSpeedReached = result.vt >= maxControlSpeed;
         if (result.maximumControlSpeedReached || result.maxKickForceReached)
         {
-            float t2 = StraightXZDragPathDOTS.getT(d, result.v0Magnitude, k);
+            Vector3 v0mzx = result.v0;
+            v0mzx.y = 0;
+            float t2 = StraightXZDragPathDOTS.getT(d, v0mzx.magnitude, k);
             result.ballReachTargetPositionTime = t2;
         }
     }

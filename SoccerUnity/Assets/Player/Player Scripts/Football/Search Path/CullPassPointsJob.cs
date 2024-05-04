@@ -66,7 +66,6 @@ public struct CullPassPointsJob : IJobEntityBatch
                 //Debug.Log(defenseReachTimeResult);
                 TestResult.GetV0DOTSResult1 = getV0DOTSResult;
                 TestResult.defenseLonelyPointReachTime = defenseReachTimeResult;
-                TestResult.ballReachTargetPositionTime = getV0DOTSResult.ballReachTargetPositionTime;
                 TestResult.defenseLonelyPointReachIndex = playerIndexStraightPass;
                 TestResult.attackLonelyPointReachIndex = attackIndex;
                 TestResult.attackReachTime = reachTime;
@@ -107,7 +106,9 @@ public struct CullPassPointsJob : IJobEntityBatch
 
         GetV0DOTSResult getV0DOTSResult = new GetV0DOTSResult();
         //StraightXZDragPathDOTS.getXZV0(ref getV0DOTSResult, attackReachTime, ballPosition, lonelyPosition, PlayerGenericParams.maxKickForce, ref VOParams, k);
-        ParabolicPassDOTS.getV0(ballPosition, lonelyPosition, ref getV0DOTSResult, maxKickForce, VOParams.maxControlSpeed, VOParams.maxControlSpeedLerpDistance, attackReachTime, k, vf);
+        Vector3 controlLonelyPosition = lonelyPosition;
+        controlLonelyPosition.y = PlayerGenericParams.heightBallControl;
+        ParabolicPassDOTS.getV0(ballPosition, controlLonelyPosition, ref getV0DOTSResult, maxKickForce, VOParams.maxControlSpeed, VOParams.maxControlSpeedLerpDistance, attackReachTime, k, vf);
         float timeDiference = defenseReachTime - getV0DOTSResult.ballReachTargetPositionTime;
         TestResult.defenseParabolicDifferenceTime = timeDiference;
         TestResult.GetV0DOTSResult2 = getV0DOTSResult;
@@ -276,6 +277,7 @@ public struct CullPassPointsJob : IJobEntityBatch
         PlayerGenericParams.goalkeeperMaxSpeed = 4.5f;
         PlayerGenericParams.maxKickForce = 33f;
         PlayerGenericParams.heightJump = 2.2f;
+        PlayerGenericParams.heightBallControl = 1.6f;
         return PlayerGenericParams;
     }
     float GetTimeToReachPosition(Vector3 playerPosition, Vector3 closestPoint,ref  PlayerGenericParams PlayerGenericParams)
