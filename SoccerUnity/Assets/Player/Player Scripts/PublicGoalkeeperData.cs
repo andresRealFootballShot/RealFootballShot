@@ -6,6 +6,7 @@ public class PublicGoalkeeperData : PublicPlayerData
 {
     public GoalkeeperComponents components;
     public GoalkeeperValues values;
+    public override bool IsGoalkeeper { get => true; }
     public override bool maximumJumpHeightIsInArea(float maximumJumpHeight, Vector3 point)
     {
         Area area;

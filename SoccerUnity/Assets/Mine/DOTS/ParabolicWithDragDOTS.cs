@@ -59,7 +59,7 @@ namespace DOTS_ChaserDataCalculation
             return y + pos0Y;
         }
         public static bool timeToReachHeightParabolicNoDrag(float height,float g,float v0y,float pos0Y,out float solution1, out float solution2)
-        {
+       {
             float a, b, c;
             a = -g / 2;
             b = v0y;

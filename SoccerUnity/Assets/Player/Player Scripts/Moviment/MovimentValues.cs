@@ -89,7 +89,7 @@ public class MovimentValues : MonoBehaviour
     public float minSpeedForChangeDirection=1;
     public float directionRotationSpeed=360;
 
-    public float maxSpeedForReachBall { get; set; }
+    public float maxSpeedForReachBall;
     public float maxAngleForRun;
     public float stopOffset;
     private void Awake()
@@ -119,5 +119,6 @@ public class MovimentValues : MonoBehaviour
         forwardDeceleration = maxForwardSpeed * maxForwardSpeed / (2 * forwardDecelerationDistance);
         horizontalDeceleration = maxHorizontalSpeed * maxHorizontalSpeed / (2 * horizontalDecelerationDistance);
         backDeceleration = maxBackSpeed * maxBackSpeed / (2 * backDecelerationDistance);
+        
     }
 }

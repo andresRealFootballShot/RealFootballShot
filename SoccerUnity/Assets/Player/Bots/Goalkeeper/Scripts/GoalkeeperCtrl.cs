@@ -46,6 +46,7 @@ public class GoalkeeperCtrl : MonoBehaviour,ILoad
     bool locked = false;
     public Transform test;
     public bool enableRandomPass;
+    public bool enableMotion;
     //OptimalPosition optimalPosition;
     public void Load(int level)
     {
@@ -604,7 +605,7 @@ public class GoalkeeperCtrl : MonoBehaviour,ILoad
     }
     protected virtual void goTo(float deltaTime)
     {
-        //goalKeeperTransform.position = Vector3.Lerp(goalKeeperTransform.position, targetPosition, deltaTime * speedTranslation);
+        if (!enableMotion) return;
         //Para que el portero se mueva a 5 m/s constantemente, no asi con la funcion Vector3.Lerp
         float distance = Vector3.Distance(goalKeeperTransform.position,targetPosition);
         Vector3 dir = targetPosition - goalKeeperTransform.position;

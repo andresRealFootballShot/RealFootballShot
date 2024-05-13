@@ -71,7 +71,7 @@ public class CullPassPoints : MonoBehaviour
             if (playerAddedToTeamEventArgs.TeamName.Equals("Red"))
             {
                 int index = isGoalkeeper ? 0 : CullPassPointsComponent.teamASize;
-                PlayerPositionElements.Insert(index, new PlayerPositionElement(Vector2.zero));
+                PlayerPositionElements.Insert(index, new PlayerPositionElement(Vector2.zero,Vector2.zero, Vector2.zero, 0));
                 if (!aux)
                     players.Insert(index, playerAddedToTeamEventArgs.publicPlayerData);
                 CullPassPointsComponent.teamASize++;
@@ -79,7 +79,7 @@ public class CullPassPoints : MonoBehaviour
             else
             {
                 int index = isGoalkeeper ? CullPassPointsComponent.teamASize : CullPassPointsComponent.teamASize + CullPassPointsComponent.teamBSize;
-                PlayerPositionElements.Insert(index, new PlayerPositionElement(Vector2.zero));
+                PlayerPositionElements.Insert(index, new PlayerPositionElement(Vector2.zero, Vector2.zero, Vector2.zero, 0));
                 if (!aux)
                     players.Insert(index, playerAddedToTeamEventArgs.publicPlayerData);
                 CullPassPointsComponent.teamBSize++;
@@ -184,8 +184,14 @@ public class CullPassPoints : MonoBehaviour
             for (int i = 0; i < players.Count; i++)
             {
                 Vector3 position = players[i].position;
+                Vector3 forward = players[i].bodyTransform.forward;
+                Vector3 normalizedVelocity = players[i].velocity;
+                normalizedVelocity.Normalize();
                 PlayerPositionElement playerPositionElement = PlayerPositionElements[i];
                 playerPositionElement.position = new Vector2(position.x, position.z);
+                playerPositionElement.bodyForward = new Vector2(forward.x, forward.z);
+                playerPositionElement.normalizedVelocity = new Vector2(normalizedVelocity.x, normalizedVelocity.z);
+                playerPositionElement.currentSpeed = players[i].speed;
                 PlayerPositionElements[i] = playerPositionElement;
             }
         }
@@ -193,6 +199,8 @@ public class CullPassPoints : MonoBehaviour
     private void Update()
     {
         TestDebug();
+        Vector3 v = new Vector3(MatchComponents.ballRigidbody.velocity.x, 0, MatchComponents.ballRigidbody.velocity.z);
+        //print("velocity=" + MatchComponents.ballRigidbody.velocity.magnitude + " " + v.magnitude);
     }
     void TestDebug()
     {
@@ -223,19 +231,21 @@ public class CullPassPoints : MonoBehaviour
         Vector3 attackPosition = players[TestResultComponent.attackLonelyPointReachIndex].bodyTransform.position;
         Vector3 attack_LonelyPositionDir = TestResultComponent.lonelyPosition - attackPosition;
         attack_LonelyPositionDir.Normalize();
-        Transform attackTransform = players[TestResultComponent.attackLonelyPointReachIndex].bodyTransform;
+        PublicPlayerData publicPlayerData = players[TestResultComponent.attackLonelyPointReachIndex];
+        Transform attackTransform = publicPlayerData.bodyTransform;
         float s1, s2;
         ParabolicWithDragDOTS.timeToReachHeightParabolicNoDrag(0, 9.8f, GetV0DOTSResult.v0.y, 0, out s1, out s2);
-        print("v=" + GetV0DOTSResult.v0);
+        print("v=" + GetV0DOTSResult.v0 +" "+ GetV0DOTSResult.v0Magnitude);
         while (t< TestResultComponent.attackReachTime)
         {
             t += Time.deltaTime;
-            attackTransform.position += attack_LonelyPositionDir * 10.5f*Time.deltaTime;
+            attackTransform.position += attack_LonelyPositionDir * publicPlayerData.maxSpeed* Time.deltaTime;
 
             yield return null;
         }
         yield return new WaitForSeconds(s2 - TestResultComponent.attackReachTime);
-        print("velocity=" + MatchComponents.ballRigidbody.velocity.magnitude);
+        Vector3 v = new Vector3(MatchComponents.ballRigidbody.velocity.x, 0, MatchComponents.ballRigidbody.velocity.z);
+        print("velocity=" + MatchComponents.ballRigidbody.velocity.magnitude + " " + v.magnitude);
     }
     IEnumerator TestCoroutineDefenseClosestPosition(TestResultComponent TestResultComponent)
     {
@@ -262,11 +272,11 @@ public class CullPassPoints : MonoBehaviour
     {
         float t = 0;
         Vector3 defensePosition = players[TestResultComponent.defenseLonelyPointReachIndex].bodyTransform.position;
-        Vector3 defense_LonelyPositionDir = TestResultComponent.lonelyPosition - defensePosition;
+        Vector3 defense_LonelyPositionDir = TestResultComponent.closestPosition - defensePosition;
         defense_LonelyPositionDir.Normalize();
         Transform defenseTransform = players[TestResultComponent.defenseLonelyPointReachIndex].bodyTransform;
         print("defenseLonelyPointReachTime="+TestResultComponent.defenseLonelyPointReachTime);
-        while (t < TestResultComponent.defenseLonelyPointReachTime)
+        while (t < TestResultComponent.defenseClosestReachTime)
         {
             t += Time.deltaTime;
             defenseTransform.position += defense_LonelyPositionDir * 10.5f * Time.deltaTime;
@@ -315,11 +325,27 @@ public class CullPassPoints : MonoBehaviour
 
                         LonelyPointElement2 lonelyPointElement = lonelyPointElements[i];
                         Vector3 pos = new Vector3(lonelyPointElements[i].position.x, 0, lonelyPointElements[i].position.y);
-                        Gizmos.color = lonelyPointElement.parabolicReachBall ? Color.green : Color.red;
+                        Color color;
+                        if (lonelyPointElement.straightReachBall&& lonelyPointElement.parabolicReachBall)
+                        {
+                            color = Color.green;
+                        }else if (lonelyPointElement.straightReachBall && !lonelyPointElement.parabolicReachBall)
+                        {
+                            color = Color.blue;
+                        }
+                        else if(!lonelyPointElement.straightReachBall && lonelyPointElement.parabolicReachBall)
+                        {
+                            color = Color.yellow;
+                        }
+                        else
+                        {
+                            color = Color.red;
+                        }
+                        Gizmos.color = color;
                         Gizmos.DrawSphere(pos + Vector3.up * 0.25f, 0.2f);
                         GUIStyle style = new GUIStyle();
                         style.fontSize = 10;
-                        style.normal.textColor = lonelyPointElement.parabolicReachBall ? Color.green : Color.red;
+                        style.normal.textColor = color;
                         //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
                         string text = "straightReachBall=" + lonelyPointElement.straightReachBall + " parabolicReachBall=" + lonelyPointElement.parabolicReachBall + " i="+lonelyPointElement.index;
                         //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;

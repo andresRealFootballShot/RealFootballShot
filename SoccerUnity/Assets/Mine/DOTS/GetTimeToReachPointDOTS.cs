@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Unity.Burst;
 using UnityEngine;
 using Unity.Mathematics;
+using CullPositionPoint;
+
 namespace DOTS_ChaserDataCalculation
 {
     [BurstCompile]
@@ -19,9 +21,9 @@ namespace DOTS_ChaserDataCalculation
                 return linearGetTimeToReachPosition(ref playerDataComponent, targetPosition);
             }
         }
-        public static float linearGetTimeToReachPosition(Vector3 playerPosition, Vector3 targetPosition,float maxSpeed)
+        public static float linearGetTimeToReachPosition(Vector3 playerPosition, Vector3 targetPosition,float maxSpeed,float scope)
         {
-            float distance = Vector3.Distance(MyFunctions.setYToVector3(playerPosition, targetPosition.y), targetPosition);
+            float distance = Mathf.Clamp(Vector3.Distance(MyFunctions.setYToVector3(playerPosition, targetPosition.y), targetPosition)-scope,0,Mathf.Infinity);
             float t = distance / maxSpeed;
             return t;
         }
@@ -30,6 +32,60 @@ namespace DOTS_ChaserDataCalculation
             float distance = Vector3.Distance(MyFunctions.setYToVector3(playerDataComponent.position, targetPosition.y), targetPosition);
             float t = distance / playerDataComponent.maxSpeed;
             return t;
+        }
+        public static float accelerationGetTimeToReachPosition(Vector3 playerPosition,float currentSpeed,Vector3 bodyForward,Vector3 normalizedForwardVelocity, ref PlayerGenericParams PlayerGenericParams, Vector3 targetPosition)
+        {
+            if (MyFunctions.Vector3IsNan(targetPosition) || targetPosition.Equals(Vector3.positiveInfinity) || targetPosition.Equals(Vector3.negativeInfinity))
+            {
+                return Mathf.Infinity;
+            }
+
+            Vector3 bodyPosition = playerPosition;
+            float d4 = Vector3.Distance(bodyPosition, MyFunctions.setYToVector3(targetPosition, bodyPosition.y));
+            if (d4 < PlayerGenericParams.scope)
+            {
+                return 0;
+            }
+            float speed = currentSpeed;
+            float minSpeedForRotate = PlayerGenericParams.minSpeedForRotate;
+            float a = PlayerGenericParams.acceleration;
+            float da = PlayerGenericParams.decceleration;
+            float maxAngleForRun = PlayerGenericParams.maxAngleForRun;
+            float t1_1 = speed > minSpeedForRotate ? AccelerationPath.getT(minSpeedForRotate, speed, da) : 0;
+            Vector3 direction = MyFunctions.setY0ToVector3(targetPosition - bodyPosition).normalized;
+            float angle = Vector3.Angle(bodyForward, direction);
+            float t1 = angle > maxAngleForRun ? t1_1 : 0;
+            Vector3 x1 = AccelerationPath.getX(bodyPosition, bodyForward, bodyForward * speed, t1, -da);
+            float t2 = angle > maxAngleForRun ? Path.getT(maxAngleForRun, angle, PlayerGenericParams.maxSpeedRotation) : 0;
+
+            Vector3 v0 = angle > maxAngleForRun ? Vector3.zero : normalizedForwardVelocity * speed;
+            float v0Magnitude = v0.magnitude;
+            float d2 = Vector3.Distance(MyFunctions.setY0ToVector3(x1), MyFunctions.setY0ToVector3(targetPosition));
+
+            float d3 = d2 - PlayerGenericParams.scope;
+            float d = AccelerationPath.getDistanceWhereStartDecelerate(v0Magnitude, PlayerGenericParams.maxSpeedForReachBall, a, -da, d3);
+            float t3, t4, t8, result;
+            float x3 = Mathf.Abs(AccelerationPath.getX2(v0Magnitude, PlayerGenericParams.maxSpeed, a));
+            if (x3 < d)
+            {
+                float t5 = AccelerationPath.getT(PlayerGenericParams.maxSpeed, v0Magnitude, a);
+                float x4 = Mathf.Abs(AccelerationPath.getX2(PlayerGenericParams.maxSpeed, PlayerGenericParams.maxSpeedForReachBall, da));
+                float x5 = d3 - x3 - x4;
+                float t6 = x5 / PlayerGenericParams.maxSpeed;
+                float t7 = AccelerationPath.getT(PlayerGenericParams.maxSpeedForReachBall, PlayerGenericParams.maxSpeed, da);
+                t8 = t5 + t6 + t7;
+                result = t1 + t2 + t8;
+            }
+            else
+            {
+                AccelerationPath.getT(d, v0Magnitude, a, out t3);
+                float v1 = v0Magnitude + a * t3;
+                t4 = AccelerationPath.getT(PlayerGenericParams.maxSpeedForReachBall, v1, da);
+                t8 = t3 + t4;
+                result = t1 + t2 + t8;
+
+            }
+            return result;
         }
         public static float accelerationGetTimeToReachPosition(ref PlayerDataComponent playerDataComponent, Vector3 targetPosition)
         {

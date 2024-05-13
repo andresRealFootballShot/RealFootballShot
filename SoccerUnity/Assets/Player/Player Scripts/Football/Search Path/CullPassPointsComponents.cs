@@ -15,9 +15,14 @@ namespace CullPositionPoint
     public struct PlayerPositionElement : IBufferElementData
     {
         public Vector2 position;
-        public PlayerPositionElement(Vector2 position)
+        public Vector2 bodyForward,normalizedVelocity;
+        public float currentSpeed;
+        public PlayerPositionElement(Vector2 position, Vector2 bodyForward, Vector2 normalizedVelocity, float currentSpeed)
         {
             this.position = position;
+            this.bodyForward = bodyForward;
+            this.normalizedVelocity = normalizedVelocity;
+            this.currentSpeed = currentSpeed;
         }
     }
     public struct PlayerGenericParams
@@ -33,6 +38,7 @@ namespace CullPositionPoint
         public float scope;
         public float heightJump;
         public float heightBallControl;
+        public float maxSpeedForReachBall;
     }
     public struct TestResultComponent : IComponentData
     {
