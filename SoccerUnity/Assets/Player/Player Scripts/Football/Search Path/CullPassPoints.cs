@@ -216,14 +216,27 @@ public class CullPassPoints : MonoBehaviour
                     {
                         MatchComponents.ballRigidbody.velocity = TestResultComponent.straightReachBall ? TestResultComponent.GetV0DOTSResult1.v0 : TestResultComponent.GetV0DOTSResult2.v0;
                         GetV0DOTSResult GetV0DOTSResult = TestResultComponent.straightReachBall ? TestResultComponent.GetV0DOTSResult1 : TestResultComponent.GetV0DOTSResult2;
-                        StartCoroutine(TestCoroutine(TestResultComponent, GetV0DOTSResult));
-                        StartCoroutine(TestCoroutineDefenseLonleyPosition(TestResultComponent));
+                        setTargetPosition(TestResultComponent, GetV0DOTSResult);
+                        //StartCoroutine(TestCoroutine(TestResultComponent, GetV0DOTSResult));
+                        //StartCoroutine(TestCoroutineDefenseLonleyPosition(TestResultComponent));
                         return;
                     }
                 }
             }
         }
         
+    }
+    void setTargetPosition(TestResultComponent TestResultComponent, GetV0DOTSResult GetV0DOTSResult)
+    {
+        PublicPlayerData publicPlayerData = players[TestResultComponent.attackLonelyPointReachIndex];
+        Transform attackTransform = publicPlayerData.bodyTransform;
+
+        Vector3 attackPosition = attackTransform.position;
+        Vector3 dir = TestResultComponent.lonelyPosition - attackPosition;
+        publicPlayerData.playerComponents.TargetPosition = TestResultComponent.lonelyPosition;
+        publicPlayerData.playerComponents.ForwardDesiredDirection =dir;
+        publicPlayerData.playerComponents.ForwardDesiredSpeed = publicPlayerData.maxSpeed;
+        publicPlayerData.playerComponents.DesiredLookDirection = dir;
     }
     IEnumerator TestCoroutine(TestResultComponent TestResultComponent, GetV0DOTSResult GetV0DOTSResult)
     {
