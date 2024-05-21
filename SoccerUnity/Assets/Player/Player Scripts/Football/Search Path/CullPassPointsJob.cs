@@ -41,7 +41,7 @@ public struct CullPassPointsJob : IJobEntityBatch
             int attackIndexStart = CullPassPointsParams.teamA_IsAttacker ? 0 : CullPassPointsParams.teamASize;
             int attackIndexEnd = CullPassPointsParams.teamA_IsAttacker ? CullPassPointsParams.teamASize : CullPassPointsParams.teamASize + CullPassPointsParams.teamBSize;
             int defenseIndexStart = CullPassPointsParams.teamA_IsAttacker ? CullPassPointsParams.teamASize : 0;
-            int defenseIndexEnd = CullPassPointsParams.teamA_IsAttacker ? CullPassPointsParams.teamASize + CullPassPointsParams.teamBSize : CullPassPointsParams.teamBSize;
+            int defenseIndexEnd = CullPassPointsParams.teamA_IsAttacker ? CullPassPointsParams.teamASize + CullPassPointsParams.teamBSize : CullPassPointsParams.teamASize;
             float minDistancePlayer_Ball;
             int playerIndexStraightPass;
             PathDataDOTS PathDataDOTS = new PathDataDOTS(0, PathType.InGround, 0, Vector3.zero, Vector3.zero, Vector3.zero, BallParams.k, BallParams.mass, BallParams.groundY, BallParams.bounciness, BallParams.friction, BallParams.dynamicFriction, BallParams.ballRadio, BallParams.g);
@@ -78,28 +78,50 @@ public struct CullPassPointsJob : IJobEntityBatch
                 {
                     TestResult.straightReachBall = false;
                     lonelyPoint.straightReachBall = false;
-                    if (defenseReachTimeResult > getV0DOTSResult.ballReachTargetPositionTime || true)
+                    bool parabolicReachBall = getParabolicPass_isPosible(ref PlayerPositions, defenseIndexStart, defenseIndexEnd, playerIndexStraightPass, ref PlayerGenericParams, lonelyPosition, BallParams.BallPosition, reachTime, defenseReachTimeResult, BallParams.k, vf, ref VOParams, PlayerGenericParams.maxKickForce,ref PathDataDOTS, ref TestResult);
+                    TestResult.parabolicReachBall = parabolicReachBall;
+                    lonelyPoint.parabolicReachBall = parabolicReachBall;
+                    if (!parabolicReachBall)
                     {
-                        bool parabolicReachBall = getParabolicPass_isPosible(ref PlayerPositions, defenseIndexStart, defenseIndexEnd, playerIndexStraightPass, ref PlayerGenericParams, lonelyPosition, BallParams.BallPosition, reachTime, defenseReachTimeResult, BallParams.k, vf, ref VOParams, PlayerGenericParams.maxKickForce,ref PathDataDOTS, ref TestResult);
-                        TestResult.parabolicReachBall = parabolicReachBall;
-                        lonelyPoint.parabolicReachBall = parabolicReachBall;
-                    }
-                    else
-                    {
-                        lonelyPoint.parabolicReachBall = false;
+                        //TestResult.defenseReachPosition = lonelyPosition;
                     }
                 }
                 else
                 {
                     //Debug.Log("aaaaa ballReachTargetPositionTime=" + getV0DOTSResult.ballReachTargetPositionTime + " defenseReachTime=" + defenseReachTimeResult);
                 }
-
+                calculateWeight(ref lonelyPoint, ref CullPassPointsParams);
                 lonelyPoints[j] = lonelyPoint;
 
             }
             TestResultBuffer[i] = TestResult;
 
         }
+    }
+    void calculateWeight(ref LonelyPointElement2 lonelyPoint, ref CullPassPointsComponent CullPassPointsParams)
+    {
+        if (!lonelyPoint.straightReachBall && !lonelyPoint.parabolicReachBall)
+        {
+            lonelyPoint.weight = Mathf.Infinity;
+            lonelyPoint.order =-1;
+            return;
+        }
+        Vector2 dir1 = CullPassPointsParams.post1Position - lonelyPoint.position;
+        Vector2 dir2 = CullPassPointsParams.post2Position - lonelyPoint.position;
+        float angle = Vector2.Angle(dir1, dir2);
+        angle = 1- (angle / 180);
+
+        Vector2 closestGoalPosition = MyFunctions.GetClosestPointOnFiniteLine(lonelyPoint.position, CullPassPointsParams.post1Position, CullPassPointsParams.post2Position);
+        float d = Vector2.Distance(CullPassPointsParams.post1Position, CullPassPointsParams.post2Position);
+        Vector2 dir3 = CullPassPointsParams.post1Position - CullPassPointsParams.post2Position;
+        dir3.Normalize();
+        Vector2 center = CullPassPointsParams.post2Position + dir3 * (d/2);
+
+        float distance = Vector2.Distance(closestGoalPosition, lonelyPoint.position);
+        distance = distance / CullPassPointsParams.distanceWeightLerp;
+        float a = 1f;
+        float weight = (angle+ distance*a)/(1+a);
+        lonelyPoint.weight = weight;
     }
     bool getParabolicPass_isPosible(ref DynamicBuffer<PlayerPositionElement> PlayerPositions, int startIndex, int endIndex, int playerIndexStraightPass, ref PlayerGenericParams PlayerGenericParams, Vector3 lonelyPosition, Vector3 ballPosition, float attackReachTime, float defenseReachTime, float k, float vf, ref GetStraightV0Params VOParams, float maxKickForce,ref PathDataDOTS PathDataDOTS, ref TestResultComponent TestResult)
     {
@@ -203,6 +225,7 @@ public struct CullPassPointsJob : IJobEntityBatch
                     distanceResult = PlayerReachDistance;
                     TestResult.closestDistanceDefenseBall = PlayerReachDistance;
                     TestResult.defenseClosestReachTime = playerReachTime;
+                    TestResult.defenseReachPosition = closestPoint;
                 }
             }
             
@@ -228,6 +251,7 @@ public struct CullPassPointsJob : IJobEntityBatch
             {
                 distanceResult = PlayerReachDistance2;
 
+                TestResult.defenseReachPosition = lonelyPosition;
             }
         }
     }
@@ -293,13 +317,13 @@ public struct CullPassPointsJob : IJobEntityBatch
         PlayerGenericParams.maxKickForce = 33f;
         PlayerGenericParams.heightJump = 2.2f;
         PlayerGenericParams.heightBallControl = 1.4f;
-        PlayerGenericParams.scope = 0.35f;
-        PlayerGenericParams.acceleration = 55.125f;
+        PlayerGenericParams.scope = 0.75f;
+        PlayerGenericParams.acceleration = 13.78125f;
         PlayerGenericParams.decceleration = 55.125f;
         PlayerGenericParams.minSpeedForRotate = 2;
         PlayerGenericParams.maxAngleForRun = 95;
         PlayerGenericParams.maxSpeedRotation = 800;
-        PlayerGenericParams.maxSpeedForReachBall = 0;
+        PlayerGenericParams.maxSpeedForReachBall =7;
         return PlayerGenericParams;
     }
     float GetTimeToReachPosition(ref PlayerPositionElement playerPositionElement, Vector3 closestPoint,float maxSpeed,ref  PlayerGenericParams PlayerGenericParams)

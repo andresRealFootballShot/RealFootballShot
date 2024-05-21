@@ -10,8 +10,9 @@ namespace CullPositionPoint
         public int teamASize, teamBSize;
         public bool teamA_IsAttacker;
         public int sizeLonelyPoints;
+        public Vector2 post1Position, post2Position;
+        public float distanceWeightLerp;
     }
-
     public struct PlayerPositionElement : IBufferElementData
     {
         public Vector2 position;
@@ -42,7 +43,7 @@ namespace CullPositionPoint
     }
     public struct TestResultComponent : IComponentData
     {
-        public Vector3 closestPosition, lonelyPosition;
+        public Vector3 closestPosition, lonelyPosition,defenseReachPosition;
         public float defenseLonelyPointReachTime, closestDistanceDefenseBall, attackReachTime, defenseClosestReachTime;
         public GetV0DOTSResult GetV0DOTSResult1, GetV0DOTSResult2;
         public float defenseParabolicDifferenceTime;

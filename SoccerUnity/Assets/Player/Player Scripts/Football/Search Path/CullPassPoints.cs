@@ -30,6 +30,7 @@ public class CullPassPoints : MonoBehaviour
     List<PublicPlayerData> players = new List<PublicPlayerData>();
     public float v0y = 5;
     public float y = 2;
+    public int batchesPerChunk = 1;
     void Start()
     {
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -112,6 +113,24 @@ public class CullPassPoints : MonoBehaviour
         }
         MatchEvents.publicPlayerDataOfAddedPlayerToTeamIsAvailable.AddListener(PlayerAddedToTeam);
         MatchEvents.ballPhysicsMaterialLoaded.AddListenerConsiderInvoked(() => SetBallParams());
+        MatchEvents.footballFieldLoaded.AddListenerConsiderInvoked(() => setFootballFieldParameters());
+    }
+    void setFootballFieldParameters()
+    {
+        foreach (var entity in entities)
+        {
+            CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
+            SideOfField sideOfField;
+            SideOfFieldCtrl.getSideOfFieldOfTeam(teamName_Defense, out sideOfField);
+            Vector3 pos1 = sideOfField.goalComponents.left.position;
+            Vector2 post1 = new Vector2(pos1.x, pos1.z);
+            Vector3 pos2 = sideOfField.goalComponents.right.position;
+            Vector2 post2 = new Vector2(pos2.x, pos2.z);
+            CullPassPointsComponent.post1Position = post1;
+            CullPassPointsComponent.post2Position = post2;
+            CullPassPointsComponent.distanceWeightLerp = MatchComponents.footballField.fieldLenght;
+            entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
+        }
     }
     void SetBallParams()
     {
@@ -215,8 +234,10 @@ public class CullPassPoints : MonoBehaviour
                     if (lonelyPointElement.index == lonelyPointIndexPassTest)
                     {
                         MatchComponents.ballRigidbody.velocity = TestResultComponent.straightReachBall ? TestResultComponent.GetV0DOTSResult1.v0 : TestResultComponent.GetV0DOTSResult2.v0;
+                        //MatchComponents.ballRigidbody.velocity = TestResultComponent.GetV0DOTSResult1.v0;
                         GetV0DOTSResult GetV0DOTSResult = TestResultComponent.straightReachBall ? TestResultComponent.GetV0DOTSResult1 : TestResultComponent.GetV0DOTSResult2;
-                        setTargetPosition(TestResultComponent, GetV0DOTSResult);
+                        setAttackTargetPosition(TestResultComponent, GetV0DOTSResult);
+                        setDefenseTargetPosition(TestResultComponent, GetV0DOTSResult);
                         //StartCoroutine(TestCoroutine(TestResultComponent, GetV0DOTSResult));
                         //StartCoroutine(TestCoroutineDefenseLonleyPosition(TestResultComponent));
                         return;
@@ -226,7 +247,7 @@ public class CullPassPoints : MonoBehaviour
         }
         
     }
-    void setTargetPosition(TestResultComponent TestResultComponent, GetV0DOTSResult GetV0DOTSResult)
+    void setAttackTargetPosition(TestResultComponent TestResultComponent, GetV0DOTSResult GetV0DOTSResult)
     {
         PublicPlayerData publicPlayerData = players[TestResultComponent.attackLonelyPointReachIndex];
         Transform attackTransform = publicPlayerData.bodyTransform;
@@ -238,6 +259,20 @@ public class CullPassPoints : MonoBehaviour
         publicPlayerData.playerComponents.ForwardDesiredSpeed = publicPlayerData.maxSpeed;
         publicPlayerData.playerComponents.DesiredLookDirection = dir;
     }
+    void setDefenseTargetPosition(TestResultComponent TestResultComponent, GetV0DOTSResult GetV0DOTSResult)
+    {
+        PublicPlayerData publicPlayerData = players[TestResultComponent.defenseLonelyPointReachIndex];
+        Transform defenseTransform = publicPlayerData.bodyTransform;
+
+        Vector3 defensePosition = defenseTransform.position;
+        Vector3 reachPosition = TestResultComponent.closestPosition;
+        Vector3 dir = reachPosition - defensePosition;
+        publicPlayerData.playerComponents.TargetPosition = reachPosition;
+        publicPlayerData.playerComponents.ForwardDesiredDirection = dir;
+        publicPlayerData.playerComponents.ForwardDesiredSpeed = publicPlayerData.maxSpeed;
+        publicPlayerData.playerComponents.DesiredLookDirection = dir;
+    }
+
     IEnumerator TestCoroutine(TestResultComponent TestResultComponent, GetV0DOTSResult GetV0DOTSResult)
     {
         float t = 0;
@@ -339,7 +374,7 @@ public class CullPassPoints : MonoBehaviour
                         LonelyPointElement2 lonelyPointElement = lonelyPointElements[i];
                         Vector3 pos = new Vector3(lonelyPointElements[i].position.x, 0, lonelyPointElements[i].position.y);
                         Color color;
-                        if (lonelyPointElement.straightReachBall&& lonelyPointElement.parabolicReachBall)
+                        if (lonelyPointElement.straightReachBall && lonelyPointElement.parabolicReachBall)
                         {
                             color = Color.green;
                         }else if (lonelyPointElement.straightReachBall && !lonelyPointElement.parabolicReachBall)
@@ -357,12 +392,17 @@ public class CullPassPoints : MonoBehaviour
                         Gizmos.color = color;
                         Gizmos.DrawSphere(pos + Vector3.up * 0.25f, 0.2f);
                         GUIStyle style = new GUIStyle();
-                        style.fontSize = 10;
+                        style.fontSize = 12;
                         style.normal.textColor = color;
                         //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
                         string text = "straightReachBall=" + lonelyPointElement.straightReachBall + " parabolicReachBall=" + lonelyPointElement.parabolicReachBall + " i="+lonelyPointElement.index;
                         //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
                         Handles.Label(pos + Vector3.up * 0.5f, text, style);
+                        Color c = Color.Lerp(Color.green, Color.red, lonelyPointElement.weight);
+                        style.normal.textColor = c;
+                        float value = lonelyPointElement.weight * 100;
+                        text = "weight=" + value.ToString("f2") + " order="+ lonelyPointElement.order;
+                        Handles.Label(pos + Vector3.up * 1.25f, text, style);
                     }
                 }
             }
@@ -428,5 +468,52 @@ public class CullPassPoints : MonoBehaviour
         {
             print(publicPlayerData.playerID);
         }
+    }
+    public void SortAllLonelyPoints()
+    {
+
+        for (int k = 0; k < entities.Count; k++)
+        {
+            DynamicBuffer<LonelyPointElement2> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement2>(entities[k]);
+            for (int i = 0; i < lonelyPointElements.Length; i++)
+            {
+                if (lonelyPointElements[i].weight == Mathf.Infinity) continue;
+                float minWeight = lonelyPointElements[i].weight;
+                int order = 0;
+                for (int z = 0; z < entities.Count; z++)
+                {
+                        DynamicBuffer<LonelyPointElement2> lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entities[z]);
+                
+                
+                        for (int j = 0; j < lonelyPointElements2.Length; j++)
+                        {
+                            if ((z==k && i == j) || lonelyPointElements2[j].weight == Mathf.Infinity) continue;
+                            if (minWeight > lonelyPointElements2[j].weight)
+                            {
+                                //order = lonelyPointElements2[j].order;
+                                order++;
+                                minWeight = lonelyPointElements2[j].weight;
+                            }
+                            else
+                            {
+                                LonelyPointElement2 lonelyPointElement = lonelyPointElements2[j];
+                                //order = lonelyPointElement.order;
+                                //lonelyPointElement.order=order+1;
+                                lonelyPointElements2[j] = lonelyPointElement;
+                                
+                            }
+                        }
+                    }
+
+                LonelyPointElement2 lonelyPointElement2 = lonelyPointElements[i];
+                lonelyPointElement2.order = order;
+                lonelyPointElements[i] = lonelyPointElement2;
+            }
+            
+        }
+    }
+    void SortLonelyPoints(ref DynamicBuffer<LonelyPointElement2> lonelyPointElements,int index,float minWeight)
+    {
+
     }
 }

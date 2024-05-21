@@ -95,7 +95,7 @@ public class ParabolicPassDOTS
         Vector2 XZ0 = new Vector2(pos0.x, pos0.z);
         Vector2 XZf = new Vector2(posf.x, posf.z);
         Vector2 dir = XZf - XZ0;
-        float distanceXZ = Vector3.Distance(XZ0, XZf);
+        float distanceXZ = Vector2.Distance(XZ0, XZf);
         float e = (1 - Mathf.Exp(-k * t));
         Vector2 vxz0 = dir.normalized * (distanceXZ * k / e);
 
@@ -134,10 +134,13 @@ public class ParabolicPassDOTS
         float d = Vector3.Distance(pos0, MyFunctions.setYToVector3(posf, pos0.y));
         maxControlSpeed = Mathf.Lerp(2, maxControlSpeed, d / maxControlSpeedLerpDistance);
         Vector3 v0 = ParabolaWithDrag_GetV0(t,pos0,posf,k,9.8f);
+        v0.y = Mathf.Clamp(v0.y,0, maxControlSpeed);
         Vector3 vt = Vector3.zero;
         ParabolicWithDragDOTS.GetVelocityAtTime(t, v0, k, vfMagnitude, ref vt);
         result.ballReachTargetPositionTime = t;
-        if ((vt.magnitude >= maxControlSpeed || t == 0))
+        Vector3 vt2 = vt;
+        vt2.y = 0;
+        if ((vt2.magnitude >= maxControlSpeed || t == 0))
         {
             Vector3 dir = (posf - pos0).normalized;
             //Vector3 v02 = getV0ByVt(maxControlSpeed, dir, k, t,vfMagnitude);

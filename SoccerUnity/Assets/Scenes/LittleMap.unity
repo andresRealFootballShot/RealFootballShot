@@ -1482,7 +1482,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 108009132}
   m_HandleRect: {fileID: 108009131}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -8139,7 +8139,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 721031710}
   m_HandleRect: {fileID: 721031709}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -25031,7 +25031,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1981492703}
   m_HandleRect: {fileID: 1981492702}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -34465,7 +34465,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 841198963}
   m_HandleRect: {fileID: 841198962}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -40699,7 +40699,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969940, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004615711249, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.z
@@ -41230,7 +41230,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 29.67
+      value: 34.31
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.y
@@ -41238,7 +41238,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 239.35
+      value: 243.72
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalRotation.w
@@ -43694,7 +43694,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 277427217}
   m_HandleRect: {fileID: 277427216}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -44579,7 +44579,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1796266504}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 24.5, y: 0, z: 186}
+  m_LocalPosition: {x: 60.5, y: 0, z: 214.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1875775244}
@@ -46723,13 +46723,14 @@ MonoBehaviour:
   teamName_Attacker: Blue
   testLonelyPoints:
   - {fileID: 1796266505}
-  test: 1
+  test: 0
   debug: 1
   debugPointResults: 1
   debugPassTest: 0
   lonelyPointIndexPassTest: 0
   v0y: 20
   y: 2.2
+  batchesPerChunk: 10
 --- !u!1 &1876518188
 GameObject:
   m_ObjectHideFlags: 0

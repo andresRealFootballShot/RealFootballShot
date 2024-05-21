@@ -46,7 +46,8 @@ public class CullPassPointsSystem : SystemBase
         CullPassPointsJob.cullPassPointsParamsHandle = this.GetComponentTypeHandle<CullPassPointsComponent>(true);
         CullPassPointsJob.BallParamsComponentHandle = this.GetComponentTypeHandle<BallParamsComponent>(true);
         CullPassPointsJob.TestResultComponentHandle = this.GetComponentTypeHandle<TestResultComponent>(false);
-        Dependency = CullPassPointsJob.ScheduleParallel(cullPassPointsQuery, 1, this.Dependency);
+        Dependency = CullPassPointsJob.ScheduleParallel(cullPassPointsQuery, CullPassPoints.batchesPerChunk, this.Dependency);
         Dependency.Complete();
+        CullPassPoints.SortAllLonelyPoints();
     }
 }

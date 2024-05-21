@@ -37,12 +37,16 @@ namespace FieldTriangleV2
         public Vector2 position;
         public int index;
         public bool straightReachBall, parabolicReachBall;
+        public float weight;
+        public int order;
         public LonelyPointElement2(Vector2 position, int index)
         {
             this.position = position;
             this.index = index;
             straightReachBall = false;
             parabolicReachBall = false;
+            weight = Mathf.Infinity;
+            order = -1;
         }
         public LonelyPointElement2(LonelyPointElement lonelyPointElement)
         {
@@ -50,6 +54,8 @@ namespace FieldTriangleV2
             this.index = lonelyPointElement.index;
             straightReachBall = false;
             parabolicReachBall = false;
+            weight = Mathf.Infinity;
+            order = -1;
         }
     }
     public struct BufferSizeComponent : IComponentData

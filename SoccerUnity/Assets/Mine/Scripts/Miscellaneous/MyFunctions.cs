@@ -141,6 +141,28 @@ public static class MyFunctions
             return false;
         }
     }
+    public static bool GetClosestPointOnFiniteLine(Vector2 point, Vector2 line_start, Vector2 line_end, out Vector2 result)
+    {
+        if (line_end == Vector2.positiveInfinity || line_end == Vector2.negativeInfinity || Vector2IsNan(line_end))
+        {
+            result = Vector2.zero;
+            return false;
+        }
+        Vector2 line_direction = line_end - line_start;
+        float line_length = line_direction.magnitude;
+        line_direction.Normalize();
+        float project_length = Vector2.Dot(point - line_start, line_direction);
+        if (project_length >= 0 && project_length <= line_length)
+        {
+            result = line_start + line_direction * project_length;
+            return true;
+        }
+        else
+        {
+            result = Vector2.zero;
+            return false;
+        }
+    }
     public static bool Line_LineIntersection(out Vector3 intersection,
         Vector3 linePoint1, Vector3 lineDirection1,
         Vector3 linePoint2, Vector3 lineDirection2)
@@ -205,6 +227,18 @@ public static class MyFunctions
         float project_length = Mathf.Clamp(Vector3.Dot(point - line_start, line_direction), 0f, line_length);
         return line_start + line_direction * project_length;
     }
+    public static Vector2 GetClosestPointOnFiniteLine(Vector2 point, Vector2 line_start, Vector2 line_end)
+    {
+        if (line_end == Vector2.positiveInfinity || line_end == Vector2.negativeInfinity || Vector2IsNan(line_end))
+        {
+            return line_start;
+        }
+        Vector2 line_direction = line_end - line_start;
+        float line_length = line_direction.magnitude;
+        line_direction.Normalize();
+        float project_length = Mathf.Clamp(Vector2.Dot(point - line_start, line_direction), 0f, line_length);
+        return line_start + line_direction * project_length;
+    }
     public static float GetClosestLenghtOnFiniteLine(Vector3 point, Vector3 line_start, Vector3 line_end)
     {
         if (line_end == Vector3.positiveInfinity || line_end == Vector3.negativeInfinity || Vector3IsNan(line_end))
@@ -215,6 +249,18 @@ public static class MyFunctions
         float line_length = line_direction.magnitude;
         line_direction.Normalize();
         float project_length = Mathf.Clamp(Vector3.Dot(point - line_start, line_direction), 0f, line_length);
+        return project_length;
+    }
+    public static float GetClosestLenghtOnFiniteLine(Vector2 point, Vector2 line_start, Vector2 line_end)
+    {
+        if (line_end == Vector2.positiveInfinity || line_end == Vector2.negativeInfinity || Vector2IsNan(line_end))
+        {
+            return 0;
+        }
+        Vector2 line_direction = line_end - line_start;
+        float line_length = line_direction.magnitude;
+        line_direction.Normalize();
+        float project_length = Mathf.Clamp(Vector2.Dot(point - line_start, line_direction), 0f, line_length);
         return project_length;
     }
     public static float DistancePointAndFiniteLine(Vector3 point, Vector3 line_start, Vector3 line_end)
@@ -478,6 +524,10 @@ public static class MyFunctions
     public static bool Vector3IsNan(Vector3 vector3)
     {
         return float.IsNaN(vector3.x) || float.IsNaN(vector3.y) || float.IsNaN(vector3.z);
+    }
+    public static bool Vector2IsNan(Vector2 vector2)
+    {
+        return float.IsNaN(vector2.x) || float.IsNaN(vector2.y);
     }
     public static bool floatIsNanOrInfinity(float value)
     {
