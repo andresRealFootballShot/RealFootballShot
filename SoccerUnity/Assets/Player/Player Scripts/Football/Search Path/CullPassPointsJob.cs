@@ -42,12 +42,13 @@ public struct CullPassPointsJob : IJobEntityBatch
             int attackIndexEnd = CullPassPointsParams.teamA_IsAttacker ? CullPassPointsParams.teamASize : CullPassPointsParams.teamASize + CullPassPointsParams.teamBSize;
             int defenseIndexStart = CullPassPointsParams.teamA_IsAttacker ? CullPassPointsParams.teamASize : 0;
             int defenseIndexEnd = CullPassPointsParams.teamA_IsAttacker ? CullPassPointsParams.teamASize + CullPassPointsParams.teamBSize : CullPassPointsParams.teamASize;
-            float minDistancePlayer_Ball;
+            float straightMinDistancePlayer_Ball, parabolicMinDistancePlayer_Ball;
             int playerIndexStraightPass;
             PathDataDOTS PathDataDOTS = new PathDataDOTS(0, PathType.InGround, 0, Vector3.zero, Vector3.zero, Vector3.zero, BallParams.k, BallParams.mass, BallParams.groundY, BallParams.bounciness, BallParams.friction, BallParams.dynamicFriction, BallParams.ballRadio, BallParams.g);
             GetV0DOTSResult getV0DOTSResult = new GetV0DOTSResult();
             float defenseReachTimeResult;
             float vf = BallParams.g / BallParams.k;
+            Vector2 ballPosition = new Vector2(BallParams.BallPosition.x, BallParams.BallPosition.z);
             for (int j = 0; j < CullPassPointsParams.sizeLonelyPoints; j++)
             {
                 LonelyPointElement2 lonelyPoint = lonelyPoints[j];
@@ -62,7 +63,7 @@ public struct CullPassPointsJob : IJobEntityBatch
                 PathDataDOTS.V0 = getV0DOTSResult.v0;
                 PathDataDOTS.v0Magnitude = getV0DOTSResult.v0Magnitude;
                 PathDataDOTS.normalizedV0 = getV0DOTSResult.v0.normalized;
-                getMinReachDistance_StraightPass(true,ref PlayerPositions, ref PlayerGenericParams, defenseIndexStart, defenseIndexEnd, lonelyPosition, BallParams.BallPosition, ref PathDataDOTS, out minDistancePlayer_Ball, out playerIndexStraightPass, out defenseReachTimeResult, ref TestResult);
+                getMinReachDistance_StraightPass(true,ref PlayerPositions, ref PlayerGenericParams, defenseIndexStart, defenseIndexEnd, lonelyPosition, BallParams.BallPosition, ref PathDataDOTS, out straightMinDistancePlayer_Ball, out playerIndexStraightPass, out defenseReachTimeResult, ref TestResult);
                 //Debug.Log(defenseReachTimeResult);
                 TestResult.GetV0DOTSResult1 = getV0DOTSResult;
                 TestResult.defenseLonelyPointReachTime = defenseReachTimeResult;
@@ -74,11 +75,13 @@ public struct CullPassPointsJob : IJobEntityBatch
                 TestResult.straightReachBall = true;
                 lonelyPoint.parabolicReachBall = true;
                 lonelyPoint.straightReachBall = true;
-                if (minDistancePlayer_Ball > 0)
+
+                parabolicMinDistancePlayer_Ball = Mathf.NegativeInfinity;
+                if (straightMinDistancePlayer_Ball > 0)
                 {
                     TestResult.straightReachBall = false;
                     lonelyPoint.straightReachBall = false;
-                    bool parabolicReachBall = getParabolicPass_isPosible(ref PlayerPositions, defenseIndexStart, defenseIndexEnd, playerIndexStraightPass, ref PlayerGenericParams, lonelyPosition, BallParams.BallPosition, reachTime, defenseReachTimeResult, BallParams.k, vf, ref VOParams, PlayerGenericParams.maxKickForce,ref PathDataDOTS, ref TestResult);
+                    bool parabolicReachBall = getParabolicPass_isPosible(ref PlayerPositions, defenseIndexStart, defenseIndexEnd, playerIndexStraightPass, ref PlayerGenericParams, lonelyPosition, BallParams.BallPosition, reachTime, defenseReachTimeResult, BallParams.k, vf, ref VOParams, PlayerGenericParams.maxKickForce,ref PathDataDOTS,out parabolicMinDistancePlayer_Ball, ref TestResult);
                     TestResult.parabolicReachBall = parabolicReachBall;
                     lonelyPoint.parabolicReachBall = parabolicReachBall;
                     if (!parabolicReachBall)
@@ -90,7 +93,7 @@ public struct CullPassPointsJob : IJobEntityBatch
                 {
                     //Debug.Log("aaaaa ballReachTargetPositionTime=" + getV0DOTSResult.ballReachTargetPositionTime + " defenseReachTime=" + defenseReachTimeResult);
                 }
-                calculateWeight(ref lonelyPoint, ref CullPassPointsParams);
+                calculateWeight(ref lonelyPoint, ref CullPassPointsParams, ballPosition,straightMinDistancePlayer_Ball, parabolicMinDistancePlayer_Ball);
                 lonelyPoints[j] = lonelyPoint;
 
             }
@@ -98,8 +101,9 @@ public struct CullPassPointsJob : IJobEntityBatch
 
         }
     }
-    void calculateWeight(ref LonelyPointElement2 lonelyPoint, ref CullPassPointsComponent CullPassPointsParams)
+    void calculateWeight(ref LonelyPointElement2 lonelyPoint, ref CullPassPointsComponent CullPassPointsParams,Vector2 ballPosition,float straightMinDistancePlayer_Ball,float parabolicMinDistancePlayer_Ball)
     {
+        //Debug.Log(straightMinDistancePlayer_Ball + " " + parabolicMinDistancePlayer_Ball);
         if (!lonelyPoint.straightReachBall && !lonelyPoint.parabolicReachBall)
         {
             lonelyPoint.weight = Mathf.Infinity;
@@ -118,12 +122,13 @@ public struct CullPassPointsJob : IJobEntityBatch
         Vector2 center = CullPassPointsParams.post2Position + dir3 * (d/2);
 
         float distance = Vector2.Distance(closestGoalPosition, lonelyPoint.position);
-        distance = distance / CullPassPointsParams.distanceWeightLerp;
+        float distance_ball_lonely= Vector2.Distance(ballPosition, lonelyPoint.position);
+        distance = (distance + distance_ball_lonely) / CullPassPointsParams.distanceWeightLerp;
         float a = 1f;
         float weight = (angle+ distance*a)/(1+a);
         lonelyPoint.weight = weight;
     }
-    bool getParabolicPass_isPosible(ref DynamicBuffer<PlayerPositionElement> PlayerPositions, int startIndex, int endIndex, int playerIndexStraightPass, ref PlayerGenericParams PlayerGenericParams, Vector3 lonelyPosition, Vector3 ballPosition, float attackReachTime, float defenseReachTime, float k, float vf, ref GetStraightV0Params VOParams, float maxKickForce,ref PathDataDOTS PathDataDOTS, ref TestResultComponent TestResult)
+    bool getParabolicPass_isPosible(ref DynamicBuffer<PlayerPositionElement> PlayerPositions, int startIndex, int endIndex, int playerIndexStraightPass, ref PlayerGenericParams PlayerGenericParams, Vector3 lonelyPosition, Vector3 ballPosition, float attackReachTime, float defenseReachTime, float k, float vf, ref GetStraightV0Params VOParams, float maxKickForce,ref PathDataDOTS PathDataDOTS,out float parabolicMinDistance_BallPlayer, ref TestResultComponent TestResult)
     {
 
         GetV0DOTSResult getV0DOTSResult = new GetV0DOTSResult();
@@ -137,12 +142,25 @@ public struct CullPassPointsJob : IJobEntityBatch
         Vector3 V0 = getV0DOTSResult.v0;
         PathDataDOTS.V0 = getV0DOTSResult.v0;
         PathDataDOTS.v0Magnitude = getV0DOTSResult.v0Magnitude;
+        parabolicMinDistance_BallPlayer = Mathf.NegativeInfinity;
         float t1, t2;
         if (!ParabolicWithDragDOTS.timeToReachHeightParabolicNoDrag(PlayerGenericParams.heightJump, 9.8f, V0.y, ballPosition.y, out t1, out t2))
         {
+
+            PlayerPositionElement playerPositionElement = PlayerPositions[playerIndexStraightPass];
+            Vector3 playerPosition2 = PlayerPositions[playerIndexStraightPass].position;
+            Vector3 playerPosition = new Vector3(playerPosition2.x, 0, playerPosition2.y);
+            float playerReachTime;
+            Vector3 ballPositionAtReachTime = Vector3.zero;
+            Vector3 closestPoint = MyFunctions.GetClosestPointOnFiniteLine(playerPosition, ballPosition, lonelyPosition);
+
+            float maxSpeed = playerIndexStraightPass == startIndex ? PlayerGenericParams.goalkeeperMaxSpeed : PlayerGenericParams.maxSpeed;
+            Vector3 closestPoint2 = MyFunctions.GetClosestPointOnFiniteLine(playerPosition, ballPosition, lonelyPosition);
+            parabolicMinDistance_BallPlayer = getPlayerReachDistance_StraightPass(false, playerPosition, closestPoint2, ballPosition, maxSpeed, ref PathDataDOTS, ref ballPositionAtReachTime, ref PlayerGenericParams, ref playerPositionElement, out playerReachTime);
+
             return false;
         }
-
+        bool result = true; ;
         for (int i = startIndex; i < endIndex; i++)     {
             PlayerPositionElement playerPositionElement = PlayerPositions[i];
             Vector3 playerPosition2 = PlayerPositions[i].position;
@@ -163,32 +181,36 @@ public struct CullPassPointsJob : IJobEntityBatch
                 if (d1 > d2 && d1 < d3)
                 {
                     float PlayerReachDistance = getPlayerReachDistance_StraightPass(false, playerPosition, posReachPlayerHeightJump1, ballPosition, maxSpeed, ref PathDataDOTS, ref ballPositionAtReachTime, ref PlayerGenericParams,ref playerPositionElement, out playerReachTime);
-                    if (PlayerReachDistance > 0)
+                    if (PlayerReachDistance > parabolicMinDistance_BallPlayer)
                     {
-                        return false;
+                        parabolicMinDistance_BallPlayer = PlayerReachDistance;
+                        result = false;
                     }
                     PlayerReachDistance = getPlayerReachDistance_StraightPass(false, playerPosition, posReachPlayerHeightJump2, ballPosition, maxSpeed, ref PathDataDOTS, ref ballPositionAtReachTime, ref PlayerGenericParams,ref playerPositionElement, out playerReachTime);
-                    if (PlayerReachDistance > 0)
+                    if (PlayerReachDistance > parabolicMinDistance_BallPlayer)
                     {
-                        return false;
+                        parabolicMinDistance_BallPlayer = PlayerReachDistance;
+                        result = false;
                     }
                 }
                 else
                 {
                     float PlayerReachDistance = getPlayerReachDistance_StraightPass(false, playerPosition, closestPoint, ballPosition, maxSpeed, ref PathDataDOTS, ref ballPositionAtReachTime, ref PlayerGenericParams,ref playerPositionElement, out playerReachTime);
-                    if (PlayerReachDistance > 0)
+                    if (PlayerReachDistance > parabolicMinDistance_BallPlayer)
                     {
-                        return false;
+                        parabolicMinDistance_BallPlayer = PlayerReachDistance;
+                        result = false;
                     }
                 }
                 float PlayerReachDistance2 = getPlayerReachDistance_StraightPass(false, playerPosition, lonelyPosition, ballPosition, maxSpeed, ref PathDataDOTS, ref ballPositionAtReachTime, ref PlayerGenericParams,ref playerPositionElement, out playerReachTime);
-                if (PlayerReachDistance2 > 0)
+                if (PlayerReachDistance2 > parabolicMinDistance_BallPlayer)
                 {
-                    return false;
+                    parabolicMinDistance_BallPlayer = PlayerReachDistance2;
+                    result = false;
                 }
             }
         }
-        return true;
+        return result;
 
     }
     
