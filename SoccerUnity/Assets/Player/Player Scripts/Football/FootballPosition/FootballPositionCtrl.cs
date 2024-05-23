@@ -255,7 +255,7 @@ public class FootballPositionCtrl : MonoBehaviour
     {
         return playerPositionType.Equals(FieldPositionsData.PlayerPositionType.CenterBack) || playerPositionType.Equals(FieldPositionsData.PlayerPositionType.LateralBack);
     }
-    public void getWeightyValue4(Vector2 normalizedPosition, List<FieldPositionsData.Point> points,float offsideLinePosY, FieldPositionsData.PlayerPositionType playerPositionType,float weightOffsideLine, out Vector2 value)
+        public void getWeightyValue4(Vector2 normalizedPosition, List<FieldPositionsData.Point> points,float offsideLinePosY, FieldPositionsData.PlayerPositionType playerPositionType,float weightOffsideLine, out Vector2 value)
     {
         float totalH = 0;
         float[] hs = new float[points.Count];
@@ -338,6 +338,25 @@ public class FootballPositionCtrl : MonoBehaviour
         }
         return result;
     }
+    public Vector2 getNormalizedPosition(FieldPositionsData.HorizontalPositionType horizontalPositionType, Vector3 position, SideOfField sideOfField)
+    {
+        float verticalBallDistance = sideOfField.backPlane.GetDistanceToPoint(position) / fieldLenght;
+        verticalBallDistance = Mathf.Clamp01(verticalBallDistance);
+        float horizontalBallDistance;
+        if (horizontalPositionType.Equals(FieldPositionsData.HorizontalPositionType.Right))
+        {
+
+            horizontalBallDistance = sideOfField.rightPlane.GetDistanceToPoint(position) / fieldWidth;
+        }
+        else
+        {
+            horizontalBallDistance = sideOfField.leftPlane.GetDistanceToPoint(position) / fieldWidth;
+        }
+        horizontalBallDistance = Mathf.Clamp01(horizontalBallDistance);
+
+        normalizedBallPosition = new Vector2(horizontalBallDistance, verticalBallDistance);
+        return normalizedBallPosition;
+    }
     public Vector2 getNormalizedPosition(FieldPositionsData.HorizontalPositionType horizontalPositionType, Vector3 position)
     {
         float verticalBallDistance = mySideOfField.backPlane.GetDistanceToPoint(position)/fieldLenght;
@@ -355,6 +374,25 @@ public class FootballPositionCtrl : MonoBehaviour
 
         normalizedBallPosition = new Vector2(horizontalBallDistance, verticalBallDistance);
         return normalizedBallPosition;
+    }
+    public Vector3 getGlobalPosition(FieldPositionsData.HorizontalPositionType horizontalPositionType, Vector2 normalizedPosition, SideOfField sideOfField)
+    {
+        Vector3 globalPosition = sideOfField.backTransform.TransformPoint(Vector3.forward * normalizedPosition.y * fieldLenght);
+        Vector3 globalHorizontalPosition;
+        if (horizontalPositionType.Equals(FieldPositionsData.HorizontalPositionType.Right))
+        {
+            globalHorizontalPosition = sideOfField.rightTransform.TransformDirection(Vector3.forward * normalizedPosition.x * fieldWidth - Vector3.forward * (fieldWidth / 2));
+
+            //Debug.DrawRay(mySideOfField.rightTransform.position, globalHorizontalPosition, Color.blue);
+        }
+        else
+        {
+            globalHorizontalPosition = sideOfField.leftTransform.TransformDirection(Vector3.forward * normalizedPosition.x * fieldWidth - Vector3.forward * (fieldWidth / 2));
+            //Debug.DrawRay(mySideOfField.leftTransform.position, globalHorizontalPosition, Color.blue);
+        }
+        globalPosition += globalHorizontalPosition;
+        //Debug.DrawLine(mySideOfField.backTransform.position, globalPosition,Color.red);
+        return globalPosition;
     }
     public Vector3 getGlobalPosition(FieldPositionsData.HorizontalPositionType horizontalPositionType, Vector2 normalizedPosition)
     {

@@ -30,13 +30,15 @@ namespace NextMove_Algorithm
         {
             public bool debug, debugTriangles, debugEdges, debugPoints, debugLonelyPoints, debugTriangleText, debugText;
         }
-        int extraPoints = 4;
+        public static int extraPoints = 4;
         
         public List<Transform> pointTransforms;
        
         NextMoveSystem nextMoveSystem;
         EntityManager entityManager;
-        public Dictionary<string,Entity> searchLonelyPointsEntitys { get; set; }
+        public Dictionary<string,Entity> teamsSearchLonelyPointsEntitys { get; set; }
+        public int entitiesSize = 10;
+        public List<Entity> sharedSearchLonelyPointsEntitys { get; set; } = new List<Entity>();
         public SearchLonelyPointsParams searchLonelyPointsParams;
         public bool testingMode;
         public string testingTeam;
@@ -50,7 +52,7 @@ namespace NextMove_Algorithm
         {
             if (enabled)
             {
-                searchLonelyPointsEntitys = new Dictionary<string, Entity>();
+                teamsSearchLonelyPointsEntitys = new Dictionary<string, Entity>();
                 entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
                 nextMoveSystem = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<NextMoveSystem>();
                 //nextMoveSystem.Enabled = false;
@@ -58,17 +60,57 @@ namespace NextMove_Algorithm
                 if (testingMode)
                 {
                     getChildsPoints();
-                    createEntities(testingTeam);
+                    createTeamEntities(testingTeam);
                     teamNames.Add(testingTeam);
                 }
                 else
                 {
                     Teams.teamsAreLoadedEvent.AddListenerConsiderInvoked(teamsSetuped);
                 }
-                    
+                createEntities();
                 nextMoveSystem.InitialNextMoveCreator.Start();
                 nextMoveSystem.NextMoveSystemManager = this;
             }
+        }
+        void setEntitiesEnable( bool value)
+        {
+            foreach (var entity in sharedSearchLonelyPointsEntitys)
+            {
+
+                entityManager.SetEnabled(entity, value);
+            }
+        }
+        void createEntities()
+        {
+            for (int i = 0; i < entitiesSize; i++)
+            {
+
+                Entity searchLonelyPointsEntity = entityManager.CreateEntity();
+                DynamicBuffer<PointElement> points = entityManager.AddBuffer<PointElement>(searchLonelyPointsEntity);
+                NativeArray<PointElement> pointsArray = new NativeArray<PointElement>(new PointElement[searchLonelyPointsParams.teamSize + extraPoints], Allocator.Temp);
+                points.AddRange(pointsArray);
+
+                DynamicBuffer<EdgeElement> edges = entityManager.AddBuffer<EdgeElement>(searchLonelyPointsEntity);
+                NativeArray<EdgeElement> edgesArray = new NativeArray<EdgeElement>(new EdgeElement[searchLonelyPointsParams.maxSizeEdgeBuffer], Allocator.Temp);
+                edges.AddRange(edgesArray);
+
+                DynamicBuffer<TriangleElement> triangles = entityManager.AddBuffer<TriangleElement>(searchLonelyPointsEntity);
+                NativeArray<TriangleElement> trianglesArray = new NativeArray<TriangleElement>(new TriangleElement[searchLonelyPointsParams.maxSizeTriangleBuffer], Allocator.Temp);
+                triangles.AddRange(trianglesArray);
+
+                DynamicBuffer<LonelyPointElement> lonelyPoints = entityManager.AddBuffer<LonelyPointElement>(searchLonelyPointsEntity);
+                NativeArray<LonelyPointElement> lonelyPointsArray = new NativeArray<LonelyPointElement>(new LonelyPointElement[searchLonelyPointsParams.maxSizeLonelyPointsBuffer], Allocator.Temp);
+                lonelyPoints.AddRange(lonelyPointsArray);
+
+                BufferSizeComponent bufferSizeComponent = new BufferSizeComponent(0, searchLonelyPointsParams.minLonelyPointDistance, searchLonelyPointsParams.divideEdgeMaxPoints, searchLonelyPointsParams.minNormalizedArea, searchLonelyPointsEntity);
+                entityManager.AddComponentData<BufferSizeComponent>(searchLonelyPointsEntity, bufferSizeComponent);
+                pointsArray.Dispose();
+                edgesArray.Dispose();
+                trianglesArray.Dispose();
+                lonelyPointsArray.Dispose();
+                sharedSearchLonelyPointsEntitys.Add(searchLonelyPointsEntity);
+            }
+            setEntitiesEnable(false);
         }
         void getChildsPoints()
         {
@@ -84,7 +126,7 @@ namespace NextMove_Algorithm
                 }
             }
         }
-        void createEntities(string teamName)
+        void createTeamEntities(string teamName)
         {
             Entity searchLonelyPointsEntity = entityManager.CreateEntity();
             DynamicBuffer<PointElement> points = entityManager.AddBuffer<PointElement>(searchLonelyPointsEntity);
@@ -109,20 +151,20 @@ namespace NextMove_Algorithm
             edgesArray.Dispose();
             trianglesArray.Dispose();
             lonelyPointsArray.Dispose();
-            searchLonelyPointsEntitys.Add(teamName,searchLonelyPointsEntity);
+            teamsSearchLonelyPointsEntitys.Add(teamName,searchLonelyPointsEntity);
         }
         private void teamsSetuped()
         {
             foreach (var team in Teams.teamsList)
             {
                 teamNames.Add(team.TeamName);
-                createEntities(team.TeamName);
+                createTeamEntities(team.TeamName);
             }
             MatchEvents.footballFieldLoaded.AddListenerConsiderInvoked(footballFieldLoaded);
         }
         public void UpdatePoints(string teamName)
         {
-            Entity searchLonelyPointsEntity = searchLonelyPointsEntitys[teamName];
+            Entity searchLonelyPointsEntity = teamsSearchLonelyPointsEntitys[teamName];
             BufferSizeComponent bufferSizeComponent = entityManager.GetComponentData<BufferSizeComponent>(searchLonelyPointsEntity);
             DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointsEntity);
             if (testingMode)
@@ -171,10 +213,23 @@ namespace NextMove_Algorithm
         {
             if (!testingMode)
             {
-                foreach (var searchLonelyPointsEntity in searchLonelyPointsEntitys.Values)
+                foreach (var searchLonelyPointsEntity in teamsSearchLonelyPointsEntitys.Values)
                 {
                     int i = 0;
                     DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointsEntity);
+                    foreach (var corner in MatchComponents.footballField.cornersComponents)
+                    {
+                        Transform cornerTransform = corner.cornerPoint;
+                        Vector3 pos = cornerTransform.position + cornerTransform.TransformDirection(new Vector3(searchLonelyPointsParams.fieldOffset, 0, searchLonelyPointsParams.fieldOffset));
+                        PointElement point = new PointElement(new Vector2(pos.x, pos.z), false, i);
+                        points[i] = point;
+                        i++;
+                    }
+                }
+                foreach (var entity in sharedSearchLonelyPointsEntitys)
+                {
+                    int i = 0;
+                    DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(entity);
                     foreach (var corner in MatchComponents.footballField.cornersComponents)
                     {
                         Transform cornerTransform = corner.cornerPoint;
@@ -210,7 +265,7 @@ namespace NextMove_Algorithm
                     k++;
                     if (!teamDebug.debug) continue;
                     
-                    Entity searchLonelyPointsEntity = searchLonelyPointsEntitys[team.TeamName];
+                    Entity searchLonelyPointsEntity = teamsSearchLonelyPointsEntitys[team.TeamName];
                     Color color = team.Color;
                     Gizmos.color = color;
                     GUIStyle style = new GUIStyle();

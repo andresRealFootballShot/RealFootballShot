@@ -40,6 +40,7 @@ public class CullPassPoints : MonoBehaviour
 
         createEntities();
         SetTeamAttacker(teamName_Attacker);
+        
     }
     void test1()
     {
@@ -172,7 +173,7 @@ public class CullPassPoints : MonoBehaviour
     }
     public void PlacePoints()
     {
-        Entity searchLonelyPointsEntity = SearchLonelyPointsManager.searchLonelyPointsEntitys[teamName_Defense];
+        Entity searchLonelyPointsEntity = SearchLonelyPointsManager.teamsSearchLonelyPointsEntitys[teamName_Defense];
         /*DynamicBuffer<EdgeElement> edges = entityManager.GetBuffer<EdgeElement>(searchLonelyPointsEntity);
         DynamicBuffer<TriangleElement> triangles = entityManager.GetBuffer<TriangleElement>(searchLonelyPointsEntity);
         DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointsEntity);*/
@@ -409,6 +410,10 @@ public class CullPassPoints : MonoBehaviour
                         float value = lonelyPointElement.weight * 100;
                         text = "weight=" + value.ToString("f2") + " order="+ lonelyPointElement.order;
                         Handles.Label(pos + Vector3.up * 1.25f, text, style);
+                        Team team;
+                        team = Teams.getTeamByName("Blue");
+                        Entity SearchLonelyPointsEntity = SearchLonelyPointsManager.sharedSearchLonelyPointsEntitys[0];
+                        CalculateNextPlayerPositionOfLonelyPoint(ref lonelyPointElement, FieldPositionsData.HorizontalPositionType.Right,team, SearchLonelyPointsEntity);
                     }
                 }
             }
@@ -418,7 +423,7 @@ public class CullPassPoints : MonoBehaviour
 #endif
     public void PlacePoints2()
     {
-        Entity searchLonelyPointsEntity = SearchLonelyPointsManager.searchLonelyPointsEntitys[teamName_Defense];
+        Entity searchLonelyPointsEntity = SearchLonelyPointsManager.teamsSearchLonelyPointsEntitys[teamName_Defense];
         /*DynamicBuffer<EdgeElement> edges = entityManager.GetBuffer<EdgeElement>(searchLonelyPointsEntity);
         DynamicBuffer<TriangleElement> triangles = entityManager.GetBuffer<TriangleElement>(searchLonelyPointsEntity);
         DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointsEntity);*/
@@ -518,17 +523,65 @@ public class CullPassPoints : MonoBehaviour
             
         }
     }
-    void CalculateNextPlayerPositionOfLonelyPoint(ref LonelyPointElement2 lonelyPointElements,Vector3 ballPosition, FieldPositionsData.HorizontalPositionType horizontalPositionType)
+    void CalculateNextPlayerPositionOfLonelyPoint(ref LonelyPointElement2 lonelyPointElements, FieldPositionsData.HorizontalPositionType horizontalPositionType,Team team,Entity searchLonelyPointsEntity)
     {
         PressureFieldPositionDatas PressureFieldPositionDatas;
         if (!FootballPositionCtrl.getCurrentPressureFieldPositions(out PressureFieldPositionDatas)) return;
+        BufferSizeComponent bufferSizeComponent = entityManager.GetComponentData<BufferSizeComponent>(searchLonelyPointsEntity);
+        DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointsEntity);
+        int i = 0;
         foreach (var FieldPositionData in PressureFieldPositionDatas.FieldPositionDatas)
         {
-            Vector2 weightyValue;
-            Vector2 normalBallPosition = FootballPositionCtrl.getGlobalPosition(horizontalPositionType, ballPosition);
+            Vector2 normalNextPosition,normalNextPosition2;
+            Vector3 nextPosition;
+            Vector3 ballPosition = new Vector3(lonelyPointElements.position.x, 0, lonelyPointElements.position.y);
+            Vector2 normalBallPosition = FootballPositionCtrl.getNormalizedPosition(horizontalPositionType, ballPosition,team.SideOfField);
             float offsideWeight;
             float offsideLineValueY = FootballPositionCtrl.GetOffsideLineGetValue(PressureFieldPositionDatas, normalBallPosition, out offsideWeight);
-            FootballPositionCtrl.getWeightyValue4(normalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out weightyValue);
+            FootballPositionCtrl.getWeightyValue4(normalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out normalNextPosition);
+            nextPosition=FootballPositionCtrl.getGlobalPosition(horizontalPositionType, normalNextPosition, team.SideOfField);
+
+            Vector2 symetricNormalBallPosition =normalBallPosition;
+            symetricNormalBallPosition.x =1- normalBallPosition.x;
+
+            FootballPositionCtrl.getWeightyValue4(symetricNormalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out normalNextPosition2);
+            FieldPositionsData.HorizontalPositionType otherHorizontalPositionType = FootballPositionCtrl.getOtherHorizontalPositionType(horizontalPositionType);
+
+
+            Vector3 nextPosition2 = FootballPositionCtrl.getGlobalPosition(otherHorizontalPositionType, normalNextPosition2, team.SideOfField);
+
+            SetLonelyPosition(ref points,i,nextPosition);
+            i++;
+            SetLonelyPosition(ref points, i, nextPosition2);
+            i++;
+            string info = FieldPositionData.playerPositionType.ToString();
+            DrawPoint(nextPosition, info);
+            DrawPoint(nextPosition2, info);
+            
         }
+
+        bufferSizeComponent.pointSize = team.publicPlayerDatas.Count + SearchLonelyPointsManager.extraPoints;
+        bufferSizeComponent.edgesResultSize = 0;
+        bufferSizeComponent.trianglesResultSize = 0;
+        bufferSizeComponent.lonelyPointsResultSize = 0;
+        entityManager.SetComponentData<BufferSizeComponent>(searchLonelyPointsEntity, bufferSizeComponent);
+        entityManager.SetEnabled(searchLonelyPointsEntity, true);
+    }
+    void SetLonelyPosition(ref DynamicBuffer<PointElement> points,int index,Vector3 position)
+    {
+        PointElement pointElement = points[index + SearchLonelyPointsManager.extraPoints];
+        pointElement.index = index + SearchLonelyPointsManager.extraPoints;
+        pointElement.position.x = position.x;
+        pointElement.position.y = position.z;
+        points[index + SearchLonelyPointsManager.extraPoints] = pointElement;
+    }
+    void DrawPoint(Vector3 position,string info)
+    {
+        Gizmos.color = Color.gray;
+        Gizmos.DrawSphere(position, 0.25f);
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 16;
+        style.normal.textColor = Color.black;
+        Handles.Label(position + Vector3.up * 1f, info, style);
     }
 }

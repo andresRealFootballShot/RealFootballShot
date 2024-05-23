@@ -46731,7 +46731,7 @@ MonoBehaviour:
   v0y: 20
   y: 2.2
   batchesPerChunk: 10
-  FootballPositionCtrl: {fileID: 0}
+  FootballPositionCtrl: {fileID: 58440509}
 --- !u!1 &1876518188
 GameObject:
   m_ObjectHideFlags: 0

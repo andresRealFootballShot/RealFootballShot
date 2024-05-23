@@ -31,6 +31,7 @@ public class Team : MonoBehaviour
     public int teamMaxPlayers { get => TypeMatch.maxPlayers / TypeMatch.getTemsSize() + 1; }
     public int teamMaxFieldPlayers { get => TypeMatch.maxPlayers / TypeMatch.getTemsSize(); }
     public TeamHUD teamHUD;
+    public SideOfField SideOfField { get; set; }
     public void Load()
     {
         nameTeamVar.Value = initName;
@@ -80,6 +81,8 @@ public class Team : MonoBehaviour
         {
             DebugsList.testing.print("setSideOfField team=" + TeamName + " | sideOfField=" + sideOfFieldID.ToString());
             sideOfFieldChanged.Invoke(sideOfField);
+            SideOfField = sideOfField;
+
         }
         return true;
     }
