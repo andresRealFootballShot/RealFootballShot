@@ -27544,6 +27544,14 @@ MonoBehaviour:
     debugLonelyPoints: 1
     debugTriangleText: 0
     debugText: 0
+  searchLonelyPointsDebug:
+    debug: 1
+    debugTriangles: 1
+    debugEdges: 0
+    debugPoints: 0
+    debugLonelyPoints: 0
+    debugTriangleText: 0
+    debugText: 0
 --- !u!114 &1028019886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27584,6 +27592,14 @@ MonoBehaviour:
     debugEdges: 0
     debugPoints: 0
     debugLonelyPoints: 1
+    debugTriangleText: 0
+    debugText: 0
+  searchLonelyPointsDebug:
+    debug: 0
+    debugTriangles: 0
+    debugEdges: 0
+    debugPoints: 0
+    debugLonelyPoints: 0
     debugTriangleText: 0
     debugText: 0
 --- !u!1 &1030710713
@@ -46613,6 +46629,7 @@ GameObject:
   - component: {fileID: 1875775244}
   - component: {fileID: 1875775245}
   - component: {fileID: 1875775246}
+  - component: {fileID: 1875775247}
   m_Layer: 0
   m_Name: Search Path
   m_TagString: Untagged
@@ -46729,10 +46746,25 @@ MonoBehaviour:
   debug: 1
   debugPointResults: 1
   debugPassTest: 0
+  debugNextLonelyPoints: 0
   lonelyPointIndexPassTest: 0
   v0y: 20
   y: 2.2
   batchesPerChunk: 10
+  FootballPositionCtrl: {fileID: 58440509}
+  sortLonelyPointsSize: 0a000000
+--- !u!114 &1875775247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1875775243}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f295e8954f2d30e4ba57c8ccfe0e0632, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   FootballPositionCtrl: {fileID: 58440509}
 --- !u!1 &1876518188
 GameObject:

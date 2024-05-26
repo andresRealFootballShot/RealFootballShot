@@ -28,7 +28,7 @@ public class FootballPositionCtrlEditor : Editor
         if (!t.debug) return;
 
         serializedObject.Update();
-        t.playerPositionType = (FieldPositionsData.PlayerPositionType)EditorGUILayout.EnumPopup("PlayerPosition", t.playerPositionType);
+        t.playerPositionType = (PlayerPositionType)EditorGUILayout.EnumPopup("PlayerPosition", t.playerPositionType);
         t.lineupName = EditorGUILayout.TextField("Lineup Name", t.lineupName);
         t.pressureName = EditorGUILayout.TextField("Lineup Name", t.pressureName);
         t.playerSize = EditorGUILayout.IntField("Lineup Name", t.playerSize);

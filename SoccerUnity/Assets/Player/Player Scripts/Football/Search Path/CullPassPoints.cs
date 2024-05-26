@@ -23,7 +23,7 @@ public class CullPassPoints : MonoBehaviour
     public string teamName_Defense = "Red";
     public string teamName_Attacker = "Blue";
     public List<Transform> testLonelyPoints;
-    public bool test,debug,debugPointResults,debugPassTest;
+    public bool test,debug,debugPointResults,debugPassTest,debugNextLonelyPoints;
     public int lonelyPointIndexPassTest;
     public List<Entity> entities = new List<Entity>();
     EntityManager entityManager;
@@ -412,17 +412,25 @@ public class CullPassPoints : MonoBehaviour
                         float value = lonelyPointElement.weight * 100;
                         text = "weight=" + value.ToString("f2") + " order="+ lonelyPointElement.order;
                         Handles.Label(pos + Vector3.up * 1.25f, text, style);
-                        Team team;
-                        team = Teams.getTeamByName("Blue");
-                        Entity SearchLonelyPointsEntity = SearchLonelyPointsManager.sharedSearchLonelyPointsEntitys[0];
-                        CalculateNextPlayerPositionOfLonelyPoint(ref lonelyPointElement, FieldPositionsData.HorizontalPositionType.Right,team, SearchLonelyPointsEntity);
+                        
                     }
                 }
+            }
+            if (debugNextLonelyPoints)
+            {
+                DebugNextLonelyPoints();
             }
 
         }
     }
 #endif
+    void DebugNextLonelyPoints()
+    {
+        Team team;
+        team = Teams.getTeamByName(teamName_Defense);
+        Entity searchLonelyPoint =  SearchLonelyPointsManager.sharedSearchLonelyPointsEntitys[0];
+        SearchLonelyPointsManager.DebugSearchLonelyPoints(searchLonelyPoint, SearchLonelyPointsManager.searchLonelyPointsDebug, team);
+    }
     public void PlacePoints2()
     {
         Entity searchLonelyPointsEntity = SearchLonelyPointsManager.teamsSearchLonelyPointsEntitys[teamName_Defense];
@@ -543,21 +551,22 @@ public class CullPassPoints : MonoBehaviour
         BufferSizeComponent bufferSizeComponent = entityManager.GetComponentData<BufferSizeComponent>(searchLonelyPointsEntity);
         DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointsEntity);
         int i = 0;
+        Vector3 ballPosition = new Vector3(lonelyPointElement.position.x, 0, lonelyPointElement.position.y);
+        Vector2 normalBallPosition = FootballPositionCtrl.getNormalizedPosition(horizontalPositionType, ballPosition, team.SideOfField);
+        float offsideWeight;
+        float offsideLineValueY = FootballPositionCtrl.GetOffsideLineGetValue(PressureFieldPositionDatas, normalBallPosition, out offsideWeight);
         foreach (var FieldPositionData in PressureFieldPositionDatas.FieldPositionDatas)
         {
-            Vector2 normalNextPosition,normalNextPosition2;
+            Vector2 normalNextPosition=Vector2.zero,normalNextPosition2 = Vector2.zero;
             Vector3 nextPosition;
-            Vector3 ballPosition = new Vector3(lonelyPointElement.position.x, 0, lonelyPointElement.position.y);
-            Vector2 normalBallPosition = FootballPositionCtrl.getNormalizedPosition(horizontalPositionType, ballPosition,team.SideOfField);
-            float offsideWeight;
-            float offsideLineValueY = FootballPositionCtrl.GetOffsideLineGetValue(PressureFieldPositionDatas, normalBallPosition, out offsideWeight);
+           
             FootballPositionCtrl.getWeightyValue4(normalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out normalNextPosition);
             nextPosition=FootballPositionCtrl.getGlobalPosition(horizontalPositionType, normalNextPosition, team.SideOfField);
 
             Vector2 symetricNormalBallPosition =normalBallPosition;
             symetricNormalBallPosition.x =1- normalBallPosition.x;
 
-            FootballPositionCtrl.getWeightyValue4(symetricNormalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out normalNextPosition2);
+            //FootballPositionCtrl.getWeightyValue4(symetricNormalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out normalNextPosition2);
             FieldPositionsData.HorizontalPositionType otherHorizontalPositionType = FootballPositionCtrl.getOtherHorizontalPositionType(horizontalPositionType);
 
 
@@ -568,8 +577,8 @@ public class CullPassPoints : MonoBehaviour
             SetLonelyPosition(ref points, i, nextPosition2);
             i++;
             string info = FieldPositionData.playerPositionType.ToString();
-            DrawPoint(nextPosition, info);
-            DrawPoint(nextPosition2, info);
+            //DrawPoint(nextPosition, info);
+            //DrawPoint(nextPosition2, info);
             
         }
 

@@ -47,6 +47,7 @@ namespace NextMove_Algorithm
         public List<string> teamNames = new List<string>();
         
         public List<TeamDebug> teamDebugs = new List<TeamDebug>();
+        public TeamDebug searchLonelyPointsDebug;
         float gizmoSphereRadio = 0.25f;
         void Start()
         {
@@ -275,6 +276,7 @@ namespace NextMove_Algorithm
                     Entity searchLonelyPointsEntity = teamsSearchLonelyPointsEntitys[team.TeamName];
                     DebugSearchLonelyPoints(searchLonelyPointsEntity, teamDebug, team);
                 }
+                
             }
         }
         public void DebugSearchLonelyPoints(Entity searchLonelyPointsEntity, TeamDebug teamDebug,Team team)

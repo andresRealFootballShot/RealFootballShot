@@ -4,6 +4,10 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
+public enum PlayerPositionType
+{
+    Forward, CenterMidfield, EdgeMidfield, CenterBack, LateralBack
+}
 [System.Serializable]
 public class FieldPositionsData
 {
@@ -11,10 +15,7 @@ public class FieldPositionsData
     {
         Right,Left
     }
-    public enum PlayerPositionType
-    {
-        Forward,CenterMidfield, EdgeMidfield,CenterBack,LateralBack
-    }
+    
     [System.Serializable]
     public class Point
     {
@@ -130,7 +131,7 @@ public class FootballPositionCtrl : MonoBehaviour
     public FieldPositionsData selectedFieldPositionParameters;
     [HideInInspector]
     public FieldPositionsData.Point selectedPoint;
-    [HideInInspector] public FieldPositionsData.PlayerPositionType playerPositionType;
+    [HideInInspector] public PlayerPositionType playerPositionType;
     [HideInInspector] public string lineupName = "Default";
     [HideInInspector] public string pressureName = "Default";
     public int playerSize = 5;
@@ -251,11 +252,11 @@ public class FootballPositionCtrl : MonoBehaviour
         p.y = p.y * fieldLenght / fieldWidth;
         return p;
     }
-    bool isDefensePlayer(FieldPositionsData.PlayerPositionType playerPositionType)
+    bool isDefensePlayer(PlayerPositionType playerPositionType)
     {
-        return playerPositionType.Equals(FieldPositionsData.PlayerPositionType.CenterBack) || playerPositionType.Equals(FieldPositionsData.PlayerPositionType.LateralBack);
+        return playerPositionType.Equals(PlayerPositionType.CenterBack) || playerPositionType.Equals(PlayerPositionType.LateralBack);
     }
-        public void getWeightyValue4(Vector2 normalizedPosition, List<FieldPositionsData.Point> points,float offsideLinePosY, FieldPositionsData.PlayerPositionType playerPositionType,float weightOffsideLine, out Vector2 value)
+    public void getWeightyValue4(Vector2 normalizedPosition, List<FieldPositionsData.Point> points,float offsideLinePosY, PlayerPositionType playerPositionType,float weightOffsideLine, out Vector2 value)
     {
         float totalH = 0;
         float[] hs = new float[points.Count];

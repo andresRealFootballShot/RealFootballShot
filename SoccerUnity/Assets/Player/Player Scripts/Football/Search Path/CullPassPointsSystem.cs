@@ -62,7 +62,7 @@ public class CullPassPointsSystem : SystemBase
         SearchLonelyPointsManager.setEntitiesEnable2(false);
         SearchLonelyPointsManager.setEntitiesEnable(false);
         UpdateNextPlayerPositions();
-        CalculateLonelyPoints();
+        //CalculateLonelyPoints();
 
     }
     void CalculateLonelyPoints()
