@@ -32,11 +32,13 @@ public class CullPassPoints : MonoBehaviour
     public float y = 2;
     public int batchesPerChunk = 1;
     public FootballPositionCtrl FootballPositionCtrl;
+    public List<int> sortLonelyPointsSize;
     void Start()
     {
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
         CullPassPointsSystem cullPassPointsSystem = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<CullPassPointsSystem>();
         cullPassPointsSystem.CullPassPoints = this;
+        cullPassPointsSystem.SearchLonelyPointsManager = SearchLonelyPointsManager;
 
         createEntities();
         SetTeamAttacker(teamName_Attacker);
@@ -480,9 +482,9 @@ public class CullPassPoints : MonoBehaviour
             print(publicPlayerData.playerID);
         }
     }
-    public void SortAllLonelyPoints()
+   
+    public void UpdateNextPlayerPositions(int lonelyPointSize, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team,int startSearchLonelyPointIndex)
     {
-
         for (int k = 0; k < entities.Count; k++)
         {
             DynamicBuffer<LonelyPointElement2> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement2>(entities[k]);
@@ -519,11 +521,22 @@ public class CullPassPoints : MonoBehaviour
                 LonelyPointElement2 lonelyPointElement2 = lonelyPointElements[i];
                 lonelyPointElement2.order = order;
                 lonelyPointElements[i] = lonelyPointElement2;
+                if (order < lonelyPointSize)
+                {
+                    LonelyPointElement2 lonelyPointElement = lonelyPointElements[i];
+                    Entity entity = SearchLonelyPointsManager.sharedSearchLonelyPointsEntitys[startSearchLonelyPointIndex + order];
+                    CalculateNextPlayerPositionOfLonelyPoint(ref lonelyPointElement, horizontalPositionType, team, entity);
+                    
+                }
+                else
+                {
+                    return;
+                }
             }
             
         }
     }
-    void CalculateNextPlayerPositionOfLonelyPoint(ref LonelyPointElement2 lonelyPointElements, FieldPositionsData.HorizontalPositionType horizontalPositionType,Team team,Entity searchLonelyPointsEntity)
+    void CalculateNextPlayerPositionOfLonelyPoint(ref LonelyPointElement2 lonelyPointElement, FieldPositionsData.HorizontalPositionType horizontalPositionType,Team team,Entity searchLonelyPointsEntity)
     {
         PressureFieldPositionDatas PressureFieldPositionDatas;
         if (!FootballPositionCtrl.getCurrentPressureFieldPositions(out PressureFieldPositionDatas)) return;
@@ -534,7 +547,7 @@ public class CullPassPoints : MonoBehaviour
         {
             Vector2 normalNextPosition,normalNextPosition2;
             Vector3 nextPosition;
-            Vector3 ballPosition = new Vector3(lonelyPointElements.position.x, 0, lonelyPointElements.position.y);
+            Vector3 ballPosition = new Vector3(lonelyPointElement.position.x, 0, lonelyPointElement.position.y);
             Vector2 normalBallPosition = FootballPositionCtrl.getNormalizedPosition(horizontalPositionType, ballPosition,team.SideOfField);
             float offsideWeight;
             float offsideLineValueY = FootballPositionCtrl.GetOffsideLineGetValue(PressureFieldPositionDatas, normalBallPosition, out offsideWeight);

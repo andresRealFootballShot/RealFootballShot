@@ -10,7 +10,9 @@ using static UnityStandardAssets.Utility.TimedObjectActivator;
 public class CullPassPointsSystem : SystemBase
 {
     EntityQuery cullPassPointsQuery;
+    EntityQuery searchLonelyPointsquery;
     public CullPassPoints CullPassPoints;
+    public SearchLonelyPointsManager SearchLonelyPointsManager;
     EntityManager entityManager;
     protected override void OnCreate()
     {
@@ -19,6 +21,14 @@ public class CullPassPointsSystem : SystemBase
             All = new ComponentType[] { typeof(LonelyPointElement2), typeof(CullPassPointsComponent), typeof(PlayerPositionElement) }
         };
         cullPassPointsQuery = this.GetEntityQuery(description1);
+
+        var description2 = new EntityQueryDesc()
+        {
+            All = new ComponentType[]
+                       {typeof(PointElement)}
+        };
+        searchLonelyPointsquery = this.GetEntityQuery(description2);
+
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
     }
     protected override void OnUpdate()
@@ -48,6 +58,34 @@ public class CullPassPointsSystem : SystemBase
         CullPassPointsJob.TestResultComponentHandle = this.GetComponentTypeHandle<TestResultComponent>(false);
         Dependency = CullPassPointsJob.ScheduleParallel(cullPassPointsQuery, CullPassPoints.batchesPerChunk, this.Dependency);
         Dependency.Complete();
-        CullPassPoints.SortAllLonelyPoints();
+
+        SearchLonelyPointsManager.setEntitiesEnable2(false);
+        SearchLonelyPointsManager.setEntitiesEnable(false);
+        UpdateNextPlayerPositions();
+        CalculateLonelyPoints();
+
+    }
+    void CalculateLonelyPoints()
+    {
+
+
+        var searchLonelyPointsJob = new SearchLonelyPointsJob();
+        searchLonelyPointsJob.pointsHandle = this.GetBufferTypeHandle<PointElement>(true);
+        searchLonelyPointsJob.edgesHandle = this.GetBufferTypeHandle<EdgeElement>(false);
+        searchLonelyPointsJob.trianglesHandle = this.GetBufferTypeHandle<TriangleElement>(false);
+        searchLonelyPointsJob.lonelyPointsHandle = this.GetBufferTypeHandle<LonelyPointElement>(false);
+        searchLonelyPointsJob.pointBufferSizeComponentHandle = this.GetComponentTypeHandle<BufferSizeComponent>(false);
+        //var ecb = new EntityCommandBuffer(Allocator.TempJob);
+        //EntityCommandBuffer.ParallelWriter ecbParallel = ecb.AsParallelWriter();
+
+        //searchLonelyPointsJob.ConcurrentCommands = ecbParallel;
+        Dependency = searchLonelyPointsJob.ScheduleParallel(searchLonelyPointsquery, 1, this.Dependency);
+        Dependency.Complete();
+    }
+    void UpdateNextPlayerPositions()
+    {
+        int sortLonelyPointsSize = CullPassPoints.sortLonelyPointsSize[0];
+        Team defenseTeam = Teams.getTeamByName(CullPassPoints.teamName_Defense);
+        CullPassPoints.UpdateNextPlayerPositions(sortLonelyPointsSize, FieldPositionsData.HorizontalPositionType.Right,defenseTeam,0);
     }
 }

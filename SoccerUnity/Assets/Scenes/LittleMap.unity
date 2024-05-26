@@ -27515,6 +27515,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pointTransforms: []
+  entitiesSize: 10
   searchLonelyPointsParams:
     maxSizeEdgeBuffer: 100
     teamSize: 11
@@ -27556,6 +27557,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pointTransforms: []
+  entitiesSize: 10
   searchLonelyPointsParams:
     maxSizeEdgeBuffer: 100
     teamSize: 11

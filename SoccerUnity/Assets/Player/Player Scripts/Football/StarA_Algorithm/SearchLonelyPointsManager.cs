@@ -56,7 +56,8 @@ namespace NextMove_Algorithm
                 entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
                 nextMoveSystem = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<NextMoveSystem>();
                 //nextMoveSystem.Enabled = false;
-                
+
+                createEntities();
                 if (testingMode)
                 {
                     getChildsPoints();
@@ -67,14 +68,21 @@ namespace NextMove_Algorithm
                 {
                     Teams.teamsAreLoadedEvent.AddListenerConsiderInvoked(teamsSetuped);
                 }
-                createEntities();
                 nextMoveSystem.InitialNextMoveCreator.Start();
                 nextMoveSystem.NextMoveSystemManager = this;
             }
         }
-        void setEntitiesEnable( bool value)
+       public void setEntitiesEnable( bool value)
         {
             foreach (var entity in sharedSearchLonelyPointsEntitys)
+            {
+
+                entityManager.SetEnabled(entity, value);
+            }
+        }
+        public void setEntitiesEnable2(bool value)
+        {
+            foreach (var entity in teamsSearchLonelyPointsEntitys.Values)
             {
 
                 entityManager.SetEnabled(entity, value);
@@ -262,88 +270,94 @@ namespace NextMove_Algorithm
                 foreach (var team in Teams.teamsList)
                 {
                     TeamDebug teamDebug = teamDebugs[k];
-                    k++;
                     if (!teamDebug.debug) continue;
-                    
+                    k++;
                     Entity searchLonelyPointsEntity = teamsSearchLonelyPointsEntitys[team.TeamName];
-                    Color color = team.Color;
-                    Gizmos.color = color;
-                    GUIStyle style = new GUIStyle();
-                    style.normal.textColor = Color.red;
-                    DynamicBuffer<EdgeElement> edges = entityManager.GetBuffer<EdgeElement>(searchLonelyPointsEntity);
-                    DynamicBuffer<TriangleElement> triangles = entityManager.GetBuffer<TriangleElement>(searchLonelyPointsEntity);
-                    DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointsEntity);
-                    BufferSizeComponent bufferSizeComponent = entityManager.GetComponentData<BufferSizeComponent>(searchLonelyPointsEntity);
-                    if (teamDebug.debugPoints)
+                    DebugSearchLonelyPoints(searchLonelyPointsEntity, teamDebug, team);
+                }
+            }
+        }
+        public void DebugSearchLonelyPoints(Entity searchLonelyPointsEntity, TeamDebug teamDebug,Team team)
+        {
+            
+
+            
+            Color color = team.Color;
+            Gizmos.color = color;
+            GUIStyle style = new GUIStyle();
+            style.normal.textColor = Color.red;
+            DynamicBuffer<EdgeElement> edges = entityManager.GetBuffer<EdgeElement>(searchLonelyPointsEntity);
+            DynamicBuffer<TriangleElement> triangles = entityManager.GetBuffer<TriangleElement>(searchLonelyPointsEntity);
+            DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointsEntity);
+            BufferSizeComponent bufferSizeComponent = entityManager.GetComponentData<BufferSizeComponent>(searchLonelyPointsEntity);
+            if (teamDebug.debugPoints)
+            {
+                for (int i = 0; i < bufferSizeComponent.pointSize; i++)
+                {
+                    Vector3 pos = getVector3(points[i].position, 1);
+                    Handles.Label(pos, "point " + points[i].index, style);
+                    Gizmos.DrawSphere(getVector3(points[i].position, 1.0f), 0.25f);
+                }
+            }
+            if (teamDebug.debugTriangles)
+            {
+                for (int i = 0; i < bufferSizeComponent.trianglesResultSize; i++)
+                {
+
+                    TriangleElement triangle = triangles[i];
+                    if (triangle.thereIsTrianglesInside) continue;
+                    PointElement p1 = points[triangle.pointIndex1];
+                    PointElement p2 = points[triangle.pointIndex2];
+                    PointElement p3 = points[triangle.pointIndex3];
+                    Vector3 barycenter = getBarycenter(p1, p2, p3);
+                    float area = SearchLonelyPointsJob.getArea(triangle, points);
+                    float perimeter = SearchLonelyPointsJob.getPerimeter(triangle, points);
+                    float normalizedArea = area / perimeter;
+                    if (teamDebug.debugTriangleText)
                     {
-                        for (int i = 0; i < bufferSizeComponent.pointSize; i++)
-                        {
-                            Vector3 pos = getVector3(points[i].position, 1);
-                            Handles.Label(pos, "point " + points[i].index, style);
-                            Gizmos.DrawSphere(getVector3(points[i].position, 1.0f), 0.25f);
-                        }
+                        Handles.Label(barycenter + Vector3.up * i * 0.1f, "triangle " + triangle.index.ToString() + " area=" + area + " perimeter=" + perimeter + " normalizedArea=" + normalizedArea, style);
+                        //Handles.Label(barycenter + Vector3.up*0.1f, "triangle "+ triangle.index.ToString() + " nextTriangles="+triangle.triangleIndex1+"," + triangle.triangleIndex2 + "," + triangle.triangleIndex3 + " edges="+triangle.edgeIndex1 + "," + triangle.edgeIndex2 + "," + triangle.edgeIndex3);
+                        //Handles.Label(barycenter + Vector3.up * 0.4f, "triangle " + triangle.index.ToString() + " edgeSign=" + triangle.edgeSign1 + "," + triangle.edgeSign2 + "," + triangle.edgeSign3 + " thereIsTriangleInside=" + triangle.thereIsTrianglesInside);
                     }
-                    if (teamDebug.debugTriangles)
-                    {
-                        for (int i = 0; i < bufferSizeComponent.trianglesResultSize; i++)
-                        {
-
-                            TriangleElement triangle = triangles[i];
-                            if (triangle.thereIsTrianglesInside) continue;
-                            PointElement p1 = points[triangle.pointIndex1];
-                            PointElement p2 = points[triangle.pointIndex2];
-                            PointElement p3 = points[triangle.pointIndex3];
-                            Vector3 barycenter = getBarycenter(p1, p2, p3);
-                            float area = SearchLonelyPointsJob.getArea(triangle, points);
-                            float perimeter = SearchLonelyPointsJob.getPerimeter(triangle, points);
-                            float normalizedArea = area / perimeter;
-                            if (teamDebug.debugTriangleText)
-                            {
-                                Handles.Label(barycenter + Vector3.up * i * 0.1f, "triangle " + triangle.index.ToString() + " area=" + area + " perimeter=" + perimeter + " normalizedArea=" + normalizedArea, style);
-                                //Handles.Label(barycenter + Vector3.up*0.1f, "triangle "+ triangle.index.ToString() + " nextTriangles="+triangle.triangleIndex1+"," + triangle.triangleIndex2 + "," + triangle.triangleIndex3 + " edges="+triangle.edgeIndex1 + "," + triangle.edgeIndex2 + "," + triangle.edgeIndex3);
-                                //Handles.Label(barycenter + Vector3.up * 0.4f, "triangle " + triangle.index.ToString() + " edgeSign=" + triangle.edgeSign1 + "," + triangle.edgeSign2 + "," + triangle.edgeSign3 + " thereIsTriangleInside=" + triangle.thereIsTrianglesInside);
-                            }
 
 
-                            Gizmos.DrawLine(getVector3(p1.position, 1.0f), getVector3(p2.position, 1.0f));
-                            Gizmos.DrawLine(getVector3(p1.position, 1.0f), getVector3(p3.position, 1.0f));
-                            Gizmos.DrawLine(getVector3(p2.position, 1.0f), getVector3(p3.position, 1.0f));
+                    Gizmos.DrawLine(getVector3(p1.position, 1.0f), getVector3(p2.position, 1.0f));
+                    Gizmos.DrawLine(getVector3(p1.position, 1.0f), getVector3(p3.position, 1.0f));
+                    Gizmos.DrawLine(getVector3(p2.position, 1.0f), getVector3(p3.position, 1.0f));
 
-                        }
-                    }
-                    if (teamDebug.debugEdges)
-                    {
-                        for (int i = 0; i < bufferSizeComponent.edgesResultSize; i++)
-                        {
-                            EdgeElement edge = edges[i];
-                            PointElement p1 = points[edge.pointIndex1];
-                            PointElement p2 = points[edge.pointIndex2];
-                            Vector3 middle = getMiddlePoint(p1, p2);
-                            if (teamDebug.debugText)
-                                Handles.Label(middle + Vector3.up * 0.1f, "edge " + edge.index.ToString() + " points=" + edge.pointIndex1 + "," + edge.pointIndex2 + " isLimit=" + edge.isLimit + " limits=" + edge.edgeLimit1 + "," + edge.edgeLimit2 + " tIndex=" + edge.triangleLimitIndex + " tEdgeIndex=" + edge.nextTriangleEdgeIndex, style);
-                            Gizmos.DrawLine(getVector3(p1.position, 1.0f), getVector3(p2.position, 1.0f));
-                            //DrawArrow.ForGizmo(getVector3(p1.position, 1.0f), getVector3(p2.position, 1.0f) - getVector3(p1.position, 1.0f), 1);
-                        }
-                    }
-                    if (teamDebug.debugLonelyPoints)
-                    {
-                        DynamicBuffer<LonelyPointElement> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement>(searchLonelyPointsEntity);
-                        for (int i = 0; i < bufferSizeComponent.lonelyPointsResultSize; i++)
-                        {
-                            LonelyPointElement lonelyPoint = lonelyPointElements[i];
-                            Vector3 pos = getVector3(lonelyPoint.position, 1);
-                            if (teamDebug.debugText)
-                                Handles.Label(pos, "LonelyPoint " + lonelyPoint.index.ToString(), style);
-                            
-                            Gizmos.DrawSphere(pos, gizmoSphereRadio);
+                }
+            }
+            if (teamDebug.debugEdges)
+            {
+                for (int i = 0; i < bufferSizeComponent.edgesResultSize; i++)
+                {
+                    EdgeElement edge = edges[i];
+                    PointElement p1 = points[edge.pointIndex1];
+                    PointElement p2 = points[edge.pointIndex2];
+                    Vector3 middle = getMiddlePoint(p1, p2);
+                    if (teamDebug.debugText)
+                        Handles.Label(middle + Vector3.up * 0.1f, "edge " + edge.index.ToString() + " points=" + edge.pointIndex1 + "," + edge.pointIndex2 + " isLimit=" + edge.isLimit + " limits=" + edge.edgeLimit1 + "," + edge.edgeLimit2 + " tIndex=" + edge.triangleLimitIndex + " tEdgeIndex=" + edge.nextTriangleEdgeIndex, style);
+                    Gizmos.DrawLine(getVector3(p1.position, 1.0f), getVector3(p2.position, 1.0f));
+                    //DrawArrow.ForGizmo(getVector3(p1.position, 1.0f), getVector3(p2.position, 1.0f) - getVector3(p1.position, 1.0f), 1);
+                }
+            }
+            if (teamDebug.debugLonelyPoints)
+            {
+                DynamicBuffer<LonelyPointElement> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement>(searchLonelyPointsEntity);
+                for (int i = 0; i < bufferSizeComponent.lonelyPointsResultSize; i++)
+                {
+                    LonelyPointElement lonelyPoint = lonelyPointElements[i];
+                    Vector3 pos = getVector3(lonelyPoint.position, 1);
+                    if (teamDebug.debugText)
+                        Handles.Label(pos, "LonelyPoint " + lonelyPoint.index.ToString(), style);
 
-                        }
-                        if (bufferSizeComponent.lonelyPointsResultSize > 0 && teamDebug.debugText)
-                        {
+                    Gizmos.DrawSphere(pos, gizmoSphereRadio);
 
-                            print(team.TeamName + " Probes Generated = " + bufferSizeComponent.lonelyPointsResultSize);
-                        }
-                    }
+                }
+                if (bufferSizeComponent.lonelyPointsResultSize > 0 && teamDebug.debugText)
+                {
+
+                    print(team.TeamName + " Probes Generated = " + bufferSizeComponent.lonelyPointsResultSize);
                 }
             }
         }
