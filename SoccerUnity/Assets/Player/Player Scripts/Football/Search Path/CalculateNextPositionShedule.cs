@@ -87,7 +87,6 @@ public class CalculateNextPositionShedule : MonoBehaviour
     }
     void LoadPoints()
     {
-        int pointsSize = 0;
         foreach (var LineupFieldPositionData in FootballPositionCtrl.LineupFieldPositionList.LineupFieldPositionDatas)
         {
             LineupFieldPositionDatas lineupFieldPositionData = new LineupFieldPositionDatas(LineupFieldPositionData.name);
@@ -117,10 +116,6 @@ public class CalculateNextPositionShedule : MonoBehaviour
                 }
                 pressureFieldPositionDatas.FieldPositionDatas = FieldPositionDatas;
                 pressureFieldPositionDatas.points = Points;
-                if(pressureFieldPositionDatas.points.Length> pointsSize)
-                {
-                    pointsSize = pressureFieldPositionDatas.points.Length;
-                }
             }
         }
     }

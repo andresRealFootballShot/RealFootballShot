@@ -136,8 +136,8 @@ public struct CalculateNextPositionJob : IJobParallelFor
     {
         for (int j = 0; j < playerSize; j++)
         {
-            getNextPosition(normalizedPosition[i].normalizedPosition1, ref points, FieldPositionDatas[i+j].startIndex, FieldPositionDatas[i + j].endIndex, offsideLinePosY[i], FieldPositionDatas[i].PlayerPositionType, weightOffsideLine[i], out Vector2 value);
-            getNextPosition(normalizedPosition[i].normalizedPosition2, ref points, FieldPositionDatas[i + j].startIndex, FieldPositionDatas[i + j].endIndex, offsideLinePosY[i], FieldPositionDatas[i].PlayerPositionType, weightOffsideLine[i], out Vector2 value2);
+            getNextPosition(normalizedPosition[i].normalizedPosition1, ref points, FieldPositionDatas[j].startIndex, FieldPositionDatas[j].endIndex, offsideLinePosY[i], FieldPositionDatas[j].PlayerPositionType, weightOffsideLine[i], out Vector2 value);
+            getNextPosition(normalizedPosition[i].normalizedPosition2, ref points, FieldPositionDatas[j].startIndex, FieldPositionDatas[j].endIndex, offsideLinePosY[i], FieldPositionDatas[j].PlayerPositionType, weightOffsideLine[i], out Vector2 value2);
             NextPositionData2 nextPositionData = normalNextPosition[i];
             nextPositionData.NextPositionData.Set(j,value);
             nextPositionData.symetricNextPositionData.Set(j, value2);
@@ -148,30 +148,23 @@ public struct CalculateNextPositionJob : IJobParallelFor
     {
         float totalH = 0;
         value = Vector2.zero;
-        //float[] hs = new float[points.Length];
-        //float[] weights = new float[points.Length];
         Vector2 p = getNormalPoint2(normalizedPosition);
         for (int i = start; i < end; i++)
         {
             if (!points[i].enabled) continue;
             Vector2 dir = p - getNormalPoint2(points[i].point);
-            //dir.y *= fieldWidth / fieldLenght;
             dir = dir.normalized * Mathf.Clamp(points[i].radio, 0, dir.magnitude);
-            //Vector2 pi = points[i].point + dir;
             Vector2 pi = getNormalPoint2(points[i].point);
             if (points[i].useRadio)
             {
                 pi += dir;
             }
-
-            //hs[i] = Mathf.Infinity;
             float hs = 1;
             for (int j = start; j < end; j++)
             {
                 if (i == j) continue;
                 if (!points[j].enabled) continue;
                 Vector2 dir2 = p - getNormalPoint2(points[j].point);
-                //dir2.y *= fieldWidth / fieldLenght;
                 dir2 = dir2.normalized * Mathf.Clamp(points[j].radio, 0, dir2.magnitude);
                 Vector2 pj = getNormalPoint2(points[j].point);
                 if (points[j].useRadio)
@@ -201,10 +194,85 @@ public struct CalculateNextPositionJob : IJobParallelFor
         //value = Vector2.zero;
         return;
     }
+    public void getNextPosition2(Vector2 normalizedPosition, ref NativeArray<Point2> points, int start, int end, float offsideLinePosY, PlayerPositionType playerPositionType, float weightOffsideLine, out Vector2 value)
+    {
+        float totalH = 0;
+        value = Vector2.zero;
+        Vector2 p = getNormalPoint2(normalizedPosition);
+        float[] weights = new float[end-start];
+        float[] hs = new float[end-start];
+        for (int i = start; i < end; i++)
+        {
+            if (!points[i].enabled) continue;
+            Vector2 dir = p - getNormalPoint2(points[i].point);
+            dir = dir.normalized * Mathf.Clamp(points[i].radio, 0, dir.magnitude);
+            Vector2 pi = getNormalPoint2(points[i].point);
+            if (points[i].useRadio)
+            {
+                pi += dir;
+            }
+            hs[i-start] = 1;
+            for (int j = start; j < end; j++)
+            {
+                if (i == j) continue;
+                if (!points[j].enabled) continue;
+                Vector2 dir2 = p - getNormalPoint2(points[j].point);
+                dir2 = dir2.normalized * Mathf.Clamp(points[j].radio, 0, dir2.magnitude);
+                Vector2 pj = getNormalPoint2(points[j].point);
+                if (points[j].useRadio)
+                {
+                    pj += dir2;
+                }
+                float p1 = Vector2.Dot(p - pi, pj - pi);
+                float p2 = Vector2.Distance(pi, pj);
+                float h_2 = Mathf.Clamp01(1 - (p1 / (p2 * p2)) * points[j].weight) * points[i].weight;
+
+                if (h_2 < hs[i - start]) hs[i - start] = h_2;
+
+            }
+            totalH += hs[i - start];
+
+        }
+        for (int i = 0; i < weights.Length; i++)
+        {
+            weights[i] = hs[i - start] / totalH;
+        }
+        value = getValue2(weights, ref points,start,end, normalizedPosition);
+        if (isDefensePlayer(playerPositionType))
+        {
+            value.y = Mathf.Lerp(value.y, offsideLinePosY, weightOffsideLine);
+        }
+        else
+        {
+            value.y = Mathf.Lerp(value.y, Mathf.Clamp(value.y, offsideLinePosY, 1), weightOffsideLine);
+        }
+        //value = Vector2.zero;
+        return;
+    }
     Vector2 getNormalPoint2(Vector2 p)
     {
         p.y = p.y * fieldLenght / fieldWidth;
         return p;
+    }
+    Vector2 getValue2(float[] weights, ref NativeArray<Point2> points,int start,int end, Vector2 p)
+    {
+        Vector2 result = Vector2.zero;
+        float totalweight = 0;
+        for (int i = start; i < end; i++)
+        {
+            if (points[i].snap)
+            {
+                result += p * weights[i - start];
+            }
+            else
+            {
+                result += points[i].value * weights[i - start];
+
+            }
+            totalweight += weights[i - start];
+        }
+
+        return result;
     }
     Vector2 getValue(float weight,Point2 point, Vector2 p)
     {

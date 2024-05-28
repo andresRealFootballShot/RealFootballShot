@@ -13,6 +13,8 @@ public class TypeFieldPosition : MonoVariable<TypeFieldPosition.Type>
         CentreLeftBack,
         CentreRightBack,
         CentreBack,
+        RightForward,
+        LeftForward,
         GoalKeeper
     }
     public static Dictionary<Type, string> UIString = new Dictionary<Type, string>()

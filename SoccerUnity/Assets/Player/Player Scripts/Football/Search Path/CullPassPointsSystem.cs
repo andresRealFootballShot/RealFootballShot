@@ -33,6 +33,7 @@ public class CullPassPointsSystem : SystemBase
     }
     protected override void OnUpdate()
     {
+
         if (CullPassPoints.test)
         {
             //CullPassPoints.PlacePoints();

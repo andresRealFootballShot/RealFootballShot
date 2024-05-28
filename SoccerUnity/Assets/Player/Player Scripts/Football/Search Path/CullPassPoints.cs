@@ -495,13 +495,14 @@ public class CullPassPoints : MonoBehaviour
    
     public void SetAllLonelyPointsCalculateNextPositionParameters(int lonelyPointSize, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team,int startSearchLonelyPointIndex)
     {
+        bool block = false;
         for (int k = 0; k < entities.Count; k++)
         {
             DynamicBuffer<LonelyPointElement2> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement2>(entities[k]);
             CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entities[k]);
             for (int i = 0; i < CullPassPointsComponent.sizeLonelyPoints; i++)
             {
-                if (lonelyPointElements[i].weight == Mathf.Infinity) continue;
+                if (lonelyPointElements[i].weight == Mathf.Infinity&& block) continue;
                 float minWeight = lonelyPointElements[i].weight;
                 int order = 0;
                 
@@ -511,7 +512,7 @@ public class CullPassPoints : MonoBehaviour
                     CullPassPointsComponent CullPassPointsComponent2 = entityManager.GetComponentData<CullPassPointsComponent>(entities[z]);
                     for (int j = 0; j < CullPassPointsComponent2.sizeLonelyPoints; j++)
                     {
-                        if ((z==k && i == j) || lonelyPointElements2[j].weight == Mathf.Infinity) continue;
+                        if ((z==k && i == j) || lonelyPointElements2[j].weight == Mathf.Infinity&& block) continue;
                         if (minWeight > lonelyPointElements2[j].weight)
                         {
                             //order = lonelyPointElements2[j].order;
@@ -595,7 +596,6 @@ public class CullPassPoints : MonoBehaviour
         PressureFieldPositionDatas PressureFieldPositionDatas;
         if (!FootballPositionCtrl.getCurrentPressureFieldPositions(out PressureFieldPositionDatas)) return;
 
-        int i = 0;
         Vector3 ballPosition = new Vector3(lonelyPointElement.position.x, 0, lonelyPointElement.position.y);
         Vector2 normalBallPosition = FootballPositionCtrl.getNormalizedPosition(horizontalPositionType, ballPosition, team.SideOfField);
         float offsideWeight;

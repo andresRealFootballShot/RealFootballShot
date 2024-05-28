@@ -382,15 +382,14 @@ public class FootballPositionCtrlEditor : Editor
         Color color2 = new Color(0.5f, 1, 0.5f,1);
         foreach (var offsideStop in PressureFieldPositionDatas.offsideStops)
         {
-            
             if (!offsideStop.enabled) color2.a = a;
             Handles.color = color2;
             if (!t.debugOnlyPlayerPositions)
                 if (Handles.Button(t.getGlobalPosition(t.horizontalPositionType, offsideStop.point), Quaternion.identity, buttonSize, 1, Handles.SphereHandleCap))
-            {
-                selectedOffsideStop = offsideStop;
-                Repaint();
-            }
+                {
+                    selectedOffsideStop = offsideStop;
+                    Repaint();
+                }
             style2.normal.textColor = color2;
             if (!t.debugOnlyPlayerPositions)
                 if (t.debugText)
