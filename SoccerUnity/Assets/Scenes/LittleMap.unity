@@ -1482,7 +1482,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 108009132}
   m_HandleRect: {fileID: 108009131}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3479,7 +3479,7 @@ MonoBehaviour:
   buttonSize: 0.5
   newPointPosition: {x: 0.39971194, y: 0.1090273}
   horizontalPositionType: 0
-  normailizedBallPosition: {x: 0.3148506, y: 0.32450637}
+  normailizedBallPosition: {x: 0.29726562, y: 0.33617488}
   selectedFieldPositionParameters:
     playerPositionType: 0
     points:
@@ -8139,7 +8139,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 721031710}
   m_HandleRect: {fileID: 721031709}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -18603,7 +18603,7 @@ Transform:
   - {fileID: 454097481}
   - {fileID: 2122770818}
   m_Father: {fileID: 1875775244}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &711856217
 GameObject:
@@ -21442,6 +21442,10 @@ PrefabInstance:
     - target: {fileID: 965224757719942071, guid: 52c7c213e7609504b823046d1531b765, type: 3}
       propertyPath: teamName
       value: Blue
+      objectReference: {fileID: 0}
+    - target: {fileID: 965224757719942071, guid: 52c7c213e7609504b823046d1531b765, type: 3}
+      propertyPath: fieldPositionType
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1297014915389412521, guid: 52c7c213e7609504b823046d1531b765, type: 3}
       propertyPath: distanceCurve.m_Curve.Array.data[1].value
@@ -25031,7 +25035,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1981492703}
   m_HandleRect: {fileID: 1981492702}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -27441,7 +27445,6 @@ GameObject:
   - component: {fileID: 1028019885}
   - component: {fileID: 1028019882}
   - component: {fileID: 1028019884}
-  - component: {fileID: 1028019886}
   m_Layer: 0
   m_Name: NextMove
   m_TagString: Untagged
@@ -27547,56 +27550,6 @@ MonoBehaviour:
   searchLonelyPointsDebug:
     debug: 1
     debugTriangles: 1
-    debugEdges: 0
-    debugPoints: 0
-    debugLonelyPoints: 0
-    debugTriangleText: 0
-    debugText: 0
---- !u!114 &1028019886
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028019881}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31436c2c2dc088a4a9f4528732c85a14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pointTransforms: []
-  entitiesSize: 10
-  searchLonelyPointsParams:
-    maxSizeEdgeBuffer: 100
-    teamSize: 11
-    maxSizeTriangleBuffer: 100
-    maxSizeLonelyPointsBuffer: 200
-    minLonelyPointDistance: 5
-    divideEdgeMaxPoints: 1
-    minNormalizedArea: 0.4
-    fieldOffset: 2
-  testingMode: 0
-  testingTeam: 
-  testPointsParentTransform: {fileID: 818615340}
-  teamNames: []
-  teamDebugs:
-  - debug: 1
-    debugTriangles: 1
-    debugEdges: 0
-    debugPoints: 0
-    debugLonelyPoints: 1
-    debugTriangleText: 0
-    debugText: 0
-  - debug: 1
-    debugTriangles: 1
-    debugEdges: 0
-    debugPoints: 0
-    debugLonelyPoints: 1
-    debugTriangleText: 0
-    debugText: 0
-  searchLonelyPointsDebug:
-    debug: 0
-    debugTriangles: 0
     debugEdges: 0
     debugPoints: 0
     debugLonelyPoints: 0
@@ -34483,7 +34436,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 841198963}
   m_HandleRect: {fileID: 841198962}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -36244,6 +36197,92 @@ Transform:
   m_Father: {fileID: 481620345}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1442790977
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 1875775244}
+    m_Modifications:
+    - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 42.83
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 181.39
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969940, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_Name
+      value: Bot Attack1 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004228969940, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010005515620609, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010005515620609, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: targetPositionTrans
+      value: 
+      objectReference: {fileID: 1796266505}
+    - target: {fileID: 3747010005541261542, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: disableAll
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010005541261548, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: teamName
+      value: Red
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010005541261548, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: fieldPositionType
+      value: 2
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+--- !u!4 &1442790978 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+  m_PrefabInstance: {fileID: 1442790977}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1444548959
 GameObject:
   m_ObjectHideFlags: 0
@@ -40669,7 +40708,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.x
@@ -41244,11 +41283,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_RootOrder
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 46.54
+      value: 46.61
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.y
@@ -41256,7 +41295,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 234.18
+      value: 233.95
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalRotation.w
@@ -41317,6 +41356,10 @@ PrefabInstance:
     - target: {fileID: 3747010005541261548, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: teamName
       value: Blue
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010005541261548, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: fieldPositionType
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
@@ -43712,7 +43755,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 277427217}
   m_HandleRect: {fileID: 277427216}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -43922,6 +43965,10 @@ PrefabInstance:
     - target: {fileID: 3747010005541261548, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: teamName
       value: Red
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010005541261548, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: fieldPositionType
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
@@ -44179,7 +44226,7 @@ Transform:
   - {fileID: 740652848}
   - {fileID: 555336959}
   m_Father: {fileID: 1875775244}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &1775594850
 GameObject:
@@ -44976,7 +45023,7 @@ Transform:
   - {fileID: 1411991549}
   - {fileID: 1050777184}
   m_Father: {fileID: 1875775244}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1821068831
 GameObject:
@@ -46652,6 +46699,7 @@ Transform:
   - {fileID: 1563016489}
   - {fileID: 769506031}
   - {fileID: 1721129657}
+  - {fileID: 1442790978}
   - {fileID: 1655104500}
   - {fileID: 1677313364}
   - {fileID: 1771444376}
@@ -46752,7 +46800,10 @@ MonoBehaviour:
   y: 2.2
   batchesPerChunk: 10
   FootballPositionCtrl: {fileID: 58440509}
-  sortLonelyPointsSize: 0a000000
+  calculateNextPositionShedule: {fileID: 1875775247}
+  sortLonelyPointsSize: 01000000
+  lineupName: Default
+  pressureName: Default
 --- !u!114 &1875775247
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46766,6 +46817,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FootballPositionCtrl: {fileID: 58440509}
+  JobSize: 1
 --- !u!1 &1876518188
 GameObject:
   m_ObjectHideFlags: 0

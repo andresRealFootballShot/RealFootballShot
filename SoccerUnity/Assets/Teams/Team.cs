@@ -30,6 +30,7 @@ public class Team : MonoBehaviour
     public MyEvent lineupChanged;
     public int teamMaxPlayers { get => TypeMatch.maxPlayers / TypeMatch.getTemsSize() + 1; }
     public int teamMaxFieldPlayers { get => TypeMatch.maxPlayers / TypeMatch.getTemsSize(); }
+    public int playersNoGoalkeeperCount { get; set; }
     public TeamHUD teamHUD;
     public SideOfField SideOfField { get; set; }
     public void Load()
@@ -47,6 +48,12 @@ public class Team : MonoBehaviour
    bool isMine()
     {
         return fieldPositionOfPlayers.ContainsValue(ComponentsPlayer.myMonoPlayerID.playerIDStr);
+    }
+    public PublicPlayerData getPublicPlayerData(string playerID)
+    {
+        if (publicPlayerDatas.Exists(x => x.playerID.Equals(playerID)))
+        return publicPlayerDatas.Find(x => x.playerID.Equals(playerID));
+        else return null;
     }
     public void addGoal(GoalData goal)
     {
@@ -72,6 +79,11 @@ public class Team : MonoBehaviour
     public string getGoalkeeper()
     {
         return fieldPositionOfPlayers[TypeFieldPosition.Type.GoalKeeper];
+    }
+    public PublicPlayerData getGoalkeeperPublicPlayerData()
+    {
+        PublicPlayerData publicPlayerData = getPublicPlayerData(getGoalkeeper());
+        return publicPlayerData;
     }
     public bool setSideOfField(SideOfFieldID sideOfFieldID)
     {
@@ -245,6 +257,10 @@ public class Team : MonoBehaviour
                 if (!fieldPositionOfPlayers[typeFieldPosition].Equals(playerID))
                 {
                     fieldPositionOfPlayers[typeFieldPosition] = playerID;
+                    if (!typeFieldPosition.Equals(TypeFieldPosition.Type.GoalKeeper))
+                    {
+                        playersNoGoalkeeperCount++;
+                    }
                     DebugsList.testing.print("assignFieldPositionToPlayer Team=" + TeamName + " playerID=" + playerID + " typeFieldPosition=" + typeFieldPositionString, Color.green);
                     MatchEvents.fieldPositionsChanged.Invoke(new FieldPositionEventArgs(TeamName, typeFieldPositionString, playerID));
                     return true;

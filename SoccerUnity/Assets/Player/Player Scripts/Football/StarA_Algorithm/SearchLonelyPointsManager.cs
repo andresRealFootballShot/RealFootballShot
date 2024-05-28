@@ -276,7 +276,9 @@ namespace NextMove_Algorithm
                     Entity searchLonelyPointsEntity = teamsSearchLonelyPointsEntitys[team.TeamName];
                     DebugSearchLonelyPoints(searchLonelyPointsEntity, teamDebug, team);
                 }
-                
+                Team team2;
+                team2 = Teams.getTeamByName("Red");
+                DebugSearchLonelyPoints(sharedSearchLonelyPointsEntitys[0], searchLonelyPointsDebug, team2);
             }
         }
         public void DebugSearchLonelyPoints(Entity searchLonelyPointsEntity, TeamDebug teamDebug,Team team)

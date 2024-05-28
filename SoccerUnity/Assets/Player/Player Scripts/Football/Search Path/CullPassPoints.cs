@@ -32,7 +32,9 @@ public class CullPassPoints : MonoBehaviour
     public float y = 2;
     public int batchesPerChunk = 1;
     public FootballPositionCtrl FootballPositionCtrl;
+    public CalculateNextPositionShedule calculateNextPositionShedule;
     public List<int> sortLonelyPointsSize;
+    public string lineupName="Default", pressureName = "Default";
     void Start()
     {
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -491,7 +493,7 @@ public class CullPassPoints : MonoBehaviour
         }
     }
    
-    public void UpdateNextPlayerPositions(int lonelyPointSize, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team,int startSearchLonelyPointIndex)
+    public void SetAllLonelyPointsCalculateNextPositionParameters(int lonelyPointSize, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team,int startSearchLonelyPointIndex)
     {
         for (int k = 0; k < entities.Count; k++)
         {
@@ -532,8 +534,8 @@ public class CullPassPoints : MonoBehaviour
                 if (order < lonelyPointSize)
                 {
                     LonelyPointElement2 lonelyPointElement = lonelyPointElements[i];
-                    Entity entity = SearchLonelyPointsManager.sharedSearchLonelyPointsEntitys[startSearchLonelyPointIndex + order];
-                    CalculateNextPlayerPositionOfLonelyPoint(ref lonelyPointElement, horizontalPositionType, team, entity);
+                   
+                    SetCalculateNextPositionParameters(order,ref lonelyPointElement, horizontalPositionType, team);
                     
                 }
                 else
@@ -544,51 +546,64 @@ public class CullPassPoints : MonoBehaviour
             
         }
     }
-    void CalculateNextPlayerPositionOfLonelyPoint(ref LonelyPointElement2 lonelyPointElement, FieldPositionsData.HorizontalPositionType horizontalPositionType,Team team,Entity searchLonelyPointsEntity)
+    public void UpdateNextPlayerPoints(int searchLonelyPointEntitySize,int startSearchLonelyPointIndex, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team,int nextPlayerPositionSize)
+    {
+        for (int i = startSearchLonelyPointIndex; i < startSearchLonelyPointIndex+searchLonelyPointEntitySize; i++)
+        {
+            Entity searchLonelyPointEntity = SearchLonelyPointsManager.sharedSearchLonelyPointsEntitys[i];
+
+            BufferSizeComponent bufferSizeComponent = entityManager.GetComponentData<BufferSizeComponent>(searchLonelyPointEntity);
+            DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointEntity);
+            NextPositionData2 nextPositionData = calculateNextPositionShedule.normalNextPosition[i];
+            int k = 0;
+            for (int j = 0; j < nextPlayerPositionSize; j++)
+            {
+                Vector2 normalNextPosition = nextPositionData.NextPositionData.Get(j), normalNextPosition2 = nextPositionData.symetricNextPositionData.Get(j);
+                Vector3 nextPosition;
+                //FootballPositionCtrl.getWeightyValue4(normalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out normalNextPosition);
+
+                nextPosition=FootballPositionCtrl.getGlobalPosition(horizontalPositionType, normalNextPosition, team.SideOfField);
+
+
+                //FootballPositionCtrl.getWeightyValue4(symetricNormalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out normalNextPosition2);
+                FieldPositionsData.HorizontalPositionType otherHorizontalPositionType = FootballPositionCtrl.getOtherHorizontalPositionType(horizontalPositionType);
+
+                Vector3 nextPosition2 = FootballPositionCtrl.getGlobalPosition(otherHorizontalPositionType, normalNextPosition2, team.SideOfField);
+
+                SetLonelyPosition(ref points,k,nextPosition);
+                k++;
+                SetLonelyPosition(ref points,k, nextPosition2);
+                k++;
+            }
+            PublicPlayerData goalkeeperPublicPlayerData = team.getGoalkeeperPublicPlayerData();
+            if (goalkeeperPublicPlayerData != null)
+            {
+                Vector3 goalkeeperPosition = goalkeeperPublicPlayerData.bodyTransform.position;
+                SetLonelyPosition(ref points, team.publicPlayerDatas.Count-1, goalkeeperPosition);
+            }
+
+            bufferSizeComponent.pointSize = team.publicPlayerDatas.Count + SearchLonelyPointsManager.extraPoints;
+            bufferSizeComponent.edgesResultSize = 0;
+            bufferSizeComponent.trianglesResultSize = 0;
+            bufferSizeComponent.lonelyPointsResultSize = 0;
+            entityManager.SetComponentData<BufferSizeComponent>(searchLonelyPointEntity, bufferSizeComponent);
+            entityManager.SetEnabled(searchLonelyPointEntity, true);
+        }
+     }
+    void SetCalculateNextPositionParameters(int index,ref LonelyPointElement2 lonelyPointElement, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team)
     {
         PressureFieldPositionDatas PressureFieldPositionDatas;
         if (!FootballPositionCtrl.getCurrentPressureFieldPositions(out PressureFieldPositionDatas)) return;
-        BufferSizeComponent bufferSizeComponent = entityManager.GetComponentData<BufferSizeComponent>(searchLonelyPointsEntity);
-        DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointsEntity);
+
         int i = 0;
         Vector3 ballPosition = new Vector3(lonelyPointElement.position.x, 0, lonelyPointElement.position.y);
         Vector2 normalBallPosition = FootballPositionCtrl.getNormalizedPosition(horizontalPositionType, ballPosition, team.SideOfField);
         float offsideWeight;
         float offsideLineValueY = FootballPositionCtrl.GetOffsideLineGetValue(PressureFieldPositionDatas, normalBallPosition, out offsideWeight);
-        foreach (var FieldPositionData in PressureFieldPositionDatas.FieldPositionDatas)
-        {
-            Vector2 normalNextPosition=Vector2.zero,normalNextPosition2 = Vector2.zero;
-            Vector3 nextPosition;
-           
-            FootballPositionCtrl.getWeightyValue4(normalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out normalNextPosition);
-            nextPosition=FootballPositionCtrl.getGlobalPosition(horizontalPositionType, normalNextPosition, team.SideOfField);
-
-            Vector2 symetricNormalBallPosition =normalBallPosition;
-            symetricNormalBallPosition.x =1- normalBallPosition.x;
-
-            //FootballPositionCtrl.getWeightyValue4(symetricNormalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out normalNextPosition2);
-            FieldPositionsData.HorizontalPositionType otherHorizontalPositionType = FootballPositionCtrl.getOtherHorizontalPositionType(horizontalPositionType);
-
-
-            Vector3 nextPosition2 = FootballPositionCtrl.getGlobalPosition(otherHorizontalPositionType, normalNextPosition2, team.SideOfField);
-
-            SetLonelyPosition(ref points,i,nextPosition);
-            i++;
-            SetLonelyPosition(ref points, i, nextPosition2);
-            i++;
-            string info = FieldPositionData.playerPositionType.ToString();
-            //DrawPoint(nextPosition, info);
-            //DrawPoint(nextPosition2, info);
+        calculateNextPositionShedule.SetCalculateNextPositionParameters(index, normalBallPosition, offsideLineValueY, offsideWeight);
             
-        }
 
-        bufferSizeComponent.pointSize = team.publicPlayerDatas.Count + SearchLonelyPointsManager.extraPoints;
-        bufferSizeComponent.edgesResultSize = 0;
-        bufferSizeComponent.trianglesResultSize = 0;
-        bufferSizeComponent.lonelyPointsResultSize = 0;
-        entityManager.SetComponentData<BufferSizeComponent>(searchLonelyPointsEntity, bufferSizeComponent);
-        entityManager.SetEnabled(searchLonelyPointsEntity, true);
-    }
+        }
     void SetLonelyPosition(ref DynamicBuffer<PointElement> points,int index,Vector3 position)
     {
         PointElement pointElement = points[index + SearchLonelyPointsManager.extraPoints];

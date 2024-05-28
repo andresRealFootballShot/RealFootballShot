@@ -62,7 +62,8 @@ public class CullPassPointsSystem : SystemBase
         SearchLonelyPointsManager.setEntitiesEnable2(false);
         SearchLonelyPointsManager.setEntitiesEnable(false);
         UpdateNextPlayerPositions();
-        //CalculateLonelyPoints();
+
+        CalculateLonelyPoints();
 
     }
     void CalculateLonelyPoints()
@@ -86,6 +87,9 @@ public class CullPassPointsSystem : SystemBase
     {
         int sortLonelyPointsSize = CullPassPoints.sortLonelyPointsSize[0];
         Team defenseTeam = Teams.getTeamByName(CullPassPoints.teamName_Defense);
-        CullPassPoints.UpdateNextPlayerPositions(sortLonelyPointsSize, FieldPositionsData.HorizontalPositionType.Right,defenseTeam,0);
+        CullPassPoints.SetAllLonelyPointsCalculateNextPositionParameters(sortLonelyPointsSize, FieldPositionsData.HorizontalPositionType.Right,defenseTeam,0);
+        CullPassPoints.calculateNextPositionShedule.SheduleJobs(sortLonelyPointsSize, defenseTeam.teamMaxFieldPlayers/2, CullPassPoints.lineupName, CullPassPoints.pressureName);
+
+        CullPassPoints.UpdateNextPlayerPoints(sortLonelyPointsSize, 0, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
     }
 }

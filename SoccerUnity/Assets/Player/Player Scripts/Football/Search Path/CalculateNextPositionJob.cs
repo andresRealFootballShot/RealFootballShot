@@ -3,11 +3,6 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Burst;
 
-public struct TestCalculateNextPosition
-{
-    public float a;
-    public Vector3 b;
-}
 public struct Point2
 {
     public bool enabled;
@@ -37,7 +32,56 @@ public struct Point2
         snap = point.snap;
     }
 }
-
+public struct NextPositionData
+{
+    public Vector2 pos1,pos2,pos3,pos4,pos5;
+    public void Set(int index,Vector2 pos)
+    {
+        switch (index)
+        {
+            case 0: 
+                pos1 = pos;
+                break;
+            case 1:
+                pos2 = pos;
+                break;
+            case 2:
+                pos3 = pos;
+                break;
+            case 3:
+                pos4 = pos;
+                break;
+            case 4:
+                pos5 = pos;
+                break;
+            default:
+                break;
+        }
+    }
+    public Vector2 Get(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                return pos1;
+                ;
+            case 1:
+                return pos2;
+                ;
+            case 2:
+                return pos3;
+                ;
+            case 3:
+                return pos4;
+                ;
+            case 4:
+                return pos5;
+                ;
+            default:
+                return pos1;
+        }
+    }
+}
 public struct FieldPositionData
 {
     public int startIndex, endIndex;
@@ -49,38 +93,65 @@ public struct FieldPositionData
         PlayerPositionType = playerPositionType;
     }
 }
+public struct TwoPositions
+{
+    public Vector2 normalizedPosition1, normalizedPosition2;
+
+    public TwoPositions(Vector2 normalizedPosition1, Vector2 normalizedPosition2)
+    {
+        this.normalizedPosition1 = normalizedPosition1;
+        this.normalizedPosition2 = normalizedPosition2;
+    }
+}
+public struct NextPositionData2
+{
+    public NextPositionData NextPositionData, symetricNextPositionData;
+
+    public NextPositionData2(NextPositionData NextPositionData, NextPositionData symetricNextPositionData)
+    {
+        this.NextPositionData = NextPositionData;
+        this.symetricNextPositionData = symetricNextPositionData;
+    }
+}
 [BurstCompile]
 public struct CalculateNextPositionJob : IJobParallelFor
 {
     [ReadOnly]
     public float fieldLenght,fieldWidth;
     [ReadOnly]
-    public PlayerPositionType playerPositionType;
-    [ReadOnly]
-    public NativeArray<Vector2> normalizedPosition;
+    public NativeArray<TwoPositions> normalizedPosition;
     [ReadOnly]
     public NativeArray<float> offsideLinePosY;
     [ReadOnly]
     public NativeArray<float> weightOffsideLine;
     [ReadOnly]
+    public float playerSize;
+    [ReadOnly]
     public NativeArray<Point2> points;
     [ReadOnly]
     public NativeArray<FieldPositionData> FieldPositionDatas;
     
-    public NativeArray<Vector2> normalNextPosition;
+    public NativeArray<NextPositionData2> normalNextPosition;
     public void Execute(int i)
     {
-        getWeightyValue4(normalizedPosition[i], ref points,offsideLinePosY[i],playerPositionType, weightOffsideLine[i], out Vector2 value);
-        normalNextPosition[i] = value;
+        for (int j = 0; j < playerSize; j++)
+        {
+            getNextPosition(normalizedPosition[i].normalizedPosition1, ref points, FieldPositionDatas[i+j].startIndex, FieldPositionDatas[i + j].endIndex, offsideLinePosY[i], FieldPositionDatas[i].PlayerPositionType, weightOffsideLine[i], out Vector2 value);
+            getNextPosition(normalizedPosition[i].normalizedPosition2, ref points, FieldPositionDatas[i + j].startIndex, FieldPositionDatas[i + j].endIndex, offsideLinePosY[i], FieldPositionDatas[i].PlayerPositionType, weightOffsideLine[i], out Vector2 value2);
+            NextPositionData2 nextPositionData = normalNextPosition[i];
+            nextPositionData.NextPositionData.Set(j,value);
+            nextPositionData.symetricNextPositionData.Set(j, value2);
+            normalNextPosition[i] = nextPositionData;
+        }
     }
-    public void getWeightyValue4(Vector2 normalizedPosition,ref NativeArray<Point2> points, float offsideLinePosY, PlayerPositionType playerPositionType, float weightOffsideLine, out Vector2 value)
+    public void getNextPosition(Vector2 normalizedPosition,ref NativeArray<Point2> points,int start,int end, float offsideLinePosY, PlayerPositionType playerPositionType, float weightOffsideLine, out Vector2 value)
     {
         float totalH = 0;
-        float[] hs = new float[points.Length];
-
-        float[] weights = new float[points.Length];
+        value = Vector2.zero;
+        //float[] hs = new float[points.Length];
+        //float[] weights = new float[points.Length];
         Vector2 p = getNormalPoint2(normalizedPosition);
-        for (int i = 0; i < points.Length; i++)
+        for (int i = start; i < end; i++)
         {
             if (!points[i].enabled) continue;
             Vector2 dir = p - getNormalPoint2(points[i].point);
@@ -94,8 +165,8 @@ public struct CalculateNextPositionJob : IJobParallelFor
             }
 
             //hs[i] = Mathf.Infinity;
-            hs[i] = 1;
-            for (int j = 0; j < points.Length; j++)
+            float hs = 1;
+            for (int j = start; j < end; j++)
             {
                 if (i == j) continue;
                 if (!points[j].enabled) continue;
@@ -111,16 +182,14 @@ public struct CalculateNextPositionJob : IJobParallelFor
                 float p2 = Vector2.Distance(pi, pj);
                 float h_2 = Mathf.Clamp01(1 - (p1 / (p2 * p2)) * points[j].weight) * points[i].weight;
 
-                if (h_2 < hs[i]) hs[i] = h_2;
+                if (h_2 < hs) hs = h_2;
 
             }
-            totalH += hs[i];
+            totalH += hs;
+            value += getValue(hs, points[i], normalizedPosition);
+
         }
-        for (int i = 0; i < weights.Length; i++)
-        {
-            weights[i] = hs[i] / totalH;
-        }
-        value = getValue(weights,ref points, normalizedPosition);
+        value = value / totalH;
         if (isDefensePlayer(playerPositionType))
         {
             value.y = Mathf.Lerp(value.y, offsideLinePosY, weightOffsideLine);
@@ -137,27 +206,23 @@ public struct CalculateNextPositionJob : IJobParallelFor
         p.y = p.y * fieldLenght / fieldWidth;
         return p;
     }
-    Vector2 getValue(float[] weights,ref NativeArray<Point2> points, Vector2 p)
+    Vector2 getValue(float weight,Point2 point, Vector2 p)
     {
         Vector2 result = Vector2.zero;
-        float totalweight = 0;
-        for (int i = 0; i < points.Length; i++)
+        if (point.snap)
         {
-            if (points[i].snap)
-            {
-                result += p * weights[i];
-            }
-            else
-            {
-                result += points[i].value * weights[i];
-
-            }
-            totalweight += weights[i];
+            result += p * weight;
         }
+        else
+        {
+            result += point.value * weight;
+
+        }
+        
         return result;
     }
     bool isDefensePlayer(PlayerPositionType playerPositionType)
     {
-        return playerPositionType.Equals(PlayerPositionType.CenterBack) || playerPositionType.Equals(PlayerPositionType.LateralBack);
+        return playerPositionType==PlayerPositionType.CenterBack || playerPositionType == PlayerPositionType.LateralBack;
     }
 }
