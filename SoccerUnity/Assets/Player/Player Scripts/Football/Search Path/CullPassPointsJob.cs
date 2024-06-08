@@ -63,6 +63,7 @@ public struct CullPassPointsJob : IJobEntityBatch
                 PathDataDOTS.V0 = getV0DOTSResult.v0;
                 PathDataDOTS.v0Magnitude = getV0DOTSResult.v0Magnitude;
                 PathDataDOTS.normalizedV0 = getV0DOTSResult.v0.normalized;
+                lonelyPoint.ballReachTime = getV0DOTSResult.ballReachTargetPositionTime;
                 getMinReachDistance_StraightPass(true,ref PlayerPositions, ref PlayerGenericParams, defenseIndexStart, defenseIndexEnd, lonelyPosition, BallParams.BallPosition, ref PathDataDOTS, out straightMinDistancePlayer_Ball, out playerIndexStraightPass, out defenseReachTimeResult, ref TestResult);
                 //Debug.Log(defenseReachTimeResult);
                 TestResult.GetV0DOTSResult1 = getV0DOTSResult;
@@ -81,11 +82,14 @@ public struct CullPassPointsJob : IJobEntityBatch
                 {
                     TestResult.straightReachBall = false;
                     lonelyPoint.straightReachBall = false;
-                    bool parabolicReachBall = getParabolicPass_isPosible(ref PlayerPositions, defenseIndexStart, defenseIndexEnd, playerIndexStraightPass, ref PlayerGenericParams, lonelyPosition, BallParams.BallPosition, reachTime, defenseReachTimeResult, BallParams.k, vf, ref VOParams, PlayerGenericParams.maxKickForce,ref PathDataDOTS,out parabolicMinDistancePlayer_Ball, ref TestResult);
+                    float ballReachTime;
+                    bool parabolicReachBall = getParabolicPass_isPosible(ref PlayerPositions, defenseIndexStart, defenseIndexEnd, playerIndexStraightPass, ref PlayerGenericParams, lonelyPosition, BallParams.BallPosition, reachTime, defenseReachTimeResult, BallParams.k, vf, ref VOParams, PlayerGenericParams.maxKickForce,ref PathDataDOTS,out parabolicMinDistancePlayer_Ball,out ballReachTime, ref TestResult);
+
                     TestResult.parabolicReachBall = parabolicReachBall;
                     lonelyPoint.parabolicReachBall = parabolicReachBall;
-                    if (!parabolicReachBall)
+                    if (parabolicReachBall)
                     {
+                        lonelyPoint.ballReachTime = ballReachTime;
                         //TestResult.defenseReachPosition = lonelyPosition;
                     }
                 }
@@ -128,7 +132,7 @@ public struct CullPassPointsJob : IJobEntityBatch
         float weight = (angle+ distance*a)/(1+a);
         lonelyPoint.weight = weight;
     }
-    bool getParabolicPass_isPosible(ref DynamicBuffer<PlayerPositionElement> PlayerPositions, int startIndex, int endIndex, int playerIndexStraightPass, ref PlayerGenericParams PlayerGenericParams, Vector3 lonelyPosition, Vector3 ballPosition, float attackReachTime, float defenseReachTime, float k, float vf, ref GetStraightV0Params VOParams, float maxKickForce,ref PathDataDOTS PathDataDOTS,out float parabolicMinDistance_BallPlayer, ref TestResultComponent TestResult)
+    bool getParabolicPass_isPosible(ref DynamicBuffer<PlayerPositionElement> PlayerPositions, int startIndex, int endIndex, int playerIndexStraightPass, ref PlayerGenericParams PlayerGenericParams, Vector3 lonelyPosition, Vector3 ballPosition, float attackReachTime, float defenseReachTime, float k, float vf, ref GetStraightV0Params VOParams, float maxKickForce,ref PathDataDOTS PathDataDOTS,out float parabolicMinDistance_BallPlayer,out float ballReachTime, ref TestResultComponent TestResult)
     {
 
         GetV0DOTSResult getV0DOTSResult = new GetV0DOTSResult();
@@ -136,6 +140,7 @@ public struct CullPassPointsJob : IJobEntityBatch
         Vector3 controlLonelyPosition = lonelyPosition;
         controlLonelyPosition.y = PlayerGenericParams.heightBallControl;
         ParabolicPassDOTS.getV0(ballPosition, controlLonelyPosition, ref getV0DOTSResult, maxKickForce, VOParams.maxControlSpeed, VOParams.maxControlSpeedLerpDistance, attackReachTime, k, vf);
+        ballReachTime = getV0DOTSResult.ballReachTargetPositionTime;
         float timeDiference = defenseReachTime - getV0DOTSResult.ballReachTargetPositionTime;
         TestResult.defenseParabolicDifferenceTime = timeDiference;
         TestResult.GetV0DOTSResult2 = getV0DOTSResult;

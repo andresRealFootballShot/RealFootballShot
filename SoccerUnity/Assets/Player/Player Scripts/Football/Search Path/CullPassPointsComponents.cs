@@ -3,8 +3,38 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
+using FieldTriangleV2;
 namespace CullPositionPoint
 {
+    public struct LonelyPointElement2 : IBufferElementData
+    {
+        public Vector2 position;
+        public int index;
+        public bool straightReachBall, parabolicReachBall;
+        public float weight;
+        public int order;
+        public float ballReachTime;
+        public LonelyPointElement2(Vector2 position, int index)
+        {
+            this.position = position;
+            this.index = index;
+            straightReachBall = false;
+            parabolicReachBall = false;
+            weight = Mathf.Infinity;
+            order = -1;
+            ballReachTime = -1;
+        }
+        public LonelyPointElement2(LonelyPointElement lonelyPointElement)
+        {
+            this.position = lonelyPointElement.position;
+            this.index = lonelyPointElement.index;
+            straightReachBall = false;
+            parabolicReachBall = false;
+            weight = Mathf.Infinity;
+            order = -1;
+            ballReachTime = -1;
+        }
+    }
     public struct CullPassPointsComponent : IComponentData
     {
         public int teamASize, teamBSize;

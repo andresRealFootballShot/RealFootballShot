@@ -17,6 +17,7 @@ public class CullPassPoints : MonoBehaviour
     {
         public int entitySize = 10;
         public int entityPointSize = 10;
+        public int differentCalculationsSize = 10;
     }
     public CullPassPointsParams cullPassPointsParams;
     public SearchLonelyPointsManager SearchLonelyPointsManager;
@@ -24,8 +25,12 @@ public class CullPassPoints : MonoBehaviour
     public string teamName_Attacker = "Blue";
     public List<Transform> testLonelyPoints;
     public bool test,debug,debugPointResults,debugPassTest,debugNextLonelyPoints;
+    public bool debugOnlyOrderLonelyPoint;
+    public int debugOrderLonelyPointIndex;
     public int lonelyPointIndexPassTest;
     public List<Entity> entities = new List<Entity>();
+    public List<List<LonelyPointElement2>> posibleLonelyPoints = new List<List<LonelyPointElement2>>();
+    public List<bool> AuxNextPositionPlayerBusiesList = new List<bool>();
     EntityManager entityManager;
     List<PublicPlayerData> players = new List<PublicPlayerData>();
     public float v0y = 5;
@@ -35,6 +40,9 @@ public class CullPassPoints : MonoBehaviour
     public CalculateNextPositionShedule calculateNextPositionShedule;
     public List<int> sortLonelyPointsSize;
     public string lineupName="Default", pressureName = "Default";
+    public PublicPlayerData publicPlayerData;
+    public float testTime = 1;
+
     void Start()
     {
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -45,27 +53,6 @@ public class CullPassPoints : MonoBehaviour
         createEntities();
         SetTeamAttacker(teamName_Attacker);
         
-    }
-    void test1()
-    {
-        float k = 0.1f;
-        
-        float pos0Y = 0;
-        float tf = 10;
-        float vf = 9.8f/k;
-        float t,tt;
-        float t1, t2;
-        ParabolicWithDragDOTS.timeToReachHeightParabolicNoDrag(y, 9.8f, v0y, pos0Y, out t1, out t2);
-        float maxY = ParabolicWithDragDOTS.getMaximumY(v0y, k, 9.8f);
-        float maxYT = ParabolicWithDragDOTS.getMaximumYTime(v0y, k, 9.8f);
-        float posY;
-        print("maxY=" + maxY + " " + t1 + " " + t2);
-        ParabolicWithDragDOTS.getTimeToReachY(true,y,t1,t2, maxYT, k,v0y,pos0Y,vf, 0.1f, out t);
-        posY = ParabolicWithDragDOTS.ParabolicWithDragGetPosYAtTime(t, k, v0y, pos0Y, vf);
-        print(t + " " + posY);
-        ParabolicWithDragDOTS.getTimeToReachY(false, y, t1, t2, maxYT, k, v0y, pos0Y, vf, 0.1f, out t);
-        posY = ParabolicWithDragDOTS.ParabolicWithDragGetPosYAtTime(t, k, v0y, pos0Y, vf);
-        print(t + " " + posY);
     }
     void PlayerAddedToTeam(PlayerAddedToTeamEventArgs playerAddedToTeamEventArgs)
     {
@@ -106,6 +93,7 @@ public class CullPassPoints : MonoBehaviour
     }
     void createEntities()
     {
+        int posibleLonelyPointsSize = sortLonelyPointsSize[0];
         for (int i = 0; i < cullPassPointsParams.entitySize; i++)
         {
             EntityArchetype entityArchetype = entityManager.CreateArchetype(typeof(LonelyPointElement2), typeof(CullPassPointsComponent), typeof(PlayerPositionElement), typeof(BallParamsComponent),typeof(TestResultComponent));
@@ -116,6 +104,21 @@ public class CullPassPoints : MonoBehaviour
                 lonelyPointElements.Add(new LonelyPointElement2());
             }
             entities.Add(entity);
+            
+        }
+        for (int i = 0; i < cullPassPointsParams.differentCalculationsSize; i++)
+        {
+
+            posibleLonelyPoints.Add(new List<LonelyPointElement2>());
+            for (int j = 0; j < posibleLonelyPointsSize; j++)
+            {
+                posibleLonelyPoints[i].Add(new LonelyPointElement2());
+            }
+            
+        }
+        for (int j = 0; j < 11; j++)
+        {
+            AuxNextPositionPlayerBusiesList.Add(false);
         }
         MatchEvents.publicPlayerDataOfAddedPlayerToTeamIsAvailable.AddListener(PlayerAddedToTeam);
         MatchEvents.ballPhysicsMaterialLoaded.AddListenerConsiderInvoked(() => SetBallParams());
@@ -224,8 +227,6 @@ public class CullPassPoints : MonoBehaviour
     private void Update()
     {
         TestDebug();
-        Vector3 v = new Vector3(MatchComponents.ballRigidbody.velocity.x, 0, MatchComponents.ballRigidbody.velocity.z);
-        //print("velocity=" + MatchComponents.ballRigidbody.velocity.magnitude + " " + v.magnitude);
     }
     void TestDebug()
     {
@@ -378,6 +379,13 @@ public class CullPassPoints : MonoBehaviour
                         
 
                         LonelyPointElement2 lonelyPointElement = lonelyPointElements[i];
+                        if (debugOnlyOrderLonelyPoint)
+                        {
+                            if (lonelyPointElement.order != debugOrderLonelyPointIndex)
+                            {
+                                continue;
+                            }
+                        }
                         Vector3 pos = new Vector3(lonelyPointElements[i].position.x, 0, lonelyPointElements[i].position.y);
                         Color color;
                         if (lonelyPointElement.order == 0)
@@ -493,7 +501,7 @@ public class CullPassPoints : MonoBehaviour
         }
     }
    
-    public void SetAllLonelyPointsCalculateNextPositionParameters(int lonelyPointSize, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team,int startSearchLonelyPointIndex)
+    public void SetAllLonelyPointsCalculateNextPositionParameters(int calculationIndex,int lonelyPointSize, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team,int startSearchLonelyPointIndex)
     {
         bool block = false;
         for (int k = 0; k < entities.Count; k++)
@@ -535,9 +543,9 @@ public class CullPassPoints : MonoBehaviour
                 if (order < lonelyPointSize)
                 {
                     LonelyPointElement2 lonelyPointElement = lonelyPointElements[i];
-                   
+                    //posibleLonelyPoints[i][order] = lonelyPointElement;
                     SetCalculateNextPositionParameters(order,ref lonelyPointElement, horizontalPositionType, team);
-                    
+                    posibleLonelyPoints[calculationIndex][order] = lonelyPointElement;
                 }
                 else
                 {
@@ -547,7 +555,14 @@ public class CullPassPoints : MonoBehaviour
             
         }
     }
-    public void UpdateNextPlayerPoints(int searchLonelyPointEntitySize,int startSearchLonelyPointIndex, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team,int nextPlayerPositionSize)
+    public void clearAuxNextPositionPublicPlayerDatas()
+    {
+        for (int i = 0; i < AuxNextPositionPlayerBusiesList.Count; i++)
+        {
+            AuxNextPositionPlayerBusiesList[i] = false;
+        }
+    }
+    public void UpdateNextPlayerPoints(int calculationIndex,int searchLonelyPointEntitySize,int startSearchLonelyPointIndex, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team,int nextPlayerPositionSize)
     {
         for (int i = startSearchLonelyPointIndex; i < startSearchLonelyPointIndex+searchLonelyPointEntitySize; i++)
         {
@@ -556,21 +571,19 @@ public class CullPassPoints : MonoBehaviour
             BufferSizeComponent bufferSizeComponent = entityManager.GetComponentData<BufferSizeComponent>(searchLonelyPointEntity);
             DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointEntity);
             NextPositionData2 nextPositionData = calculateNextPositionShedule.normalNextPosition[i];
+            LonelyPointElement2 lonelyPoint = posibleLonelyPoints[calculationIndex][i];
             int k = 0;
+            clearAuxNextPositionPublicPlayerDatas();
             for (int j = 0; j < nextPlayerPositionSize; j++)
             {
                 Vector2 normalNextPosition = nextPositionData.NextPositionData.Get(j), normalNextPosition2 = nextPositionData.symetricNextPositionData.Get(j);
                 Vector3 nextPosition;
-                //FootballPositionCtrl.getWeightyValue4(normalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out normalNextPosition);
-
                 nextPosition=FootballPositionCtrl.getGlobalPosition(horizontalPositionType, normalNextPosition, team.SideOfField);
-
-
-                //FootballPositionCtrl.getWeightyValue4(symetricNormalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out normalNextPosition2);
                 FieldPositionsData.HorizontalPositionType otherHorizontalPositionType = FootballPositionCtrl.getOtherHorizontalPositionType(horizontalPositionType);
 
                 Vector3 nextPosition2 = FootballPositionCtrl.getGlobalPosition(otherHorizontalPositionType, normalNextPosition2, team.SideOfField);
-
+                nextPosition = getCloseNextPosition(team, ref lonelyPoint, nextPosition, calculationIndex);
+                nextPosition2 = getCloseNextPosition(team, ref lonelyPoint, nextPosition2, calculationIndex);
                 SetLonelyPosition(ref points,k,nextPosition);
                 k++;
                 SetLonelyPosition(ref points,k, nextPosition2);
@@ -580,7 +593,7 @@ public class CullPassPoints : MonoBehaviour
             if (goalkeeperPublicPlayerData != null)
             {
                 Vector3 goalkeeperPosition = goalkeeperPublicPlayerData.bodyTransform.position;
-                SetLonelyPosition(ref points, team.publicPlayerDatas.Count-1, goalkeeperPosition);
+                SetLonelyPosition(ref points, k, goalkeeperPosition);
             }
 
             bufferSizeComponent.pointSize = team.publicPlayerDatas.Count + SearchLonelyPointsManager.extraPoints;
@@ -591,6 +604,38 @@ public class CullPassPoints : MonoBehaviour
             entityManager.SetEnabled(searchLonelyPointEntity, true);
         }
      }
+    Vector3 getCloseNextPosition(Team team,ref LonelyPointElement2 lonelyPoint,Vector3 optimalDefensePosition,int calculationIndex)
+    {
+        int i = 0;
+        float minDistance = Mathf.Infinity;
+        int playerIndex=-1;
+        PublicPlayerData closestPublicPlayerData = null;
+        Vector3 lonelyPosition = new Vector3(lonelyPoint.position.x, 0, lonelyPoint.position.y);
+        Vector3 nextPositionResult = Vector3.zero;
+        foreach (var publicPlayerData in team.publicPlayerDatas)
+        {
+            if (AuxNextPositionPlayerBusiesList[i])
+            {
+                i++;
+                continue;
+            }
+            Transform playerTransform = publicPlayerData.bodyTransform;
+            MovimentValues movimentValues = publicPlayerData.movimentValues;
+            Vector3 nextPosition = GetTimeToReachPointDOTS.accelerationGetPosition(playerTransform.position, publicPlayerData.speed, playerTransform.forward, movimentValues.rotationSpeed, publicPlayerData.movimentValues.minSpeedForRotateBody, movimentValues.forwardAcceleration, movimentValues.forwardDeceleration, movimentValues.maxAngleForRun, publicPlayerData.playerComponents.scope, optimalDefensePosition, publicPlayerData.maxSpeed, lonelyPoint.ballReachTime);
+            float distance = Vector3.Distance(playerTransform.position, nextPosition);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                playerIndex = i;
+                closestPublicPlayerData = publicPlayerData;
+                nextPositionResult = nextPosition;
+            }
+            i++;
+        }
+        AuxNextPositionPlayerBusiesList[playerIndex] = true;
+        return nextPositionResult;
+
+    }
     void SetCalculateNextPositionParameters(int index,ref LonelyPointElement2 lonelyPointElement, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team)
     {
         PressureFieldPositionDatas PressureFieldPositionDatas;
@@ -603,14 +648,14 @@ public class CullPassPoints : MonoBehaviour
         calculateNextPositionShedule.SetCalculateNextPositionParameters(index, normalBallPosition, offsideLineValueY, offsideWeight);
             
 
-        }
+    }
     void SetLonelyPosition(ref DynamicBuffer<PointElement> points,int index,Vector3 position)
     {
-        PointElement pointElement = points[index + SearchLonelyPointsManager.extraPoints];
-        pointElement.index = index + SearchLonelyPointsManager.extraPoints;
+        PointElement pointElement = points[index];
+        pointElement.index = index;
         pointElement.position.x = position.x;
         pointElement.position.y = position.z;
-        points[index + SearchLonelyPointsManager.extraPoints] = pointElement;
+        points[index] = pointElement;
     }
     void DrawPoint(Vector3 position,string info)
     {

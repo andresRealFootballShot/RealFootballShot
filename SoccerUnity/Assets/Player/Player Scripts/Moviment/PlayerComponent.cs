@@ -56,10 +56,12 @@ public class PlayerComponent : MonoBehaviour
     public new string name { get => playerComponents.root.name; }
     public float getMaxAcceleration()
     {
+        //return movementValues.forwardAcceleration;
         return playerComponents.getMaxAcceleration();
     }
     public float getMaxDeceleration()
     {
+        //return movementValues.forwardDeceleration;
         return playerComponents.getMaxDeceleration();
     }
 }

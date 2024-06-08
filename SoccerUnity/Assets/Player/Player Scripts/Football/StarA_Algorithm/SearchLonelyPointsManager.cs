@@ -244,12 +244,14 @@ namespace NextMove_Algorithm
                 {
                     int i = 0;
                     DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(entity);
+                    Team team;
+                    Teams.getTeamByIndex(0,out team);
                     foreach (var corner in MatchComponents.footballField.cornersComponents)
                     {
                         Transform cornerTransform = corner.cornerPoint;
                         Vector3 pos = cornerTransform.position + cornerTransform.TransformDirection(new Vector3(searchLonelyPointsParams.fieldOffset, 0, searchLonelyPointsParams.fieldOffset));
-                        PointElement point = new PointElement(new Vector2(pos.x, pos.z), false, i);
-                        points[i] = point;
+                        PointElement point = new PointElement(new Vector2(pos.x, pos.z), false, team.teamMaxPlayers + i);
+                        points[team.teamMaxPlayers + i] = point;
                         i++;
                     }
                 }

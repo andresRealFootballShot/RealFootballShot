@@ -90,8 +90,8 @@ public class MovementPlayerComponent : PlayerComponent
             {
                 accelerationResult = 0;
             }
-            //float lerpAcceleration = Mathf.Lerp(0, accelerationResult, Mathf.Abs(targetSpeed - adjustedForwardVelocitySpeed) / 0.1f);
             float lerpAcceleration = Mathf.Lerp(0, accelerationResult, Mathf.Abs(targetSpeed - EndForwardSpeed) / 0.01f);
+            //float lerpAcceleration = accelerationResult;
             float sign = Mathf.Sign(targetSpeed - EndForwardSpeed);
             //print(targetSpeed + "  | " + adjustedForwardVelocitySpeed+ " | "+ acceleration);
             return sign * lerpAcceleration;
@@ -100,7 +100,8 @@ public class MovementPlayerComponent : PlayerComponent
         {
             float targetSpeed = 0;
             float decelerationSkill = getMaxDeceleration();
-            float acceleration = Mathf.Lerp(0, decelerationSkill, Mathf.Abs(targetSpeed - Speed) / 0.1f);
+            //float acceleration = Mathf.Lerp(0, decelerationSkill, Mathf.Abs(targetSpeed - Speed) / 0.1f);
+            float acceleration = decelerationSkill;
             return -acceleration;
         }
     }

@@ -8,7 +8,7 @@ public class MovementCtrl : MovementPlayerComponent
     float forwardAnim, sprintAnim;
     float targetVelocityBall;
     Vector3 previousPosition;
-    float speed,forwardDesiredSpeed2;
+    float speed, forwardDesiredSpeed2;
     Vector3 direction;
     // Update is called once per frame
     private void Start()
@@ -25,15 +25,15 @@ public class MovementCtrl : MovementPlayerComponent
         {
             float speedRotation = Mathf.Clamp01(1 - angleVelocity_DesiredVelocity / 90);
             float targetSpeed = speedRotation * ForwardDesiredSpeed;
-            
+
             float max, min;
-            if(targetSpeed < EndForwardSpeed)
+            if (targetSpeed < EndForwardSpeed)
             {
                 max = MaxSpeed;
                 min = targetSpeed;
                 //print("a");
             }
-            else if(targetSpeed > EndForwardSpeed)
+            else if (targetSpeed > EndForwardSpeed)
             {
                 max = targetSpeed;
                 min = 0;
@@ -58,7 +58,7 @@ public class MovementCtrl : MovementPlayerComponent
             //print("ForwardVelocity");
             float a = acceleration;
             EndForwardSpeed += a * deltaTime;
-            
+
             EndForwardSpeed = Mathf.Clamp(EndForwardSpeed, 0, MaxSpeed);
         }
         //DrawArrow.ForDebug(bodyPosition, direction.normalized);
@@ -68,7 +68,7 @@ public class MovementCtrl : MovementPlayerComponent
     void calculateDistanceStop()
     {
         float v = maxSpeedForReachBall;
-        if (true || isAccelerating)
+        if (isAccelerating)
         {
             speed = EndForwardSpeed;
             //print(speed);
@@ -86,8 +86,8 @@ public class MovementCtrl : MovementPlayerComponent
         float d = AccelerationPath.getDistanceWhereStartDecelerate(ballVelocity.magnitude, maxSpeedForReachBall, getMaxAcceleration(), -da, targetDistance);*/
         movementValues.distanceStopMoveBallPlayerOffset = Mathf.Abs(d);
 
-        float speed2 = BodyTargetXZDistance < distanceStopMoveBallPlayer + 0.5f && angleBodyTarget_DesiredDirection < 5? MinForwardSpeed : ForwardDesiredSpeed;
-        
+        float speed2 = BodyTargetXZDistance < distanceStopMoveBallPlayer + 0.5f && angleBodyTarget_DesiredDirection < 5 ? MinForwardSpeed : ForwardDesiredSpeed;
+
         speed2 = speed2 < 0.001f ? 0 : speed2;
         ForwardDesiredSpeed = speed2;
     }
@@ -102,7 +102,7 @@ public class MovementCtrl : MovementPlayerComponent
                 float maxSpeed = movementValues.rotationSpeed;
                 float minSpeed = movementValues.minRotationSpeedWhileRun;
                 float speedRotation = Mathf.Lerp(maxSpeed, minSpeed, EndForwardSpeed / movementValues.maxSpeedWhileRun_AngularLerp);
-                
+
 
                 bodyRotationSpeed = Mathf.Lerp(0, speedRotation, angleBodyForward_DesiredLookDirection / 1f);
                 Vector3 cross = Vector3.Cross(bodyY0Forward, DesiredLookDirection);
@@ -110,7 +110,7 @@ public class MovementCtrl : MovementPlayerComponent
                 AngularSpeed = bodyRotationSpeed;
                 bodyTransform.eulerAngles += Mathf.Sign(cross.y) * Vector3.up * bodyRotationSpeed * deltaTime;
 
-                
+
                 //print(angleBodyForward_DesiredLookDirection + " "+maxAngleForRun + " " + ForwardY0Velocity);
             }
             else
@@ -125,15 +125,16 @@ public class MovementCtrl : MovementPlayerComponent
                 //Debug.LogError("bodyRotationSpeed=" + bodyRotationSpeed+ " | speedRotation=" + speedRotation + " | angle=" + angle + " | EndForwardSpeed=" + EndForwardSpeed + " | maxSpeed=" + maxSpeed + " | ForwardDesiredDirection=" + ForwardDesiredDirection);
                 AngularSpeed = bodyRotationSpeed;
                 bodyTransform.eulerAngles += Mathf.Sign(cross.y) * Vector3.up * bodyRotationSpeed * deltaTime;
-                
+
                 //print("b " + speedRotation);
             }
         }
+        
         if (DesiredDirection != Vector3.zero)
         {
             if (angleVelocity_DesiredVelocity < maxAngleForRun)
             {
-                direction = Vector3.RotateTowards(direction, DesiredDirection, movementValues.directionRotationSpeed*Mathf.Deg2Rad * deltaTime, 1).normalized;
+                direction = Vector3.RotateTowards(direction, DesiredDirection, movementValues.directionRotationSpeed * Mathf.Deg2Rad * deltaTime, 1).normalized;
             }
             else
             {
@@ -146,7 +147,7 @@ public class MovementCtrl : MovementPlayerComponent
         if (DesiredLookDirection != Vector3.zero)
         {
 
-            if (angleBodyForwardDesiredVelocity < maxAngleForRun )
+            if (angleBodyForwardDesiredVelocity < maxAngleForRun)
             {
                 float maxSpeed = movementValues.rotationSpeed;
                 float minSpeed = Mathf.Lerp(10, 30, rotAccelerationSkill);
@@ -162,9 +163,9 @@ public class MovementCtrl : MovementPlayerComponent
             {
                 //print("rotation");
                 float maxSpeed = movementValues.rotationSpeed;
-                float speedRotation = EndForwardSpeed <= minSpeedForRotate ? maxSpeed : 0 ;
+                float speedRotation = EndForwardSpeed <= minSpeedForRotate ? maxSpeed : 0;
                 //float speedRotation = Mathf.Lerp(maxSpeed,0,(adjustedForwardVelocitySpeed - 2)/2);
-                
+
                 float angle = angleBodyForwardDesiredVelocity;
                 bodyRotationSpeed = Mathf.Lerp(0, speedRotation, angle / 0.1f);
                 Vector3 cross = Vector3.Cross(bodyY0Forward, DesiredLookDirection);
@@ -174,7 +175,7 @@ public class MovementCtrl : MovementPlayerComponent
             }
         }
     }
-    
+
     public void movement(float deltaTime)
     {
         /*if (!playerComponents.wallRayCast.isHitting)
@@ -191,14 +192,14 @@ public class MovementCtrl : MovementPlayerComponent
         }
         else
         {
-            bodyTransform.Translate(direction.normalized * EndForwardSpeed * deltaTime,Space.World);
+            bodyTransform.Translate(direction.normalized * EndForwardSpeed * deltaTime, Space.World);
         }
         calculateVelocity(deltaTime);
     }
     void calculateVelocity(float deltaTime)
     {
         //movementValues.ForwardVelocity = (bodyRigidbody.position - previousPosition)/ deltaTime;
-        
+
         calculateIsAccelerating();
         float forwardSpeed = Vector3.Dot(bodyY0Forward, direction.normalized * EndForwardSpeed);
         float horizontalSpeed = Vector3.Dot(bodyTransform.right, direction.normalized * EndForwardSpeed);
@@ -231,5 +232,5 @@ public class MovementCtrl : MovementPlayerComponent
         //anim.SetFloat("vertical", movementValues.forwardAnimCurve.Evaluate(forwardAnim), 0.1f, deltaTime * GeneralPlayerParameters.speedAnim2);
         //anim.SetFloat("sprint", movementValues.sprintAnimCurve.Evaluate(sprintAnim) + 0.5f, 0.1f, deltaTime * GeneralPlayerParameters.speedAnim2);
     }
-   
+
 }

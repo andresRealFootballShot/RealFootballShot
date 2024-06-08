@@ -32,6 +32,7 @@ namespace NextMove_Algorithm
                 NextMoveSystemManager.UpdatePoints(teamName);
             }
             NextMoveSystemManager.setEntitiesEnable2(true);
+            NextMoveSystemManager.setEntitiesEnable(false);
             var searchLonelyPointsJob = new SearchLonelyPointsJob();
             searchLonelyPointsJob.pointsHandle = this.GetBufferTypeHandle<PointElement>(true);
             searchLonelyPointsJob.edgesHandle = this.GetBufferTypeHandle<EdgeElement>(false);

@@ -22,9 +22,9 @@ public class CalculateNextPositionShedule : MonoBehaviour
     public class PressureFieldPositionDatas
     {
         public string name;
-        public NativeArray<FieldPositionData> FieldPositionDatas;
+        public NativeArray<PlayerPositionType> PlayerPositionTypes;
         public NativeList<Point2> points;
-
+        public NativeList<NextPlayerPosition> NextPlayerPositions;
         public PressureFieldPositionDatas(string name)
         {
             this.name = name;
@@ -32,7 +32,7 @@ public class CalculateNextPositionShedule : MonoBehaviour
     }
     public FootballPositionCtrl FootballPositionCtrl;
     List<LineupFieldPositionDatas> lineupFieldPositionDatas=new List<LineupFieldPositionDatas>();
-    public NativeArray<TwoPositions> normalizedPositions;
+    public NativeArray<Vector2> normalizedPositions;
     public NativeArray<float> offsideLinePosYs;
     public NativeArray<float> weightOffsideLines;
     public NativeArray<NextPositionData2> normalNextPosition;
@@ -44,16 +44,14 @@ public class CalculateNextPositionShedule : MonoBehaviour
     }
     void LoadParameters()
     {
-        normalizedPositions = new NativeArray<TwoPositions>(JobSize, Allocator.Persistent);
+        normalizedPositions = new NativeArray<Vector2>(JobSize, Allocator.Persistent);
         offsideLinePosYs= new NativeArray<float>(JobSize, Allocator.Persistent);
         weightOffsideLines = new NativeArray<float>(JobSize, Allocator.Persistent);
         normalNextPosition = new NativeArray<NextPositionData2>(JobSize, Allocator.Persistent);
     }
     public void SetCalculateNextPositionParameters(int index,Vector2 normalizedPosition,float offsideLinePosY,float weightOffsideLine)
     {
-        Vector2 symetricNormalBallPosition = normalizedPosition;
-        symetricNormalBallPosition.x = 1 - normalizedPosition.x;
-        normalizedPositions[index] = new TwoPositions(normalizedPosition, symetricNormalBallPosition);
+        normalizedPositions[index] = normalizedPosition;
         offsideLinePosYs[index] = offsideLinePosY;
         weightOffsideLines[index] = weightOffsideLine;
     }
@@ -78,44 +76,55 @@ public class CalculateNextPositionShedule : MonoBehaviour
         jobData.offsideLinePosY = offsideLinePosYs;
         jobData.weightOffsideLine = weightOffsideLines;
         jobData.points = pressureFieldPositionDatas.points;
-        jobData.FieldPositionDatas = pressureFieldPositionDatas.FieldPositionDatas;
+        jobData.playerPositionTypes = pressureFieldPositionDatas.PlayerPositionTypes;
         jobData.normalNextPosition = normalNextPosition;
+        jobData.NextPlayerPositions = pressureFieldPositionDatas.NextPlayerPositions;
         jobData.playerSize = playerSize;
-        
+
         JobHandle handle = jobData.Schedule(jobSize, 1);
+
         handle.Complete();
+    }
+    private void LateUpdate()
+    {
     }
     void LoadPoints()
     {
+
         foreach (var LineupFieldPositionData in FootballPositionCtrl.LineupFieldPositionList.LineupFieldPositionDatas)
         {
             LineupFieldPositionDatas lineupFieldPositionData = new LineupFieldPositionDatas(LineupFieldPositionData.name);
             lineupFieldPositionDatas.Add(lineupFieldPositionData);
-            
-            
+
+           
             foreach (var PressureFieldPositionDatas in LineupFieldPositionData.PressureFieldPositionDatasList)
             {
                 PressureFieldPositionDatas pressureFieldPositionDatas = new PressureFieldPositionDatas(PressureFieldPositionDatas.name);
                 lineupFieldPositionData.PressureFieldPositionDatas.Add(pressureFieldPositionDatas);
                 NativeList<Point2> Points = new NativeList<Point2>(Allocator.Persistent);
-                int startIndex = 0;
-                NativeArray<FieldPositionData> FieldPositionDatas = new NativeArray<FieldPositionData>(PressureFieldPositionDatas.FieldPositionDatas.Count, Allocator.Persistent);
-                
-               
-                int i = 0;
-                foreach (var FieldPositionData in PressureFieldPositionDatas.FieldPositionDatas)
+                NativeArray<PlayerPositionType> PlayerPositionType = new NativeArray<PlayerPositionType>(PressureFieldPositionDatas.FieldPositionDatas.Count, Allocator.Persistent);
+                NativeList<NextPlayerPosition> NextPlayerPositions = new NativeList<NextPlayerPosition>(Allocator.Persistent);
+                FieldPositionsData FieldPositionsData = PressureFieldPositionDatas.FieldPositionDatas[0];
+
+                for (int i = 0; i < PressureFieldPositionDatas.FieldPositionDatas.Count; i++)
                 {
-                    FieldPositionData fieldPositionsData = new FieldPositionData(startIndex,startIndex+ FieldPositionData.points.Count,FieldPositionData.playerPositionType);
-                    startIndex = startIndex + FieldPositionData.points.Count;
-                    FieldPositionDatas[i] = fieldPositionsData;
-                    foreach (var point in FieldPositionData.points)
-                    {
-                        Points.Add(new Point2(point));
-                    }
-                    i++;
+                    PlayerPositionType[i] = PressureFieldPositionDatas.FieldPositionDatas[i].playerPositionType;
+
                 }
-                pressureFieldPositionDatas.FieldPositionDatas = FieldPositionDatas;
+                foreach (var point in FieldPositionsData.points)
+                {
+                    Points.Add(new Point2(point.point));
+                }
+                foreach (var item in PressureFieldPositionDatas.FieldPositionDatas)
+                {
+                    foreach (var point in item.points)
+                    {
+                        NextPlayerPositions.Add(new NextPlayerPosition(point));
+                    }
+                }
+                pressureFieldPositionDatas.PlayerPositionTypes = PlayerPositionType;
                 pressureFieldPositionDatas.points = Points;
+                pressureFieldPositionDatas.NextPlayerPositions = NextPlayerPositions;
             }
         }
     }
@@ -125,8 +134,9 @@ public class CalculateNextPositionShedule : MonoBehaviour
         {
             foreach (var PressureFieldPositionData in lineupFieldPositionData.PressureFieldPositionDatas)
             {
-                PressureFieldPositionData.FieldPositionDatas.Dispose();
+                PressureFieldPositionData.PlayerPositionTypes.Dispose();
                 PressureFieldPositionData.points.Dispose();
+                PressureFieldPositionData.NextPlayerPositions.Dispose();
             }
         }
         normalizedPositions.Dispose();

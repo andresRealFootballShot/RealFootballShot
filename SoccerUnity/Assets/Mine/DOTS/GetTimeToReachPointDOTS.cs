@@ -33,6 +33,67 @@ namespace DOTS_ChaserDataCalculation
             float t = distance / playerDataComponent.maxSpeed;
             return t;
         }
+        public static Vector3 accelerationGetPosition(Vector3 playerPosition, float currentSpeed, Vector3 bodyForward,float speedRotation,float minSpeedForRotate, float a,float da,float maxAngleForRun,float scope, Vector3 targetPosition,float maxSpeed,float t)
+        {
+            if (MyFunctions.Vector3IsNan(targetPosition) || targetPosition.Equals(Vector3.positiveInfinity) || targetPosition.Equals(Vector3.negativeInfinity))
+            {
+                return Vector3.positiveInfinity;
+            }
+
+            Vector3 bodyPosition = playerPosition;
+            float d4 = Vector3.Distance(bodyPosition, MyFunctions.setYToVector3(targetPosition, bodyPosition.y));
+            if (d4 < scope)
+            {
+                return playerPosition;
+            }
+            float speed = currentSpeed;
+            
+            Vector3 direction = MyFunctions.setY0ToVector3(targetPosition - bodyPosition).normalized;
+            float angle = Vector3.Angle(bodyForward, direction);
+            //float t1 = angle > maxAngleForRun ? t1_1 : 0;
+            float t1 = 0;
+            float t2 = 0;
+            float v0Magnitude = speed;
+            Vector3 x1 = playerPosition;
+            if (angle > maxAngleForRun)
+            {
+                if(speed > minSpeedForRotate)
+                {
+
+                    float t1_1 = AccelerationPath.getT(minSpeedForRotate, speed, da);
+                    //float xToStop = speed > minSpeedForRotate ? AccelerationPath.getX3(speed, t, -da) : 0;
+                    t1 = t1_1;
+                    float t11 = Mathf.Clamp(t1, 0, t);
+                   
+                    float d = Mathf.Abs(AccelerationPath.getX3(speed, t11, -da));
+                    x1 = playerPosition+direction*d;
+                    if (t1 >= t)
+                    {
+                        return x1;
+                    }
+                }
+               
+                direction = targetPosition - x1;
+                direction.y = 0;
+                direction.Normalize();
+                t2 = Path.getT(maxAngleForRun, angle,speedRotation);
+                v0Magnitude = 0;
+            }
+            t -= t1 + t2;
+            float distance = 0;
+            if (v0Magnitude < maxSpeed && t > 0)
+            {
+                float t3 = AccelerationPath.getT(v0Magnitude, maxSpeed, a);
+                t3 = Mathf.Clamp(t3, 0, t);
+                distance += Mathf.Abs(AccelerationPath.getX2(v0Magnitude, maxSpeed, a));
+                t -= t3;
+            }
+            if(t>0)
+                distance += maxSpeed * t;
+
+            Vector3 result = x1 + direction * distance;
+            return result;
+        }
         public static float accelerationGetTimeToReachPosition(Vector3 playerPosition,float currentSpeed,Vector3 bodyForward,Vector3 normalizedForwardVelocity, ref PlayerGenericParams PlayerGenericParams, Vector3 targetPosition)
         {
             if (MyFunctions.Vector3IsNan(targetPosition) || targetPosition.Equals(Vector3.positiveInfinity) || targetPosition.Equals(Vector3.negativeInfinity))

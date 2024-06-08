@@ -59,13 +59,13 @@ public class CullPassPointsSystem : SystemBase
         CullPassPointsJob.TestResultComponentHandle = this.GetComponentTypeHandle<TestResultComponent>(false);
         Dependency = CullPassPointsJob.ScheduleParallel(cullPassPointsQuery, CullPassPoints.batchesPerChunk, this.Dependency);
         Dependency.Complete();
-
+        
         SearchLonelyPointsManager.setEntitiesEnable2(false);
         SearchLonelyPointsManager.setEntitiesEnable(false);
         UpdateNextPlayerPositions();
 
         CalculateLonelyPoints();
-
+        
     }
     void CalculateLonelyPoints()
     {
@@ -77,20 +77,17 @@ public class CullPassPointsSystem : SystemBase
         searchLonelyPointsJob.trianglesHandle = this.GetBufferTypeHandle<TriangleElement>(false);
         searchLonelyPointsJob.lonelyPointsHandle = this.GetBufferTypeHandle<LonelyPointElement>(false);
         searchLonelyPointsJob.pointBufferSizeComponentHandle = this.GetComponentTypeHandle<BufferSizeComponent>(false);
-        //var ecb = new EntityCommandBuffer(Allocator.TempJob);
-        //EntityCommandBuffer.ParallelWriter ecbParallel = ecb.AsParallelWriter();
-
-        //searchLonelyPointsJob.ConcurrentCommands = ecbParallel;
         Dependency = searchLonelyPointsJob.ScheduleParallel(searchLonelyPointsquery, 1, this.Dependency);
         Dependency.Complete();
+        //SearchLonelyPointsManager.setEntitiesEnable(false);
     }
     void UpdateNextPlayerPositions()
     {
         int sortLonelyPointsSize = CullPassPoints.sortLonelyPointsSize[0];
         Team defenseTeam = Teams.getTeamByName(CullPassPoints.teamName_Defense);
-        CullPassPoints.SetAllLonelyPointsCalculateNextPositionParameters(sortLonelyPointsSize, FieldPositionsData.HorizontalPositionType.Right,defenseTeam,0);
+        if (defenseTeam.publicPlayerDatas.Count == 0) return;
+        CullPassPoints.SetAllLonelyPointsCalculateNextPositionParameters(0,sortLonelyPointsSize, FieldPositionsData.HorizontalPositionType.Right,defenseTeam,0);
         CullPassPoints.calculateNextPositionShedule.SheduleJobs(sortLonelyPointsSize, defenseTeam.teamMaxFieldPlayers/2, CullPassPoints.lineupName, CullPassPoints.pressureName);
-
-        CullPassPoints.UpdateNextPlayerPoints(sortLonelyPointsSize, 0, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
+        CullPassPoints.UpdateNextPlayerPoints(0,sortLonelyPointsSize, 0, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
     }
 }
