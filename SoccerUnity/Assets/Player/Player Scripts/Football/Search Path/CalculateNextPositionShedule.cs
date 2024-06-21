@@ -30,6 +30,20 @@ public class CalculateNextPositionShedule : MonoBehaviour
             this.name = name;
         }
     }
+    public Dictionary<PlayerPositionType, List<TypeFieldPosition.Type>> RightPlayerPosition_TypeFieldPosition = new Dictionary<PlayerPositionType, List<TypeFieldPosition.Type>>() {
+             { PlayerPositionType.Forward, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightForward,} },
+             { PlayerPositionType.CenterBack, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.CentreRightBack,} },
+             { PlayerPositionType.LateralBack, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RighttOutsideDefense,} },
+             { PlayerPositionType.CenterMidfield, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightCentreMidfield,} },
+             { PlayerPositionType.EdgeMidfield, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightOutsideMidfield,} },
+        };
+    public Dictionary<PlayerPositionType, List<TypeFieldPosition.Type>> LeftPlayerPosition_TypeFieldPosition = new Dictionary<PlayerPositionType, List<TypeFieldPosition.Type>>() {
+             { PlayerPositionType.Forward, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.LeftForward } },
+             { PlayerPositionType.CenterBack, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.CentreLeftBack } },
+             { PlayerPositionType.LateralBack, new List<TypeFieldPosition.Type>(){TypeFieldPosition.Type.LeftOutsideDefense } },
+             { PlayerPositionType.CenterMidfield, new List<TypeFieldPosition.Type>(){TypeFieldPosition.Type.LeftCentreMidfield } },
+             { PlayerPositionType.EdgeMidfield, new List<TypeFieldPosition.Type>(){TypeFieldPosition.Type.LeftOutsideMidfield } },
+        };
     public FootballPositionCtrl FootballPositionCtrl;
     List<LineupFieldPositionDatas> lineupFieldPositionDatas=new List<LineupFieldPositionDatas>();
     public NativeArray<Vector2> normalizedPositions;
@@ -37,6 +51,7 @@ public class CalculateNextPositionShedule : MonoBehaviour
     public NativeArray<float> weightOffsideLines;
     public NativeArray<NextPositionData2> normalNextPosition;
     public int JobSize = 10;
+    public List<PlayerPositionType> playerPositionTypeOrder;
     private void Start()
     {
         LoadParameters();
@@ -68,7 +83,7 @@ public class CalculateNextPositionShedule : MonoBehaviour
         float fieldWidth = MatchComponents.footballField.fieldWidth;
 
         PressureFieldPositionDatas pressureFieldPositionDatas = GetFieldPositionsData(lineupName,pressureName);
-
+        
         CalculateNextPositionJob jobData = new CalculateNextPositionJob();
         jobData.fieldLenght = fieldLenght;
         jobData.fieldWidth = fieldWidth;
@@ -88,6 +103,17 @@ public class CalculateNextPositionShedule : MonoBehaviour
     private void LateUpdate()
     {
     }
+    FieldPositionsData getFieldPositionData(PlayerPositionType playerPositionType,List<FieldPositionsData> FieldPositionDatas)
+    {
+        foreach (var FieldPositionData in FieldPositionDatas)
+        {
+            if (FieldPositionData.playerPositionType.Equals(playerPositionType))
+            {
+                return FieldPositionData;
+            }
+        }
+        return FieldPositionDatas[0];
+    }
     void LoadPoints()
     {
 
@@ -104,20 +130,23 @@ public class CalculateNextPositionShedule : MonoBehaviour
                 NativeList<Point2> Points = new NativeList<Point2>(Allocator.Persistent);
                 NativeArray<PlayerPositionType> PlayerPositionType = new NativeArray<PlayerPositionType>(PressureFieldPositionDatas.FieldPositionDatas.Count, Allocator.Persistent);
                 NativeList<NextPlayerPosition> NextPlayerPositions = new NativeList<NextPlayerPosition>(Allocator.Persistent);
+                //FieldPositionsData FieldPositionsData = PressureFieldPositionDatas.FieldPositionDatas[0];
                 FieldPositionsData FieldPositionsData = PressureFieldPositionDatas.FieldPositionDatas[0];
 
                 for (int i = 0; i < PressureFieldPositionDatas.FieldPositionDatas.Count; i++)
                 {
-                    PlayerPositionType[i] = PressureFieldPositionDatas.FieldPositionDatas[i].playerPositionType;
+                    //PlayerPositionType[i] = PressureFieldPositionDatas.FieldPositionDatas[i].playerPositionType;
+                    PlayerPositionType[i] = playerPositionTypeOrder[i];
 
                 }
                 foreach (var point in FieldPositionsData.points)
                 {
                     Points.Add(new Point2(point.point));
                 }
-                foreach (var item in PressureFieldPositionDatas.FieldPositionDatas)
+                foreach (var playerPositionType in playerPositionTypeOrder)
                 {
-                    foreach (var point in item.points)
+                    FieldPositionsData FieldPositionsData2 = getFieldPositionData(playerPositionType, PressureFieldPositionDatas.FieldPositionDatas);
+                    foreach (var point in FieldPositionsData2.points)
                     {
                         NextPlayerPositions.Add(new NextPlayerPosition(point));
                     }

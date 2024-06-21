@@ -30,6 +30,7 @@ public class CullPassPoints : MonoBehaviour
     public int lonelyPointIndexPassTest;
     public List<Entity> entities = new List<Entity>();
     public List<List<LonelyPointElement2>> posibleLonelyPoints = new List<List<LonelyPointElement2>>();
+    public List<int> posibleLonelyPointsSize = new List<int>();
     public List<bool> AuxNextPositionPlayerBusiesList = new List<bool>();
     EntityManager entityManager;
     List<PublicPlayerData> players = new List<PublicPlayerData>();
@@ -38,6 +39,7 @@ public class CullPassPoints : MonoBehaviour
     public int batchesPerChunk = 1;
     public FootballPositionCtrl FootballPositionCtrl;
     public CalculateNextPositionShedule calculateNextPositionShedule;
+    public TriangulatorJob triangulatorJob;
     public List<int> sortLonelyPointsSize;
     public string lineupName="Default", pressureName = "Default";
     public PublicPlayerData publicPlayerData;
@@ -114,7 +116,7 @@ public class CullPassPoints : MonoBehaviour
             {
                 posibleLonelyPoints[i].Add(new LonelyPointElement2());
             }
-            
+            this.posibleLonelyPointsSize.Add(0);
         }
         for (int j = 0; j < 11; j++)
         {
@@ -504,27 +506,29 @@ public class CullPassPoints : MonoBehaviour
     public void SetAllLonelyPointsCalculateNextPositionParameters(int calculationIndex,int lonelyPointSize, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team,int startSearchLonelyPointIndex)
     {
         bool block = false;
+        int order = 0;
         for (int k = 0; k < entities.Count; k++)
         {
             DynamicBuffer<LonelyPointElement2> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement2>(entities[k]);
             CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entities[k]);
+            
             for (int i = 0; i < CullPassPointsComponent.sizeLonelyPoints; i++)
             {
-                if (lonelyPointElements[i].weight == Mathf.Infinity&& block) continue;
+                if (lonelyPointElements[i].weight == Mathf.Infinity && !block) continue;
                 float minWeight = lonelyPointElements[i].weight;
-                int order = 0;
                 
+
                 for (int z = 0; z < entities.Count; z++)
                 {
                     DynamicBuffer<LonelyPointElement2> lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entities[z]);
                     CullPassPointsComponent CullPassPointsComponent2 = entityManager.GetComponentData<CullPassPointsComponent>(entities[z]);
                     for (int j = 0; j < CullPassPointsComponent2.sizeLonelyPoints; j++)
                     {
-                        if ((z==k && i == j) || lonelyPointElements2[j].weight == Mathf.Infinity&& block) continue;
+                        if ((z==k && i == j) || lonelyPointElements2[j].weight == Mathf.Infinity && !block) continue;
                         if (minWeight > lonelyPointElements2[j].weight)
                         {
                             //order = lonelyPointElements2[j].order;
-                            order++;
+                            //order++;
                         }
                         else
                         {
@@ -536,20 +540,21 @@ public class CullPassPoints : MonoBehaviour
                         }
                     }
                 }
-
-                LonelyPointElement2 lonelyPointElement2 = lonelyPointElements[i];
-                lonelyPointElement2.order = order;
-                lonelyPointElements[i] = lonelyPointElement2;
                 if (order < lonelyPointSize)
                 {
+                    
                     LonelyPointElement2 lonelyPointElement = lonelyPointElements[i];
+                    lonelyPointElement.order = order;
+                    lonelyPointElements[i] = lonelyPointElement;
                     //posibleLonelyPoints[i][order] = lonelyPointElement;
                     SetCalculateNextPositionParameters(order,ref lonelyPointElement, horizontalPositionType, team);
                     posibleLonelyPoints[calculationIndex][order] = lonelyPointElement;
-                }
-                else
-                {
-                    return;
+                    order++;
+                    posibleLonelyPointsSize[calculationIndex] = order;
+                    if (order >= lonelyPointSize)
+                    {
+                        break;
+                    }
                 }
             }
             
@@ -566,55 +571,70 @@ public class CullPassPoints : MonoBehaviour
     {
         for (int i = startSearchLonelyPointIndex; i < startSearchLonelyPointIndex+searchLonelyPointEntitySize; i++)
         {
-            Entity searchLonelyPointEntity = SearchLonelyPointsManager.sharedSearchLonelyPointsEntitys[i];
 
-            BufferSizeComponent bufferSizeComponent = entityManager.GetComponentData<BufferSizeComponent>(searchLonelyPointEntity);
-            DynamicBuffer<PointElement> points = entityManager.GetBuffer<PointElement>(searchLonelyPointEntity);
             NextPositionData2 nextPositionData = calculateNextPositionShedule.normalNextPosition[i];
             LonelyPointElement2 lonelyPoint = posibleLonelyPoints[calculationIndex][i];
             int k = 0;
             clearAuxNextPositionPublicPlayerDatas();
+            
             for (int j = 0; j < nextPlayerPositionSize; j++)
             {
+                
                 Vector2 normalNextPosition = nextPositionData.NextPositionData.Get(j), normalNextPosition2 = nextPositionData.symetricNextPositionData.Get(j);
                 Vector3 nextPosition;
                 nextPosition=FootballPositionCtrl.getGlobalPosition(horizontalPositionType, normalNextPosition, team.SideOfField);
                 FieldPositionsData.HorizontalPositionType otherHorizontalPositionType = FootballPositionCtrl.getOtherHorizontalPositionType(horizontalPositionType);
 
                 Vector3 nextPosition2 = FootballPositionCtrl.getGlobalPosition(otherHorizontalPositionType, normalNextPosition2, team.SideOfField);
-                nextPosition = getCloseNextPosition(team, ref lonelyPoint, nextPosition, calculationIndex);
-                nextPosition2 = getCloseNextPosition(team, ref lonelyPoint, nextPosition2, calculationIndex);
-                SetLonelyPosition(ref points,k,nextPosition);
+                //nextPosition = getCloseNextPosition(team, ref lonelyPoint, nextPosition);
+                //nextPosition2 = getCloseNextPosition(team, ref lonelyPoint, nextPosition2);
+                nextPosition = getOrderNextPosition(team, ref lonelyPoint, nextPosition, j, 0);
+                nextPosition2 = getOrderNextPosition(team, ref lonelyPoint, nextPosition2, j, 1);
+                SetLonelyPosition2(i, k,nextPosition);
                 k++;
-                SetLonelyPosition(ref points,k, nextPosition2);
+                SetLonelyPosition2(i, k, nextPosition2);
                 k++;
             }
             PublicPlayerData goalkeeperPublicPlayerData = team.getGoalkeeperPublicPlayerData();
             if (goalkeeperPublicPlayerData != null)
             {
                 Vector3 goalkeeperPosition = goalkeeperPublicPlayerData.bodyTransform.position;
-                SetLonelyPosition(ref points, k, goalkeeperPosition);
+                //Vector3 nextPosition2 = getCloseNextPosition(team, ref lonelyPoint, goalkeeperPosition, calculationIndex);
+                SetLonelyPosition2(i, k, goalkeeperPosition);
             }
-
-            bufferSizeComponent.pointSize = team.publicPlayerDatas.Count + SearchLonelyPointsManager.extraPoints;
-            bufferSizeComponent.edgesResultSize = 0;
-            bufferSizeComponent.trianglesResultSize = 0;
-            bufferSizeComponent.lonelyPointsResultSize = 0;
-            entityManager.SetComponentData<BufferSizeComponent>(searchLonelyPointEntity, bufferSizeComponent);
-            entityManager.SetEnabled(searchLonelyPointEntity, true);
         }
      }
-    Vector3 getCloseNextPosition(Team team,ref LonelyPointElement2 lonelyPoint,Vector3 optimalDefensePosition,int calculationIndex)
+    Vector3 getOrderNextPosition(Team team, ref LonelyPointElement2 lonelyPoint, Vector3 optimalDefensePosition,int indexFieldPosition,int sideFieldPosition)
+    {
+        PlayerPositionType playerPositionType = calculateNextPositionShedule.playerPositionTypeOrder[indexFieldPosition];
+        List<TypeFieldPosition.Type> typeFieldPositions = null;
+        if (sideFieldPosition == 0)
+        {
+            typeFieldPositions = calculateNextPositionShedule.RightPlayerPosition_TypeFieldPosition[playerPositionType];
+        }
+        else
+        {
+            typeFieldPositions = calculateNextPositionShedule.LeftPlayerPosition_TypeFieldPosition[playerPositionType];
+        }
+        PublicPlayerData publicPlayerData;
+        team.getPublicPlayerData(typeFieldPositions, out publicPlayerData);
+
+        Transform playerTransform = publicPlayerData.bodyTransform;
+        MovimentValues movimentValues = publicPlayerData.movimentValues;
+        Vector3 nextPosition = GetTimeToReachPointDOTS.accelerationGetPosition(playerTransform.position, publicPlayerData.speed, playerTransform.forward, movimentValues.rotationSpeed, publicPlayerData.movimentValues.minSpeedForRotateBody, movimentValues.forwardAcceleration, movimentValues.forwardDeceleration, movimentValues.maxAngleForRun, publicPlayerData.playerComponents.scope, optimalDefensePosition, publicPlayerData.maxSpeed, lonelyPoint.ballReachTime);
+        return nextPosition;
+    }
+    Vector3 getCloseNextPosition(Team team,ref LonelyPointElement2 lonelyPoint,Vector3 optimalDefensePosition)
     {
         int i = 0;
         float minDistance = Mathf.Infinity;
-        int playerIndex=-1;
-        PublicPlayerData closestPublicPlayerData = null;
-        Vector3 lonelyPosition = new Vector3(lonelyPoint.position.x, 0, lonelyPoint.position.y);
+        int playerIndex=0;
         Vector3 nextPositionResult = Vector3.zero;
+        
         foreach (var publicPlayerData in team.publicPlayerDatas)
         {
-            if (AuxNextPositionPlayerBusiesList[i])
+            
+            if (AuxNextPositionPlayerBusiesList[i] || publicPlayerData.IsGoalkeeper)
             {
                 i++;
                 continue;
@@ -622,17 +642,24 @@ public class CullPassPoints : MonoBehaviour
             Transform playerTransform = publicPlayerData.bodyTransform;
             MovimentValues movimentValues = publicPlayerData.movimentValues;
             Vector3 nextPosition = GetTimeToReachPointDOTS.accelerationGetPosition(playerTransform.position, publicPlayerData.speed, playerTransform.forward, movimentValues.rotationSpeed, publicPlayerData.movimentValues.minSpeedForRotateBody, movimentValues.forwardAcceleration, movimentValues.forwardDeceleration, movimentValues.maxAngleForRun, publicPlayerData.playerComponents.scope, optimalDefensePosition, publicPlayerData.maxSpeed, lonelyPoint.ballReachTime);
-            float distance = Vector3.Distance(playerTransform.position, nextPosition);
-            if (distance < minDistance)
+
+            //float d = publicPlayerData.maxSpeed * lonelyPoint.ballReachTime;
+            //d = Mathf.Clamp(d, 0, Vector3.Distance(publicPlayerData.bodyTransform.position, optimalDefensePosition));
+            float d = Vector3.Distance(nextPosition, optimalDefensePosition);
+            if (d < minDistance)
             {
-                minDistance = distance;
+                minDistance = d;
                 playerIndex = i;
-                closestPublicPlayerData = publicPlayerData;
+                Vector3 dir = optimalDefensePosition - publicPlayerData.bodyTransform.position;
+                dir.y = 0;
+                dir.Normalize();
+                //Vector3 nextPosition = dir * d + publicPlayerData.bodyTransform.position;
                 nextPositionResult = nextPosition;
             }
             i++;
         }
         AuxNextPositionPlayerBusiesList[playerIndex] = true;
+        //if (test == 0 && test != -1) print(nextPositionResult);
         return nextPositionResult;
 
     }
@@ -656,6 +683,18 @@ public class CullPassPoints : MonoBehaviour
         pointElement.position.x = position.x;
         pointElement.position.y = position.z;
         points[index] = pointElement;
+    }
+    void SetLonelyPosition2(int jobIndex,int index, Vector3 position)
+    {
+        triangulatorJob.SetPoint(jobIndex, index, position);
+    }
+    public int GetPosibleLonelyPoints(int calculationIndex)
+    {
+        return posibleLonelyPointsSize[calculationIndex];
+    }
+    public void CompleteTriangulatorJob(int jobSize)
+    {
+        triangulatorJob.UpdatePoints(jobSize);
     }
     void DrawPoint(Vector3 position,string info)
     {

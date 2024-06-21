@@ -77,6 +77,7 @@ namespace DOTS_ChaserDataCalculation
                 direction.y = 0;
                 direction.Normalize();
                 t2 = Path.getT(maxAngleForRun, angle,speedRotation);
+                t2 = Mathf.Clamp(t2, 0,t);
                 v0Magnitude = 0;
             }
             t -= t1 + t2;
@@ -88,8 +89,12 @@ namespace DOTS_ChaserDataCalculation
                 distance += Mathf.Abs(AccelerationPath.getX2(v0Magnitude, maxSpeed, a));
                 t -= t3;
             }
-            if(t>0)
-                distance += maxSpeed * t;
+            if (t > 0)
+            {
+                Vector3 x = x1 + direction * distance;
+                float d = Vector3.Distance(x,targetPosition);
+                distance += Mathf.Clamp(maxSpeed * t, 0, d);
+            }
 
             Vector3 result = x1 + direction * distance;
             return result;

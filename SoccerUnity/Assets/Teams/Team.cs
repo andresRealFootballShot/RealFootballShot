@@ -110,6 +110,19 @@ public class Team : MonoBehaviour
         }
         return list;
     }
+    public bool getPublicPlayerData(List<TypeFieldPosition.Type> types,out PublicPlayerData publicPlayerData)
+    {
+        foreach (var type in types)
+        {
+            if (fieldPositionOfPlayers.ContainsKey(type))
+            {
+                publicPlayerData = getPublicPlayerData(fieldPositionOfPlayers[type]);
+                return true;
+            }
+        }
+        publicPlayerData = null;
+        return false;
+    }
     public bool fieldPositionIsAvailable(TypeFieldPosition.Type type)
     {
         return fieldPositionOfPlayers[type] == "None";

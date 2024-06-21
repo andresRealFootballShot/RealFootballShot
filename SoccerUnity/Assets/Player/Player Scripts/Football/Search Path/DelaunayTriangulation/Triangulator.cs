@@ -11,6 +11,7 @@ using UnityEngine;
 
 namespace andywiecko.BurstTriangulator
 {
+    
     public class Triangulator : IDisposable
     {
         #region Primitives
@@ -290,7 +291,7 @@ namespace andywiecko.BurstTriangulator
         public JobHandle Schedule(JobHandle dependencies = default) => new TriangulationJob(this).Schedule(dependencies);
 
         #region Jobs
-        [BurstCompile]
+
         private struct TriangulationJob : IJob
         {
             public Preprocessor preprocessor;
@@ -421,7 +422,6 @@ namespace andywiecko.BurstTriangulator
                         constrainedHalfedges = constrainedHalfedges,
                     }.Execute();
                     MarkerConstrainEdges.End();
-
                     if (localHoles.IsCreated || restoreBoundary)
                     {
                         MarkerPlantSeeds.Begin();

@@ -128,6 +128,7 @@ public struct CalculateNextPositionJob : IJobParallelFor
         symetricNormalBallPosition.x = 1 - normalizedPosition[i].x;
         getNextPosition(symetricNormalBallPosition, ref points, ref NextPlayerPositions, ref NextPositionData2, offsideLinePosY[i], ref playerPositionTypes, weightOffsideLine[i], playerSize);
         NextPositionData2 nextPositionData = normalNextPosition[i];
+        
         nextPositionData.NextPositionData = NextPositionData1;
         nextPositionData.symetricNextPositionData = NextPositionData2;
         normalNextPosition[i] = nextPositionData;
