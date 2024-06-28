@@ -8,13 +8,13 @@ namespace FieldTriangleSpace
     public class Triangle
     {
         public List<Edge> edges;
-        public Point point1 { get => points[0]; }
-        public Point point2 { get => points[1]; }
-        public Point point3 { get => points[2]; }
-        public List<Point> points { get; set; }
+        public Point3 point1 { get => points[0]; }
+        public Point3 point2 { get => points[1]; }
+        public Point3 point3 { get => points[2]; }
+        public List<Point3> points { get; set; }
         private void LoadPoints()
         {
-            points= new List<Point>();
+            points= new List<Point3>();
             foreach (var edge in edges)
             {
                 foreach (var point in edge.points)
@@ -47,7 +47,7 @@ namespace FieldTriangleSpace
             float perimeter = dir1.magnitude + dir2.magnitude + dir3.magnitude;
             return perimeter;
         }
-        public List<Edge> getConectedEdges(Point point)
+        public List<Edge> getConectedEdges(Point3 point)
         {
             List<Edge> conectedEdges = new List<Edge>();
             foreach (var edge in edges)
@@ -59,9 +59,9 @@ namespace FieldTriangleSpace
             }
             return conectedEdges;
         }
-        public List<Point> getOtherPoints(Point point)
+        public List<Point3> getOtherPoints(Point3 point)
         {
-            List<Point> otherPoints = new List<Point>();
+            List<Point3> otherPoints = new List<Point3>();
             foreach (var _point in points)
             {
                 if (!_point.Equals(point))
@@ -71,9 +71,9 @@ namespace FieldTriangleSpace
             }
             return otherPoints;
         }
-        public float getAngle(Point point)
+        public float getAngle(Point3 point)
         {
-            List<Point> otherPoints = new List<Point>();
+            List<Point3> otherPoints = new List<Point3>();
             foreach (var _point in points)
             {
                 if (!_point.Equals(point))
@@ -113,23 +113,23 @@ namespace FieldTriangleSpace
             return "Triangle " + points[0].pointName + "-" + points[1].pointName + "-" + points[2].pointName;
         }
     }
-    public class Point
+    public class Point3
     {
         public Vector3 position;
         public string pointName;
-        public Point(Vector3 position,string pointName) : this(position)
+        public Point3(Vector3 position,string pointName) : this(position)
         {
             this.pointName = pointName;
         }
-        public Point(Vector3 position) 
+        public Point3(Vector3 position) 
         {
             this.position = position;
         }
-        public Point(string pointName)
+        public Point3(string pointName)
         {
             
         }
-        public int Sort(Point point1, Point point2)
+        public int Sort(Point3 point1, Point3 point2)
         {
             float d1 = Vector3.Distance(position, point1.position);
             float d2 = Vector3.Distance(position, point2.position);
@@ -143,14 +143,14 @@ namespace FieldTriangleSpace
     }
     public class Edge
     {
-        public List<Point> points = new List<Point>();
+        public List<Point3> points = new List<Point3>();
         public int index;
-        public Edge(Point point1, Point point2)
+        public Edge(Point3 point1, Point3 point2)
         {
             points.Add(point1);
             points.Add(point2);
         }
-        public Point getFirstOtherPoint(Point point)
+        public Point3 getFirstOtherPoint(Point3 point)
         {
             foreach (var _point in points)
             {
@@ -164,7 +164,7 @@ namespace FieldTriangleSpace
         public float getDistance()
         {
             float d = 0;
-            Point lastPoint = null;
+            Point3 lastPoint = null;
             foreach (var point in points)
             {
                 if (lastPoint != null)
@@ -178,8 +178,8 @@ namespace FieldTriangleSpace
         public Vector3 getMiddlePoint(){
             float d = getDistance();
             d = d / 2;
-            Point point1 = points[0];
-            Point point2 = points[1];
+            Point3 point1 = points[0];
+            Point3 point2 = points[1];
             Vector3 dir = point1.position - point2.position;
             dir.Normalize();
             return point2.position + dir * d;
@@ -193,14 +193,14 @@ namespace FieldTriangleSpace
     {
         public class Line
         {
-            public Point otherPoint;
-            public Point basePoint;
+            public Point3 otherPoint;
+            public Point3 basePoint;
             public Edge edge;
             public Vector3 dir;
             bool _right;
             public bool right { get => _right; set { _right = value; ySign = _right ? 1 : -1; } }
             public float ySign;
-            public Line(Point basePoint,Edge edge)
+            public Line(Point3 basePoint,Edge edge)
             {
                 otherPoint = edge.getFirstOtherPoint(basePoint);
                 this.basePoint = basePoint;
@@ -208,7 +208,7 @@ namespace FieldTriangleSpace
                 dir = otherPoint.position - basePoint.position;
 
             }
-            public Line(Point basePoint, Edge edge,bool right) : this(basePoint,edge)
+            public Line(Point3 basePoint, Edge edge,bool right) : this(basePoint,edge)
             {
                 this.right = right;
                 ySign = right ? 1 : -1;
@@ -224,13 +224,13 @@ namespace FieldTriangleSpace
                 return "Line " + edge.points[0].pointName + "-" + edge.points[1].pointName;
             }
         }
-        public Point basePoint;
+        public Point3 basePoint;
         public List<Line> lines = new List<Line>();
         Line line1 { get => lines[0]; }
         Line line2 { get => lines[1]; }
         bool isObtuse { get => angle > 180; }
         public float angle;
-        public Limit(Point basePoint,Triangle triangle,float triangleAngle)
+        public Limit(Point3 basePoint,Triangle triangle,float triangleAngle)
         {
             this.basePoint = basePoint;
             List<Edge> edges = triangle.getConectedEdges(basePoint);
@@ -245,7 +245,7 @@ namespace FieldTriangleSpace
             line2.right = !right;
             angle = triangleAngle;
         }
-        public Limit(Point basePoint, List<Line> lines)
+        public Limit(Point3 basePoint, List<Line> lines)
         {
             this.basePoint = basePoint;
             this.lines = lines;
@@ -261,10 +261,10 @@ namespace FieldTriangleSpace
             public bool isCompleted;
             public class ClosestEdgeData
             {
-                public Point joinedPoint;
+                public Point3 joinedPoint;
                 public Edge closestEdge;
 
-                public ClosestEdgeData(Point joinedPoint, Edge closestEdge)
+                public ClosestEdgeData(Point3 joinedPoint, Edge closestEdge)
                 {
                     this.joinedPoint = joinedPoint;
                     this.closestEdge = closestEdge;
@@ -311,7 +311,7 @@ namespace FieldTriangleSpace
             }
             return notifyNewTriangleResult;
         }
-        public bool pointIsInside(Point point)
+        public bool pointIsInside(Point3 point)
         {
             Vector3 dir3 = point.position - basePoint.position;
             Vector3 cross1 = Vector3.Cross(line1.dir, dir3);
@@ -331,9 +331,9 @@ namespace FieldTriangleSpace
     public class LimitList
     {
         List<Limit> limits = new List<Limit>();
-        public Point basePoint;
+        public Point3 basePoint;
 
-        public LimitList(Point basePoint)
+        public LimitList(Point3 basePoint)
         {
             this.basePoint = basePoint;
         }
@@ -341,7 +341,7 @@ namespace FieldTriangleSpace
         {
             limits.Add(limit);
         }
-        public bool isInside(Point point)
+        public bool isInside(Point3 point)
         {
             bool isInside = false;
             foreach (var limit in limits)

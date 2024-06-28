@@ -11,7 +11,7 @@ public class FootballPositionCtrlEditor : Editor
     [System.Serializable]
     public class FieldPointList
     {
-        public List<FieldPositionsData.Point> list;
+        public List<FieldPositionsData.Point2> list;
     }
     
     private void OnEnable()
@@ -93,7 +93,7 @@ public class FootballPositionCtrlEditor : Editor
             {
                 Vector2 random2 = new Vector2(UnityEngine.Random.Range(-a, a), UnityEngine.Random.Range(-a, a));
 
-                FieldPositionsData.Point newPoint = new FieldPositionsData.Point(t.newPointPosition + random1, t.newPointPosition + random2);
+                FieldPositionsData.Point2 newPoint = new FieldPositionsData.Point2(t.newPointPosition + random1, t.newPointPosition + random2);
                 pressureFieldPositionDatas.FieldPositionDatas[i].points.Add(newPoint);
                 selectedPoint = newPoint;
                 selectedPointIndex = pressureFieldPositionDatas.FieldPositionDatas[i].points.Count-1;
@@ -105,7 +105,7 @@ public class FootballPositionCtrlEditor : Editor
             for (int i = 0; i < t.playerSize; i++)
             {
                 Vector2 newValue = pressureFieldPositionDatas.FieldPositionDatas[i].points[selectedPointIndex].value;
-                FieldPositionsData.Point newPoint = new FieldPositionsData.Point(selectedPoint.point, newValue);
+                FieldPositionsData.Point2 newPoint = new FieldPositionsData.Point2(selectedPoint.point, newValue);
                 pressureFieldPositionDatas.FieldPositionDatas[i].points.Add(newPoint);
                 selectedPoint = newPoint;
                 
@@ -206,8 +206,8 @@ public class FootballPositionCtrlEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
-    FieldPositionsData.Point selectedPoint;
-    FieldPositionsData.Point selectedValue;
+    FieldPositionsData.Point2 selectedPoint;
+    FieldPositionsData.Point2 selectedValue;
     OffsideLine selectedOffsideLine;
     OffsideStop selectedOffsideStop;
     int selectedPointIndex;
@@ -285,7 +285,7 @@ public class FootballPositionCtrlEditor : Editor
             }
             else
             {
-                FieldPositionsData.Point point = FieldPositionData.points[selectedPointIndex];
+                FieldPositionsData.Point2 point = FieldPositionData.points[selectedPointIndex];
                 Color color = Color.blue;
                 if (!point.enabled) color.a = a;
                 Handles.color = color;
@@ -541,7 +541,7 @@ public class FootballPositionCtrlEditor : Editor
                 Handles.color = Color.blue;
                 foreach (var FieldPositionData in PressureFieldPositionDatas.FieldPositionDatas)
                 {
-                    FieldPositionsData.Point point = FieldPositionData.points[selectedPointIndex];
+                    FieldPositionsData.Point2 point = FieldPositionData.points[selectedPointIndex];
                     if (!point.snap && point.enabled)
                         Handles.SphereHandleCap(0,
                            t.getGlobalPosition(t.horizontalPositionType, point.value),

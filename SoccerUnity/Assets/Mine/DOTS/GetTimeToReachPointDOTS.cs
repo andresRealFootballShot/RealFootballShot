@@ -33,10 +33,12 @@ namespace DOTS_ChaserDataCalculation
             float t = distance / playerDataComponent.maxSpeed;
             return t;
         }
-        public static Vector3 accelerationGetPosition(Vector3 playerPosition, float currentSpeed, Vector3 bodyForward,float speedRotation,float minSpeedForRotate, float a,float da,float maxAngleForRun,float scope, Vector3 targetPosition,float maxSpeed,float t)
+        public static Vector3 accelerationGetPosition(Vector3 playerPosition, float currentSpeed, Vector3 bodyForward,float speedRotation,float minSpeedForRotate, float a,float da,float maxAngleForRun,float scope, Vector3 targetPosition,float maxSpeed,float t,Vector3 ballPosition,out float endSpeed,out Vector3 endDirection)
         {
             if (MyFunctions.Vector3IsNan(targetPosition) || targetPosition.Equals(Vector3.positiveInfinity) || targetPosition.Equals(Vector3.negativeInfinity))
             {
+                 endSpeed = Mathf.Infinity;
+                endDirection = Vector3.positiveInfinity;
                 return Vector3.positiveInfinity;
             }
 
@@ -44,6 +46,8 @@ namespace DOTS_ChaserDataCalculation
             float d4 = Vector3.Distance(bodyPosition, MyFunctions.setYToVector3(targetPosition, bodyPosition.y));
             if (d4 < scope)
             {
+                endSpeed = Mathf.Infinity;
+                endDirection = Vector3.positiveInfinity;
                 return playerPosition;
             }
             float speed = currentSpeed;
@@ -69,6 +73,8 @@ namespace DOTS_ChaserDataCalculation
                     x1 = playerPosition+direction*d;
                     if (t1 >= t)
                     {
+                        endSpeed = AccelerationPath.getV(t11,speed,-da);
+                        endDirection =  Quaternion.AngleAxis(speedRotation*t, Vector3.up)* direction;
                         return x1;
                     }
                 }
@@ -82,9 +88,13 @@ namespace DOTS_ChaserDataCalculation
             }
             t -= t1 + t2;
             float distance = 0;
+            endSpeed = maxSpeed;
+            endDirection = direction;
             if (v0Magnitude < maxSpeed && t > 0)
             {
-                float t3 = AccelerationPath.getT(v0Magnitude, maxSpeed, a);
+                float t3 = AccelerationPath.getT(maxSpeed, v0Magnitude, a);
+                if (t3 < t) endSpeed = maxSpeed;
+                else endSpeed = AccelerationPath.getV(t, v0Magnitude, a);
                 t3 = Mathf.Clamp(t3, 0, t);
                 distance += Mathf.Abs(AccelerationPath.getX2(v0Magnitude, maxSpeed, a));
                 t -= t3;
@@ -93,7 +103,18 @@ namespace DOTS_ChaserDataCalculation
             {
                 Vector3 x = x1 + direction * distance;
                 float d = Vector3.Distance(x,targetPosition);
-                distance += Mathf.Clamp(maxSpeed * t, 0, d);
+                float d2 = maxSpeed * t;
+                float t4 = d / maxSpeed;
+                t4 = t - t4;
+                if (t4 > 0)
+                {
+                    endDirection = Quaternion.AngleAxis(speedRotation * t4, Vector3.up) * endDirection;
+                }
+                distance += Mathf.Clamp(d2, 0, d);
+                if (d2 >= d) 
+                    endSpeed = 0;
+                else
+                    endSpeed = maxSpeed;
             }
 
             Vector3 result = x1 + direction * distance;

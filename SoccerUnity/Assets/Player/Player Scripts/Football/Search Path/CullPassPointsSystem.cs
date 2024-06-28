@@ -14,6 +14,7 @@ public class CullPassPointsSystem : SystemBase
     public CullPassPoints CullPassPoints;
     public SearchLonelyPointsManager SearchLonelyPointsManager;
     EntityManager entityManager;
+    SearchPlayData SearchPlayData { get => CullPassPoints.searchPlayData; }
     protected override void OnCreate()
     {
         var description1 = new EntityQueryDesc()
@@ -33,35 +34,38 @@ public class CullPassPointsSystem : SystemBase
     }
     protected override void OnUpdate()
     {
-        if (CullPassPoints.test)
+        if (SearchPlayData.size==0)
         {
-            //CullPassPoints.PlacePoints();
-            CullPassPoints.PlaceTestLonelyPoint();
+            if (CullPassPoints.test)
+            {
+                CullPassPoints.PlaceTestLonelyPoint();
+            }
+            else
+            {
+                CullPassPoints.PlacePoints(0);
+            }
         }
-        else
+        for (int i = 0; i < SearchPlayData.size; i++)
         {
-            CullPassPoints.PlacePoints2();
-        }
-        CullPassPoints.UpdatePlayerPositions();
-        foreach (var entity in CullPassPoints.entities)
-        {
-            BallParamsComponent BallParamsComponent = entityManager.GetComponentData<BallParamsComponent>(entity);
-            CullPassPoints.SetBallPosition(ref BallParamsComponent);
-            entityManager.SetComponentData<BallParamsComponent>(entity, BallParamsComponent);
-        }
-        var CullPassPointsJob = new CullPassPointsJob();
+            CullPassPoints.UpdatePlayerPositions();
+            foreach (var entity in CullPassPoints.entities)
+            {
+                BallParamsComponent BallParamsComponent = entityManager.GetComponentData<BallParamsComponent>(entity);
+                CullPassPoints.SetBallPosition(ref BallParamsComponent);
+                entityManager.SetComponentData<BallParamsComponent>(entity, BallParamsComponent);
+            }
+            var CullPassPointsJob = new CullPassPointsJob();
 
-        CullPassPointsJob.lonelyPointsHandle = this.GetBufferTypeHandle<LonelyPointElement2>(false);
-        CullPassPointsJob.playerPositionElementHandle = this.GetBufferTypeHandle<PlayerPositionElement>(true);
-        CullPassPointsJob.cullPassPointsParamsHandle = this.GetComponentTypeHandle<CullPassPointsComponent>(true);
-        CullPassPointsJob.BallParamsComponentHandle = this.GetComponentTypeHandle<BallParamsComponent>(true);
-        CullPassPointsJob.TestResultComponentHandle = this.GetComponentTypeHandle<TestResultComponent>(false);
-        Dependency = CullPassPointsJob.ScheduleParallel(cullPassPointsQuery, CullPassPoints.batchesPerChunk, this.Dependency);
-        Dependency.Complete();
-        
-        //SearchLonelyPointsManager.setEntitiesEnable2(false);
-        //SearchLonelyPointsManager.setEntitiesEnable(false);
-        UpdateNextPlayerPositions();
+            CullPassPointsJob.lonelyPointsHandle = this.GetBufferTypeHandle<LonelyPointElement2>(false);
+            CullPassPointsJob.playerPositionElementHandle = this.GetBufferTypeHandle<PlayerPositionElement>(true);
+            CullPassPointsJob.cullPassPointsParamsHandle = this.GetComponentTypeHandle<CullPassPointsComponent>(true);
+            CullPassPointsJob.BallParamsComponentHandle = this.GetComponentTypeHandle<BallParamsComponent>(true);
+            CullPassPointsJob.TestResultComponentHandle = this.GetComponentTypeHandle<TestResultComponent>(false);
+            Dependency = CullPassPointsJob.ScheduleParallel(cullPassPointsQuery, CullPassPoints.batchesPerChunk, this.Dependency);
+            Dependency.Complete();
+
+            UpdateNextPlayerPositions();
+        }
         
     }
     void CalculateLonelyPoints()
@@ -91,6 +95,6 @@ public class CullPassPointsSystem : SystemBase
         CullPassPoints.calculateNextPositionShedule.SheduleJobs(posibleLonelyPointSize, defenseTeam.teamMaxFieldPlayers/2, CullPassPoints.lineupName, CullPassPoints.pressureName);
 
         CullPassPoints.UpdateNextPlayerPoints(0, posibleLonelyPointSize, 0, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
-        CullPassPoints.CompleteTriangulatorJob(posibleLonelyPointSize);
+        CullPassPoints.CompleteTriangulatorJob(0,posibleLonelyPointSize);
     }
 }

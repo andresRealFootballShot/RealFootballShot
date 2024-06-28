@@ -234,6 +234,7 @@ namespace andywiecko.BurstTriangulator
             public NativeArray<float2> Positions { get; set; }
             public NativeArray<int> ConstraintEdges { get; set; }
             public NativeArray<float2> HoleSeeds { get; set; }
+            public GetLonelyPointParameters GetLonelyPointParameters { get; set; }
         }
 
         public struct OutputData
@@ -242,6 +243,7 @@ namespace andywiecko.BurstTriangulator
             public NativeList<float2> Positions;
             public NativeList<int> Triangles;
             public NativeReference<Status> Status;
+            public NativeList<Point> LonelyPoints;
         }
 
         public TriangulationSettings Settings { get; } = new TriangulationSettings();
@@ -251,26 +253,30 @@ namespace andywiecko.BurstTriangulator
             Positions = outputPositions,
             Triangles = triangles,
             Status = status,
+            LonelyPoints = lonelyPoints
         };
 
         private NativeList<float2> outputPositions;
         private NativeList<int> triangles;
         private NativeReference<Status> status;
-
-        public Triangulator(int capacity, Allocator allocator)
+        private NativeList<Point> lonelyPoints;
+        public Triangulator(int capacity, Allocator allocator, GetLonelyPointParameters getLonelyPointParameters)
         {
             outputPositions = new NativeList<float2>(capacity, allocator);
             triangles = new NativeList<int>(6 * capacity, allocator);
             status = new NativeReference<Status>(allocator);
+            lonelyPoints = new NativeList<Point>(allocator);
+            Input.GetLonelyPointParameters = getLonelyPointParameters;
         }
 
-        public Triangulator(Allocator allocator) : this(capacity: 16 * 1024, allocator) { }
+        public Triangulator(Allocator allocator, GetLonelyPointParameters getLonelyPointParameters) : this(capacity: 16 * 1024, allocator, getLonelyPointParameters) { }
 
         public void Dispose()
         {
             outputPositions.Dispose();
             triangles.Dispose();
             status.Dispose();
+            lonelyPoints.Dispose();
         }
 
         /// <summary>
@@ -291,7 +297,13 @@ namespace andywiecko.BurstTriangulator
         public JobHandle Schedule(JobHandle dependencies = default) => new TriangulationJob(this).Schedule(dependencies);
 
         #region Jobs
-
+        
+        [System.Serializable]
+        public struct GetLonelyPointParameters
+        {
+            public int lonelyPointDistance;
+            public int maxLonelyPointsOfEdgeCount, maxLonelyPoints;
+        }
         private struct TriangulationJob : IJob
         {
             public Preprocessor preprocessor;
@@ -313,6 +325,7 @@ namespace andywiecko.BurstTriangulator
                 public NativeArray<int> ConstraintEdges;
                 [NativeDisableContainerSafetyRestriction]
                 public NativeArray<float2> HoleSeeds;
+                public GetLonelyPointParameters GetLonelyPointParameters;
             }
 
             private static readonly ProfilerMarker MarkerPreProcess = new ProfilerMarker("PreProcess");
@@ -339,6 +352,7 @@ namespace andywiecko.BurstTriangulator
                     Positions = triangulator.Input.Positions,
                     ConstraintEdges = triangulator.Input.ConstraintEdges,
                     HoleSeeds = triangulator.Input.HoleSeeds,
+                    GetLonelyPointParameters = triangulator.Input.GetLonelyPointParameters
                 };
                 output = triangulator.Output;
             }
@@ -378,7 +392,7 @@ namespace andywiecko.BurstTriangulator
                 output.Status.Value = Status.OK;
                 output.Triangles.Clear();
                 output.Positions.Clear();
-
+                output.LonelyPoints.Clear();
                 MarkerPreProcess.Begin();
                 PreProcessInput(preprocessor, input, output, out var localPositions, out var localHoles, out var localTransformation);
                 MarkerPreProcess.End();
@@ -459,8 +473,115 @@ namespace andywiecko.BurstTriangulator
                     localTransformation.InverseTransform(localPositions.AsArray(), output.Positions.AsArray());
                 }
                 MarkerInverseTransformation.End();
+                GetPointsOfTriangles(ref output.LonelyPoints, input.Positions, output.Triangles);
+                GetPointsOfEdges(ref output.LonelyPoints, input.Positions, output.Triangles, input.GetLonelyPointParameters);
             }
+            private void GetPointsOfTriangles(ref NativeList<Point> lonelyPoints, NativeArray<float2> positions, NativeList<int> triangles)
+            {
+                for (int i = 0; i < triangles.Length; i += 3)
+                {
+                    float2 result = new float2(0, 0);
+                    for (int j = 0; j < 3; j++)
+                    {
+                        result += positions[triangles[i + j]];
+                    }
+                    result /= 3;
+                    Point point = new Point();
+                    point.position = new Vector2(result.x, result.y);
+                    lonelyPoints.Add(point);
+                }
+                
+            }
+            private void GetPointsOfEdges(ref NativeList<Point> lonelyPoints, NativeArray<float2> positions, NativeList<int> triangles, GetLonelyPointParameters getLonelyPointParameters)
+            {
 
+                for (int i = 0; i < triangles.Length; i += 3)
+                {
+                    for (int k = i; k < i+3; k++)
+                    {
+                        int index1, index2;
+                        index1 = k;
+                        index2 = k + 1;
+                        if (k == i+2) index2 = i;
+                        bool _continue = false;
+                        for (int j = 0; j < i; j += 3)
+                        {
+                            
+                            for (int z = j; z < j+3; z++)
+                            {
+                                if (k == z) continue;
+
+                                int index3, index4;
+                                index3 = z;
+                                index4 = z + 1;
+                                if (z == j+2) index4 = j;
+                                if (triangles[index1] == triangles[index3] && triangles[index2] == triangles[index4])
+                                {
+                                    _continue = true;
+                                    break;
+                                }
+                                if (triangles[index1] == triangles[index4] && triangles[index2] == triangles[index3])
+                                {
+                                    _continue = true;
+                                    break;
+                                }
+                            }
+                            if (_continue) break;
+                        }
+                        if (_continue)
+                        {
+                            continue;
+                        }
+                        float2 p1 = positions[triangles[index1]];
+                        float2 p2 = positions[triangles[index2]];
+                        calculateEdgePoints(ref lonelyPoints, p1, p2, getLonelyPointParameters);
+                    }
+                }
+            }
+            private void calculateEdgePoints(ref NativeList<Point> lonelyPoints, float2 p1, float2 p2, GetLonelyPointParameters getLonelyPointParameters)
+            {
+                Vector2 point1 = new Vector2(p1.x, p1.y);
+                Vector2 point2 = new Vector2(p2.x, p2.y);
+                Vector2 dir = point2 - point1;
+                float distance = dir.magnitude;
+                dir.Normalize();
+                float d1 = distance / getLonelyPointParameters.lonelyPointDistance;
+                if (d1 < getLonelyPointParameters.maxLonelyPointsOfEdgeCount + 1)
+                {
+                    int a = Mathf.FloorToInt(d1);
+                    if (a == 0)
+                    {
+                        return;
+                    }
+                    float b = distance / a;
+                    for (int k = 1; k < a; k++)
+                    {
+                        Vector2 pos = point1 + dir * b * k;
+                        if (lonelyPoints.Length >= getLonelyPointParameters.maxLonelyPoints)
+                        {
+                            return;
+                        }
+                        Point point = new Point(pos);
+                        lonelyPoints.Add(point);
+                        //lonelyPointElements[lonelyPointCreateIndex] = new LonelyPointElement(pos, lonelyPointCreateIndex, false);
+                        //lonelyPointCreateIndex++;
+                    }
+                }
+                else
+                {
+                    float a = distance / (getLonelyPointParameters.maxLonelyPointsOfEdgeCount + 1);
+                    for (int k = 1; k < getLonelyPointParameters.maxLonelyPointsOfEdgeCount + 1; k++)
+                    {
+                        if (lonelyPoints.Length >= getLonelyPointParameters.maxLonelyPoints)
+                        {
+                            return;
+                        }
+                        Vector2 pos = point1 + dir * a * k;
+                        Point point = new Point(pos);
+                        lonelyPoints.Add(point);
+                    }
+                }
+            }
             private void ValidateInput(NativeArray<float2> localPositions, NativeArray<int> constraintEdges, bool verbose)
             {
                 new ValidateInputPositionsJob
@@ -478,7 +599,7 @@ namespace andywiecko.BurstTriangulator
                 }.Execute();
             }
         }
-
+        
         [BurstCompile]
         private struct ValidateInputPositionsJob : IJob
         {

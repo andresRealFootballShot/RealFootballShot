@@ -18,7 +18,7 @@ public struct NextPlayerPosition
     public float radio, weight;
     public bool useRadio;
     public bool snap;
-    public NextPlayerPosition(FieldPositionsData.Point point)
+    public NextPlayerPosition(FieldPositionsData.Point2 point)
     {
         enabled = point.enabled;
         value = point.value;

@@ -9,46 +9,30 @@ using System;
 
 public class TriangulatorJob : MonoBehaviour
 {
+    
     public Transform pointsRoot;
     public int jobSize = 10;
     public bool debug = false;
     public int debugIndex;
     List<Transform> points;
-    List<NativeArray<float2>> positions = new List<NativeArray<float2>>();
+    //List<NativeArray<float2>> positions = new List<NativeArray<float2>>();
     List<int> positionsSizes = new List<int>();
-    List<Triangulator> triangulators=new List<Triangulator>();
+    //List<Triangulator> triangulators=new List<Triangulator>();
     float fieldOffset = 2;
+    public SearchPlayData searchPlayData;
     void Start() {
         points = MyFunctions.GetComponentsInChilds<Transform>(pointsRoot.gameObject, false, true);
-        for (int i = 0; i < jobSize; i++)
-        {
-
-            positions.Add(new NativeArray<float2>(15, Allocator.Persistent));
-        }
-        for (int i = 0; i < jobSize; i++)
-        {
-            triangulators.Add(new Triangulator(Allocator.Persistent));
-        }
         
-        MatchEvents.footballFieldLoaded.AddListenerConsiderInvoked(footballFieldLoaded);
+        //for (int i = 0; i < jobSize; i++)
+        //{
+        //    triangulators.Add(new Triangulator(Allocator.Persistent,GetLonelyPointParameters));
+        //}
+        
+        
     }
 
-    private void footballFieldLoaded()
-    {
-        for (int i = 0; i < jobSize; i++)
-        {
-            NativeArray<float2> array = positions[i];
-            for (int j = 0; j < MatchComponents.footballField.cornersComponents.Count; j++)
-            {
-                Transform cornerTransform = MatchComponents.footballField.cornersComponents[j].cornerPoint;
-                Vector3 pos = cornerTransform.position + cornerTransform.TransformDirection(new Vector3(fieldOffset, 0, fieldOffset));
-                array[j] = new Vector2(pos.x, pos.z);
-                
-            }
-            positions[i] = array;
-        }
-    }
-
+    
+    /*
     NativeList<int> getTriangles(List<Transform> points,int pointsSize)
     {
         NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(jobSize, Allocator.Temp);
@@ -84,13 +68,19 @@ public class TriangulatorJob : MonoBehaviour
             jobHandles[i] = triangulators[i].Schedule();
         }
         JobHandle.CompleteAll(jobHandles);
-    }
+    }*/
 
     public NativeList<int> GetTriangles(int index)
     {
-        var triangles = triangulators[index].Output.Triangles;
+        var triangles = searchPlayData.searchPlayNodes[index].triangulator.Output.Triangles;
 
         return triangles;
+    }
+    public NativeList<Point> GetPoints(int index)
+    {
+        var lonelyPoints = searchPlayData.GetPoints(index);
+
+        return lonelyPoints;
     }
     void DrawTriangles(NativeList<int> points, NativeArray<float2> positions)
     {
@@ -108,18 +98,27 @@ public class TriangulatorJob : MonoBehaviour
             Debug.DrawLine(point3, point1, color);
         }
     }
+    void DrawLonelyPoints(NativeList<Point> lonelyPoints)
+    {
+        Color color = Color.red;
+        for (int i = 0; i < lonelyPoints.Length; i ++)
+        {
+            Vector2 pos = lonelyPoints[i].position;
+            Vector3 point = new Vector3(pos.x, 0.1f, pos.y);
+            Gizmos.color = color;
+            Gizmos.DrawSphere(point, 0.2f);
+        }
+    }
     // Update is called once per frame
     void OnDrawGizmos()
     {
         if (Application.isPlaying && debug)
         {
             var triangles = GetTriangles(debugIndex);
-            DrawTriangles(triangles, positions[debugIndex]);
+            var lonelyPoints = GetPoints(debugIndex);
+            DrawTriangles(triangles, searchPlayData.GetPlayerPositions(debugIndex));
+            DrawLonelyPoints(lonelyPoints);
         }
     }
-    private void OnDestroy()
-    {
-        triangulators.ForEach(x=>x.Dispose());
-        positions.ForEach(x => x.Dispose());
-    }
+    
 }

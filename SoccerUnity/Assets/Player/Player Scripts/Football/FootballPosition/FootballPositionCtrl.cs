@@ -17,7 +17,7 @@ public class FieldPositionsData
     }
     
     [System.Serializable]
-    public class Point
+    public class Point2
     {
 
         public bool enabled;
@@ -27,7 +27,7 @@ public class FieldPositionsData
         public float radio,weight=1;
         public bool useRadio=false;
         public bool snap;
-        public Point(Vector2 point,Vector2 value)
+        public Point2(Vector2 point,Vector2 value)
         {
             this.point = point;
             enabled = true;
@@ -38,9 +38,9 @@ public class FieldPositionsData
         {
             return info;
         }
-        public Point Clone()
+        public Point2 Clone()
         {
-            Point clone = new Point(point,value);
+            Point2 clone = new Point2(point,value);
             clone.enabled = enabled;
             clone.info = info;
             clone.radio = radio;
@@ -50,14 +50,14 @@ public class FieldPositionsData
         }
     }
     public PlayerPositionType playerPositionType;
-    public List<Point> points;
+    public List<Point2> points;
     
-    [HideInInspector] public FieldPositionsData.Point selectedPoint;
+    [HideInInspector] public FieldPositionsData.Point2 selectedPoint;
 
     public FieldPositionsData Clone()
     {
         FieldPositionsData clone = new FieldPositionsData();
-        clone.points = new List<Point>();
+        clone.points = new List<Point2>();
         foreach (var point in points)
         {
             clone.points.Add(point.Clone());
@@ -130,7 +130,7 @@ public class FootballPositionCtrl : MonoBehaviour
     [HideInInspector]
     public FieldPositionsData selectedFieldPositionParameters;
     [HideInInspector]
-    public FieldPositionsData.Point selectedPoint;
+    public FieldPositionsData.Point2 selectedPoint;
     [HideInInspector] public PlayerPositionType playerPositionType;
     [HideInInspector] public string lineupName = "Default";
     [HideInInspector] public string pressureName = "Default";
@@ -234,7 +234,7 @@ public class FootballPositionCtrl : MonoBehaviour
         }
     }
     
-    void getWeightyValue(Vector2 normalizedPosition, List<FieldPositionsData.Point> points, out Vector2 value)
+    void getWeightyValue(Vector2 normalizedPosition, List<FieldPositionsData.Point2> points, out Vector2 value)
     {
         //Vector2 normalizedPosition = getNormalizedPosition(position);
         Vector2 a=Vector2.zero;
@@ -256,7 +256,7 @@ public class FootballPositionCtrl : MonoBehaviour
     {
         return playerPositionType.Equals(PlayerPositionType.CenterBack) || playerPositionType.Equals(PlayerPositionType.LateralBack);
     }
-    public void getWeightyValue4(Vector2 normalizedPosition, List<FieldPositionsData.Point> points,float offsideLinePosY, PlayerPositionType playerPositionType,float weightOffsideLine, out Vector2 value)
+    public void getWeightyValue4(Vector2 normalizedPosition, List<FieldPositionsData.Point2> points,float offsideLinePosY, PlayerPositionType playerPositionType,float weightOffsideLine, out Vector2 value)
     {
         float totalH = 0;
         float[] hs = new float[points.Count];
@@ -316,7 +316,7 @@ public class FootballPositionCtrl : MonoBehaviour
         return;
     }
    
-    Vector2 getValue(float[] weights, List<FieldPositionsData.Point> points,Vector2 p)
+    Vector2 getValue(float[] weights, List<FieldPositionsData.Point2> points,Vector2 p)
     {
         Vector2 result = Vector2.zero;
         float totalweight = 0;

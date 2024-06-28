@@ -18,7 +18,7 @@ namespace FieldTriangleSpace
                 this.name = name;
             }
         }
-        List<Point> allPoints = new List<Point>();
+        List<Point3> allPoints = new List<Point3>();
         public float divideEdgeLonelyPointDistance=5;
         public int divideEdgeMaxPoints=3;
         public bool debug;
@@ -64,7 +64,7 @@ namespace FieldTriangleSpace
         {
             for (int i = 0; i < size; i++)
             {
-                Point point = new Point(i.ToString());
+                Point3 point = new Point3(i.ToString());
                 allPoints.Add(point);
             }
         }
@@ -107,7 +107,7 @@ namespace FieldTriangleSpace
         }
         void createLonelyPoints(Triangle triangle, float lonelyPointDistance, int maxPoints, ref List<LonelyPoint> lonelyPoints)
         {
-            Point barycenter = new Point(triangle.getBarycenter());
+            Point3 barycenter = new Point3(triangle.getBarycenter());
             if(checkPoints_Point_Distance(triangle.points, barycenter.position, lonelyPointDistance))
             {
                 LonelyPoint lonelyPoint = new LonelyPoint(barycenter.position,barycenter.pointName);
@@ -116,7 +116,7 @@ namespace FieldTriangleSpace
             }
             foreach (var point in triangle.points)
             {
-                List<Point> points = divideEdge(barycenter, point, lonelyPointDistance, maxPoints);
+                List<Point3> points = divideEdge(barycenter, point, lonelyPointDistance, maxPoints);
                 foreach (var point2 in points)
                 {
                     if(checkPoints_Point_Distance(triangle.points, point2.position, lonelyPointDistance))
@@ -127,13 +127,13 @@ namespace FieldTriangleSpace
             }
             
         }
-        List<Point> divideEdge(Point point1,Point point2,float lonelyPointDistance,int maxCount)
+        List<Point3> divideEdge(Point3 point1,Point3 point2,float lonelyPointDistance,int maxCount)
         {
             Vector3 dir = point2.position - point1.position;
             float distance = dir.magnitude;
             dir.Normalize();
             float d1 = distance / lonelyPointDistance;
-            List<Point> points = new List<Point>();
+            List<Point3> points = new List<Point3>();
             if (d1 < maxCount + 1)
             {
                 int a = Mathf.FloorToInt(d1);
@@ -145,7 +145,7 @@ namespace FieldTriangleSpace
                 for (int i = 1; i < a; i++)
                 {
                     Vector3 pos = point1.position + dir * b*i;
-                    points.Add(new Point(pos));
+                    points.Add(new Point3(pos));
                 }
             }
             else
@@ -154,12 +154,12 @@ namespace FieldTriangleSpace
                 for (int i = 1; i < maxCount+1; i++)
                 {
                     Vector3 pos = point1.position + dir * a*i;
-                    points.Add(new Point(pos));
+                    points.Add(new Point3(pos));
                 }
             }
             return points;
         }
-        bool checkPoints_Point_Distance(List<Point> points,Vector3 pointPosition,float lonelyPointDistance)
+        bool checkPoints_Point_Distance(List<Point3> points,Vector3 pointPosition,float lonelyPointDistance)
         {
             bool add = true;
             foreach (var point in points)
@@ -174,7 +174,7 @@ namespace FieldTriangleSpace
         }
         List<LonelyPoint> createLonelyPoints(Edge edge, float lonelyPointDistance,int maxPoints, ref List<LonelyPoint> lonelyPoints)
         {
-            List<Point> points = divideEdge(edge.points[0], edge.points[1], lonelyPointDistance, maxPoints);
+            List<Point3> points = divideEdge(edge.points[0], edge.points[1], lonelyPointDistance, maxPoints);
             foreach (var point in points)
             {
                 if (checkPoints_Point_Distance(edge.points, point.position, lonelyPointDistance))
@@ -184,7 +184,7 @@ namespace FieldTriangleSpace
             }
             return lonelyPoints;
         }
-        void createFieldOfTriangles(List<Point> points,ref List<Triangle> triangles,ref List<Edge> edges)
+        void createFieldOfTriangles(List<Point3> points,ref List<Triangle> triangles,ref List<Edge> edges)
         {
 
             List<TrianglesAround> trianglesArounds = new List<TrianglesAround>();
@@ -230,7 +230,7 @@ namespace FieldTriangleSpace
                 }
                 foreach (var edge in edges)
                 {
-                    Point lastPoint = null;
+                    Point3 lastPoint = null;
                     string text2 = edge.ToString();
                     if (debugText)
                     {
@@ -280,13 +280,13 @@ namespace FieldTriangleSpace
     {
         public class ClosestEdgeDataList
         {
-            public Point point;
+            public Point3 point;
             public class ClosestEdgeData
             {
                 public string type;
                 public bool founded;
                 public bool exist;
-                public Point closestPoint;
+                public Point3 closestPoint;
                 public Edge closestEdge;
                 public float minAngle = Mathf.Infinity;
                 public float ySign;
@@ -297,7 +297,7 @@ namespace FieldTriangleSpace
                 }
             }
             public List<ClosestEdgeData> closestEdgeDatas = new List<ClosestEdgeData>();
-            public ClosestEdgeDataList(Point point)
+            public ClosestEdgeDataList(Point3 point)
             {
                 this.point = point;
                 ClosestEdgeData closestEdgeData = new ClosestEdgeData("right",1);
@@ -307,17 +307,17 @@ namespace FieldTriangleSpace
             }
             public float getAngle(string type) => closestEdgeDatas.Find(x => x.type.Equals(type)).minAngle;
             public void setAngle(string type, float angle)=> closestEdgeDatas.Find(x => x.type.Equals(type)).minAngle = angle;
-            public void setEdge(string type, Edge edge,Point otherPoint)
+            public void setEdge(string type, Edge edge,Point3 otherPoint)
             {
                 ClosestEdgeData closestEdgeData = closestEdgeDatas.Find(x => x.type.Equals(type));
                 closestEdgeData.closestEdge = edge;
                 closestEdgeData.closestPoint = otherPoint;
                 closestEdgeData.exist = true;
             }
-            public void notifyNewTriangle(Triangle triangle,Point basePoint)
+            public void notifyNewTriangle(Triangle triangle,Point3 basePoint)
             {
-                List<Point> points = triangle.getOtherPoints(basePoint);
-                Point otherPoint = points.Find(x => !x.Equals(point));
+                List<Point3> points = triangle.getOtherPoints(basePoint);
+                Point3 otherPoint = points.Find(x => !x.Equals(point));
                 Vector3 dir1 = point.position - basePoint.position;
                 Vector3 dir2 = otherPoint.position - basePoint.position;
                 float y = Mathf.Sign(Vector3.Cross(dir1, dir2).y);
@@ -332,11 +332,11 @@ namespace FieldTriangleSpace
         }
         public class EdgeWithDirection
         {
-            public Point originPoint;
-            public Point targetPoint;
+            public Point3 originPoint;
+            public Point3 targetPoint;
             public Vector3 direction;
             public Edge edge;
-            public EdgeWithDirection(Point originPoint, Point targetPoint,Edge edge)
+            public EdgeWithDirection(Point3 originPoint, Point3 targetPoint,Edge edge)
             {
                 this.originPoint = originPoint;
                 this.targetPoint = targetPoint;
@@ -344,9 +344,9 @@ namespace FieldTriangleSpace
                 this.edge = edge;
             }
         }
-        public Point basePoint;
-        public List<Point> otherPoints = new List<Point>();
-        public List<Point> otherPointsCompleted = new List<Point>();
+        public Point3 basePoint;
+        public List<Point3> otherPoints = new List<Point3>();
+        public List<Point3> otherPointsCompleted = new List<Point3>();
         public LimitList limits;
         public List<Triangle> triangles = new List<Triangle>();
         public List<Edge> edges { get; set; } = new List<Edge>();
@@ -356,7 +356,7 @@ namespace FieldTriangleSpace
         public List<ClosestEdgeDataList> closestEdgeDatas { get; set; } = new List<ClosestEdgeDataList>();
         List<TrianglesAround> othersTrianglesAround;
         bool isCompleted;
-        public TrianglesAround(Point basePoint, List<Point> allPoints)
+        public TrianglesAround(Point3 basePoint, List<Point3> allPoints)
         {
             this.basePoint = basePoint;
             limits = new LimitList(basePoint);
@@ -387,7 +387,7 @@ namespace FieldTriangleSpace
                 }
             }
         }
-        void createTrianglesOfPoint(Point otherPoint)
+        void createTrianglesOfPoint(Point3 otherPoint)
         {
             Edge otherPointEdge = getEdgeWithPoint(otherPoint);
             bool otherPointEdgeCreatedByMe = false;
@@ -506,7 +506,7 @@ namespace FieldTriangleSpace
                 }
             }
         }
-        public TrianglesAround getTrianglesAroundFromPoint(Point point)
+        public TrianglesAround getTrianglesAroundFromPoint(Point3 point)
         {
             foreach (var item in othersTrianglesAround)
             {
@@ -517,7 +517,7 @@ namespace FieldTriangleSpace
             }
             return null;
         }
-        public Edge getEdgeWithPoint(Point point)
+        public Edge getEdgeWithPoint(Point3 point)
         {
             foreach (var edge in edges)
             {
@@ -528,7 +528,7 @@ namespace FieldTriangleSpace
             }
             return null;
         }
-        bool callCheckNewEdge(Edge edge,Point point,Point otherPoint)
+        bool callCheckNewEdge(Edge edge,Point3 point,Point3 otherPoint)
         {
             TrianglesAround trianglesAround = getTrianglesAroundFromPoint(point);
             if (trianglesAround != null)
@@ -537,7 +537,7 @@ namespace FieldTriangleSpace
             }
             else{ return false; }
         }
-        void callNotifyNewTriangle(Triangle triangle, Point otherPoint)
+        void callNotifyNewTriangle(Triangle triangle, Point3 otherPoint)
         {
             TrianglesAround trianglesAround = getTrianglesAroundFromPoint(otherPoint);
             if (trianglesAround != null)
@@ -546,7 +546,7 @@ namespace FieldTriangleSpace
             }
         }
        
-        bool addEdge(Edge edge,Point otherPoint,bool checkIfExist,bool notifyToOtherPoint,bool isCreatedForMe)
+        bool addEdge(Edge edge,Point3 otherPoint,bool checkIfExist,bool notifyToOtherPoint,bool isCreatedForMe)
         {
             if (checkIfExist)
             {
@@ -585,7 +585,7 @@ namespace FieldTriangleSpace
             }
             return false;
         }
-        public void notifyNewEdge(Edge edge, Point otherPoint)
+        public void notifyNewEdge(Edge edge, Point3 otherPoint)
         {
             if (!edges.Contains(edge))
             {
@@ -594,7 +594,7 @@ namespace FieldTriangleSpace
                 edgesWithDirection.Add(edgeWithDirection);
             }
         }
-        void addEdge(Edge edge, Point otherPoint,bool isCreatedForMe)
+        void addEdge(Edge edge, Point3 otherPoint,bool isCreatedForMe)
         {
             if (isCreatedForMe)
             {
@@ -604,7 +604,7 @@ namespace FieldTriangleSpace
             EdgeWithDirection edgeWithDirection = new EdgeWithDirection(basePoint, otherPoint, edge);
             edgesWithDirection.Add(edgeWithDirection);
         }
-        public bool checkNewEdge(Edge edge,Point otherPoint)
+        public bool checkNewEdge(Edge edge,Point3 otherPoint)
         {
             if (!limits.isInside(otherPoint)&&!isCompleted)
             {
@@ -613,9 +613,9 @@ namespace FieldTriangleSpace
             }
             else { return false; }
         }
-        public bool callCheckNewTriangle(Triangle triangle, Point otherPoint)
+        public bool callCheckNewTriangle(Triangle triangle, Point3 otherPoint)
         {
-            List<Point> otherPoints = triangle.getOtherPoints(basePoint);
+            List<Point3> otherPoints = triangle.getOtherPoints(basePoint);
 
             foreach (var point in otherPoints)
             {
@@ -634,7 +634,7 @@ namespace FieldTriangleSpace
             }
             return true;
         }
-        public bool checkNewTriangle(Triangle triangle, Point otherPoint)
+        public bool checkNewTriangle(Triangle triangle, Point3 otherPoint)
         {
             if (limits.isInside(otherPoint)|| isCompleted)
             {
@@ -654,7 +654,7 @@ namespace FieldTriangleSpace
                 List<Edge> edges = triangle.getConectedEdges(basePoint);
                 edges.ForEach(x => addEdge(x, x.getFirstOtherPoint(basePoint),true,false, false));
                 Limit.NotifyNewTriangleResult notifyNewTriangleResult = limits.notifyNewTriangle(triangle);
-                List<Point> points = triangle.getOtherPoints(basePoint);
+                List<Point3> points = triangle.getOtherPoints(basePoint);
                 foreach (var point in points)
                 {
                     ClosestEdgeDataList closestEdgeDataList = closestEdgeDatas.Find(x=>x.point.Equals(point));
@@ -685,7 +685,7 @@ namespace FieldTriangleSpace
             style.fontSize = 14;
             style.normal.textColor = Color.yellow;
 
-            string text = "Base Point";
+            string text = "Base Point3";
             Handles.Label(basePoint.position + Vector3.up * i, text, style);
             int j = 1;
             foreach (var item in otherPoints)
@@ -700,7 +700,7 @@ namespace FieldTriangleSpace
             i += i2;
             foreach (var edge in getAllEdgesOfTriangles())
             {
-                Point lastPoint = null;
+                Point3 lastPoint = null;
                 string text2 = "Edge "+j;
                 Handles.Label(edge.getMiddlePoint() + Vector3.up * i, text2, style);
                 foreach (var point in edge.points)
@@ -741,7 +741,7 @@ namespace FieldTriangleSpace
                     {
                         if (closestLine != null)
                         {
-                            Point closestLinePoint= closestLine.point;
+                            Point3 closestLinePoint= closestLine.point;
                             List<Edge> triangleEdges = new List<Edge>();
                             triangleEdges.Add(closestLine.edge);
                             Edge edge = createEdge(otherPoint);

@@ -30,7 +30,7 @@ public class FootballPointWeightCalculator : MonoBehaviour
     {
         if (Application.isPlaying&&enabled&&debug)
         {
-            Point point = new Point(pointTransform.position, "point");
+            Point3 point = new Point3(pointTransform.position, "point");
             Vector3 goalCenterDir = getGoalCenterDir(point);
             DrawArrow.ForGizmo(point.position, goalCenterDir);
             Gizmos.color = Color.red;
@@ -44,13 +44,13 @@ public class FootballPointWeightCalculator : MonoBehaviour
 
         }
     }
-    float getGoalAngle(Point point)
+    float getGoalAngle(Point3 point)
     {
         Vector3 dir1 = goalStick1position - point.position;
         Vector3 dir2 = goalStick2position - point.position;
         return Vector3.Angle(dir1, dir2);
     }
-    Vector3 getGoalCenterDir(Point point)
+    Vector3 getGoalCenterDir(Point3 point)
     {
         Vector3 pointPosition = MyFunctions.setY0ToVector3(point.position);
         Vector3 dir1 = goalStick1position - pointPosition;
@@ -60,7 +60,7 @@ public class FootballPointWeightCalculator : MonoBehaviour
         Vector3 dir = Quaternion.AngleAxis( a/2, Vector3.up * b) * dir1;
         return dir;
     }
-    float getRivalsCoverAdjust_Angle(Point point,float angleGoal)
+    float getRivalsCoverAdjust_Angle(Point3 point,float angleGoal)
     {
         float coverAngle = 0;
         Vector3 goalCenterDir = getGoalCenterDir(point);
@@ -89,7 +89,7 @@ public class FootballPointWeightCalculator : MonoBehaviour
 
 
 
-    float calculatePointWeight(Point point)
+    float calculatePointWeight(Point3 point)
     {
         float angleGoal = getGoalAngle(point);
         float distance = Vector3.Distance(point.position, goalCenterTransform.position);

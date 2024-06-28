@@ -47521,7 +47521,7 @@ MonoBehaviour:
   debugPassTest: 0
   debugNextLonelyPoints: 0
   debugOnlyOrderLonelyPoint: 1
-  debugOrderLonelyPointIndex: 3
+  debugOrderLonelyPointIndex: 0
   lonelyPointIndexPassTest: 0
   posibleLonelyPointsSize: 
   AuxNextPositionPlayerBusiesList: 
@@ -47531,11 +47531,20 @@ MonoBehaviour:
   FootballPositionCtrl: {fileID: 58440509}
   calculateNextPositionShedule: {fileID: 1875775247}
   triangulatorJob: {fileID: 1875775248}
-  sortLonelyPointsSize: 0a000000
+  sortLonelyPointsSize: 01000000
   lineupName: Default
   pressureName: Default
   publicPlayerData: {fileID: 1690164272}
   testTime: 2
+  searchPlayData:
+    maxSize: 30
+    maxPointsSize: 200
+    playerPosSize: 15
+    size: 0
+    GetLonelyPointParameters:
+      lonelyPointDistance: 0
+      maxLonelyPointsOfEdgeCount: 0
+      maxLonelyPoints: 0
 --- !u!114 &1875775247
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47549,7 +47558,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FootballPositionCtrl: {fileID: 58440509}
-  JobSize: 10
+  JobSize: 1
   playerPositionTypeOrder: 0300000004000000010000000200000000000000
 --- !u!114 &1875775248
 MonoBehaviour:
@@ -47564,9 +47573,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pointsRoot: {fileID: 1743058746}
-  jobSize: 10
+  jobSize: 1
   debug: 1
-  debugIndex: 3
+  debugIndex: 0
+  searchPlayData:
+    maxSize: 30
+    maxPointsSize: 200
+    playerPosSize: 15
+    size: 0
+    GetLonelyPointParameters:
+      lonelyPointDistance: 0
+      maxLonelyPointsOfEdgeCount: 0
+      maxLonelyPoints: 0
 --- !u!1 &1876518188
 GameObject:
   m_ObjectHideFlags: 0
