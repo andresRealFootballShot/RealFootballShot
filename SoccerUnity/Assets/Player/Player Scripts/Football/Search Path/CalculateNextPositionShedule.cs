@@ -54,7 +54,7 @@ public class CalculateNextPositionShedule : MonoBehaviour
     public List<PlayerPositionType> playerPositionTypeOrder;
     private void Start()
     {
-        LoadParameters();
+        //LoadParameters();
         LoadPoints();
     }
     void LoadParameters()
@@ -64,44 +64,43 @@ public class CalculateNextPositionShedule : MonoBehaviour
         weightOffsideLines = new NativeArray<float>(JobSize, Allocator.Persistent);
         normalNextPosition = new NativeArray<NextPositionData2>(JobSize, Allocator.Persistent);
     }
-    public void SetCalculateNextPositionParameters(int index,Vector2 normalizedPosition,float offsideLinePosY,float weightOffsideLine)
+    /*public void SetCalculateNextPositionParameters(int index,Vector2 normalizedPosition,float offsideLinePosY,float weightOffsideLine)
     {
         normalizedPositions[index] = normalizedPosition;
         offsideLinePosYs[index] = offsideLinePosY;
         weightOffsideLines[index] = weightOffsideLine;
-    }
+    }*/
     PressureFieldPositionDatas GetFieldPositionsData(string lineupName, string pressureName)
     {
         LineupFieldPositionDatas LineupFieldPositionDatas = lineupFieldPositionDatas.Find(x => x.name == lineupName);
         PressureFieldPositionDatas PressureFieldPositionDatas = LineupFieldPositionDatas.PressureFieldPositionDatas.Find(x => x.name == pressureName);
         return PressureFieldPositionDatas;
     }
-    public void SheduleJobs(int jobSize,int playerSize,string lineupName,string pressureName)
+    public void SheduleJobs(List<int> nodes, int nodeSize,int nextNodeSize,SearchPlayData searchPlayData,int playerSize,string lineupName,string pressureName)
     {
 
         float fieldLenght = MatchComponents.footballField.fieldLenght;
         float fieldWidth = MatchComponents.footballField.fieldWidth;
-
+        NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(nodeSize, Allocator.Temp);
         PressureFieldPositionDatas pressureFieldPositionDatas = GetFieldPositionsData(lineupName,pressureName);
-        
-        CalculateNextPositionJob jobData = new CalculateNextPositionJob();
-        jobData.fieldLenght = fieldLenght;
-        jobData.fieldWidth = fieldWidth;
-        jobData.normalizedPosition = normalizedPositions;
-        jobData.offsideLinePosY = offsideLinePosYs;
-        jobData.weightOffsideLine = weightOffsideLines;
-        jobData.points = pressureFieldPositionDatas.points;
-        jobData.playerPositionTypes = pressureFieldPositionDatas.PlayerPositionTypes;
-        jobData.normalNextPosition = normalNextPosition;
-        jobData.NextPlayerPositions = pressureFieldPositionDatas.NextPlayerPositions;
-        jobData.playerSize = playerSize;
-
-        JobHandle handle = jobData.Schedule(jobSize, 1);
-
-        handle.Complete();
-    }
-    private void LateUpdate()
-    {
+        for (int i = 0; i < nodeSize; i++)
+        {
+            int node = nodes[i];
+            CalculateNextPositionComponents CalculateNextPositionComponents = searchPlayData.GetCalculateNextPositionComponents(node);
+            CalculateNextPositionJob jobData = new CalculateNextPositionJob();
+            jobData.fieldLenght = fieldLenght;
+            jobData.fieldWidth = fieldWidth;
+            jobData.normalizedPosition = CalculateNextPositionComponents.normalizedPositions;
+            jobData.offsideLinePosY = CalculateNextPositionComponents.offsideLinePosYs;
+            jobData.weightOffsideLine = CalculateNextPositionComponents.weightOffsideLines;
+            jobData.points = pressureFieldPositionDatas.points;
+            jobData.playerPositionTypes = pressureFieldPositionDatas.PlayerPositionTypes;
+            jobData.normalNextPosition = CalculateNextPositionComponents.normalNextPosition;
+            jobData.NextPlayerPositions = pressureFieldPositionDatas.NextPlayerPositions;
+            jobData.playerSize = playerSize;
+            jobHandles[i] = jobData.Schedule(nextNodeSize, 1);
+        }
+        JobHandle.CompleteAll(jobHandles);
     }
     FieldPositionsData getFieldPositionData(PlayerPositionType playerPositionType,List<FieldPositionsData> FieldPositionDatas)
     {

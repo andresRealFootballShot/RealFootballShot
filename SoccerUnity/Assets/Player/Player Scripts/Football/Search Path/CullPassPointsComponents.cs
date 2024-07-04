@@ -8,6 +8,7 @@ using andywiecko.BurstTriangulator;
 using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Jobs;
+using CullPositionPoint;
 
 namespace CullPositionPoint
 {
@@ -115,6 +116,13 @@ public struct Point
         this.position = position;
     }
 }
+public class CalculateNextPositionComponents
+{
+    public NativeArray<Vector2> normalizedPositions;
+    public NativeArray<float> offsideLinePosYs;
+    public NativeArray<float> weightOffsideLines;
+    public NativeArray<NextPositionData2> normalNextPosition;
+}
 [System.Serializable]
 public class SearchPlayData
 {
@@ -123,17 +131,52 @@ public class SearchPlayData
         public Triangulator triangulator;
         public NativeArray<float2> playerPositions = new NativeArray<float2>();
         public List<int> cullEntities = new List<int>();
+        public List<int> nextTriangulatorEntities = new List<int>();
+        public List<float> speed = new List<float>();
+        public List<Vector3> direction = new List<Vector3>();
         public int maxPointsSize;
-        public SearchPlayNode(int initSize,int playerPosSize, Triangulator.GetLonelyPointParameters GetLonelyPointParameters)
+        public int playerCount;
+        public int nextNode;
+        public int cullEntitiesSize { get => cullEntities.Count; }
+        public List<LonelyPointElement2> posibleLonelyPoints;
+        public int previousNode;
+        public bool isSearched;
+        public CalculateNextPositionComponents CalculateNextPositionComponents;
+        public SearchPlayNode(int initSize,int playerPosSize,int playerSize, Triangulator.GetLonelyPointParameters GetLonelyPointParameters,int maxPosibleLonelyPoints)
         {
             maxPointsSize = initSize;
             playerPositions = new NativeArray<float2>(playerPosSize, Allocator.Persistent);
+            speed = new List<float>(playerSize);
+            direction = new List<Vector3>(playerSize);
             triangulator = new Triangulator(Allocator.Persistent, GetLonelyPointParameters);
+            playerCount = playerSize;
+            posibleLonelyPoints = new List<LonelyPointElement2>(maxPosibleLonelyPoints);
+            LoadParameters(maxPosibleLonelyPoints);
         }
-        public void SetPlayerPosition(int index, Vector3 position)
+        public void LoadParameters(int JobSize)
+        {
+            CalculateNextPositionComponents.normalizedPositions = new NativeArray<Vector2>(JobSize, Allocator.Persistent);
+            CalculateNextPositionComponents.offsideLinePosYs = new NativeArray<float>(JobSize, Allocator.Persistent);
+            CalculateNextPositionComponents.weightOffsideLines = new NativeArray<float>(JobSize, Allocator.Persistent);
+            CalculateNextPositionComponents.normalNextPosition = new NativeArray<NextPositionData2>(JobSize, Allocator.Persistent);
+        }
+        public void SetCalculateNextPositionParameters(int index, Vector2 normalizedPosition, float offsideLinePosY, float weightOffsideLine)
+        {
+            CalculateNextPositionComponents.normalizedPositions[index] = normalizedPosition;
+            CalculateNextPositionComponents.offsideLinePosYs[index] = offsideLinePosY;
+            CalculateNextPositionComponents.weightOffsideLines[index] = weightOffsideLine;
+        }
+        public void SetPlayerPosition(int index, Vector3 position, float speed, Vector3 direction)
         {
             playerPositions[index + 4] = new Vector2(position.x, position.z);
+            this.speed[index] = speed;
+            this.direction[index] = direction;
         }
+        public void SetPosibleLonelyPoint(int index, LonelyPointElement2 lonelyPoint)
+        {
+            posibleLonelyPoints[index] = lonelyPoint;
+        }
+        
         public NativeList<Point> GetLonelyPoints()
         {
             var lonelyPoints = triangulator.Output.LonelyPoints;
@@ -141,14 +184,14 @@ public class SearchPlayData
             return lonelyPoints;
         }
         public NativeArray<float2> GetPlayerPositions() => playerPositions;
-        public int getCullEntity(int index) => -1;
+        public int getCullEntity(int index) => cullEntities[index];
     }
 
-    public SearchPlayData()
+    public SearchPlayData(int maxPosibleLonelyPoints)
     {
         for (int i = 0; i < maxSize; i++)
         {
-            searchPlayNodes.Add(new SearchPlayNode(maxPointsSize, playerPosSize, GetLonelyPointParameters));
+            searchPlayNodes.Add(new SearchPlayNode(maxPointsSize, playerPosSize, playerPosSize-4, GetLonelyPointParameters, maxPosibleLonelyPoints));
         }
     }
 
@@ -158,27 +201,59 @@ public class SearchPlayData
     public int size;
     public Triangulator.GetLonelyPointParameters GetLonelyPointParameters;
     public List<SearchPlayNode> searchPlayNodes = new List<SearchPlayNode>();
-
+    public LonelyPointElement2 GetPosibleLonelyPoint(int node,int index) => searchPlayNodes[node].posibleLonelyPoints[index];
+    public CalculateNextPositionComponents GetCalculateNextPositionComponents(int node)
+    {
+       return searchPlayNodes[node].CalculateNextPositionComponents;
+    }
+    public void SetCalculateNextPositionParameters(int node,int index, Vector2 normalizedPosition, float offsideLinePosY, float weightOffsideLine)
+    {
+        searchPlayNodes[node].SetCalculateNextPositionParameters(index, normalizedPosition, offsideLinePosY, weightOffsideLine);
+    }
+    public void SetPosibleLonelyPoint(int node,int index, LonelyPointElement2 lonelyPoint)
+    {
+        searchPlayNodes[node].SetPosibleLonelyPoint(index, lonelyPoint);
+    }
+    public void SetPreviousNode(int node,int previousNode)=>searchPlayNodes[node].previousNode = previousNode;
+    public bool GetIsSearched(int node) => searchPlayNodes[node].isSearched;
+    public void SetIsSearched(int node,bool isSearched) => searchPlayNodes[node].isSearched= isSearched;
     public int getSortedNode(int index)
     {
         return -1;
+    }
+    public void getSortedNodes(ref List<int> nodes,int size)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            nodes[i] = i;
+        }
+    }
+    public void getFreeNodes(ref List<int> nodes, int size)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            nodes[i] = i;
+        }
     }
     public int getFreeNode(int index)
     {
         return -1;
     }
     public int getCullEntity(int node, int index) =>searchPlayNodes[node].getCullEntity(index);
-    public void UpdatePoints(int startIndex,int endIndex)
+    public int getCullEntityCount(int node) => searchPlayNodes[node].cullEntitiesSize;
+    public void UpdatePoints(List<int> nodes, int size)
     {
-        NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(endIndex-startIndex, Allocator.Temp);
-        for (int i = startIndex,j=0; i < endIndex; i++,j++)
+        NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(size, Allocator.Temp);
+        for (int i = 0; i < size; i++)
         {
-            SearchPlayNode searchPlayNode = searchPlayNodes[i];
+            int node = nodes[i];
+            SearchPlayNode searchPlayNode = searchPlayNodes[node];
             NativeArray<float2> playerPositions = searchPlayNode.playerPositions;
             searchPlayNode.triangulator.Input.Positions = playerPositions;
-            jobHandles[j] = searchPlayNode.triangulator.Schedule();
+            jobHandles[i] = searchPlayNode.triangulator.Schedule();
         }
         JobHandle.CompleteAll(jobHandles);
+        jobHandles.Dispose();
     }
     public int GetLonelyPointSize(int index) => searchPlayNodes[index].maxPointsSize;
     public bool GetLonelyPoint(int index, int pointIndex,out Point point)
@@ -196,9 +271,9 @@ public class SearchPlayData
             return false;
         }
     }
-    public void SetPlayerPosition(int nodeIndex, int index, Vector3 position)
+    public void SetPlayerPosition(int nodeIndex, int index, Vector3 position, float endSpeed, Vector3 direction)
     {
-        searchPlayNodes[nodeIndex].SetPlayerPosition(index,position);
+        searchPlayNodes[nodeIndex].SetPlayerPosition(index,position,endSpeed,direction);
     }
     public NativeList<Point> GetPoints(int index)=> searchPlayNodes[index].triangulator.Output.LonelyPoints;
     public NativeArray<float2> GetPlayerPositions(int index) => searchPlayNodes[index].playerPositions;
@@ -206,6 +281,9 @@ public class SearchPlayData
        float2 pos = searchPlayNodes[node].playerPositions[index];
         return new Vector2(pos.x, pos.y);
     }
+    public float GetPlayerSpeed(int node, int index)=> searchPlayNodes[node].speed[index];
+    public Vector3 GetPlayerDirection(int node, int index) => searchPlayNodes[node].direction[index];
+    public int GetPlayerCount(int node) => searchPlayNodes[node].playerCount;
     public void Dispose()
     {
         foreach (var searchPlayNode in searchPlayNodes)

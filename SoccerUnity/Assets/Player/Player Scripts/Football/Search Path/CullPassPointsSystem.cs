@@ -15,6 +15,8 @@ public class CullPassPointsSystem : SystemBase
     public SearchLonelyPointsManager SearchLonelyPointsManager;
     EntityManager entityManager;
     SearchPlayData SearchPlayData { get => CullPassPoints.searchPlayData; }
+    public List<int> Snodes,Fnodes;
+    CullPassPoints.CullPassPointsParams cullPassPointsParams { get => CullPassPoints.cullPassPointsParams; }
     protected override void OnCreate()
     {
         var description1 = new EntityQueryDesc()
@@ -45,9 +47,14 @@ public class CullPassPointsSystem : SystemBase
                 CullPassPoints.PlacePoints(0);
             }
         }
-        for (int i = 0; i < SearchPlayData.size; i++)
+        
+        for (int i = 0; i < 2; i++)
         {
-            CullPassPoints.UpdatePlayerPositions();
+            int nodeSize = CullPassPoints.sortLonelyPointsSize[i];
+            int nextNodeSize = CullPassPoints.sortLonelyPointsSize[i];
+            SearchPlayData.getSortedNodes(ref Snodes, nodeSize);
+            SearchPlayData.getFreeNodes(ref Fnodes, nodeSize);
+            CullPassPoints.UpdatePlayerPositions(Snodes,Fnodes, nodeSize);
             foreach (var entity in CullPassPoints.entities)
             {
                 BallParamsComponent BallParamsComponent = entityManager.GetComponentData<BallParamsComponent>(entity);
@@ -64,9 +71,13 @@ public class CullPassPointsSystem : SystemBase
             Dependency = CullPassPointsJob.ScheduleParallel(cullPassPointsQuery, CullPassPoints.batchesPerChunk, this.Dependency);
             Dependency.Complete();
 
-            UpdateNextPlayerPositions();
+            UpdateNextPlayerPositions(Snodes, nodeSize, nextNodeSize);
         }
         
+    }
+    void DistribuiteLonelyPointsToNodes()
+    {
+
     }
     void CalculateLonelyPoints()
     {
@@ -82,19 +93,18 @@ public class CullPassPointsSystem : SystemBase
         Dependency.Complete();
         //SearchLonelyPointsManager.setEntitiesEnable(false);
     }
-    void UpdateNextPlayerPositions()
+    void UpdateNextPlayerPositions(List<int> nodes, int nodeSize,int nextNodeSize)
     {
         int calculationIndex = CullPassPoints.debugOrderLonelyPointIndex;
-        int sortLonelyPointsSize = CullPassPoints.sortLonelyPointsSize[0];
+        
 
         Team defenseTeam = Teams.getTeamByName(CullPassPoints.teamName_Defense);
         if (defenseTeam.publicPlayerDatas.Count == 0) return;
-        CullPassPoints.SetAllLonelyPointsCalculateNextPositionParameters(0,sortLonelyPointsSize, FieldPositionsData.HorizontalPositionType.Right,defenseTeam,0);
+        CullPassPoints.SetAllLonelyPointsCalculateNextPositionParameters(FieldPositionsData.HorizontalPositionType.Right,defenseTeam, nodes,nodeSize, nextNodeSize);
 
-        int posibleLonelyPointSize = CullPassPoints.GetPosibleLonelyPoints(0);
-        CullPassPoints.calculateNextPositionShedule.SheduleJobs(posibleLonelyPointSize, defenseTeam.teamMaxFieldPlayers/2, CullPassPoints.lineupName, CullPassPoints.pressureName);
-
-        CullPassPoints.UpdateNextPlayerPoints(0, posibleLonelyPointSize, 0, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
-        CullPassPoints.CompleteTriangulatorJob(0,posibleLonelyPointSize);
+        //int posibleLonelyPointSize = CullPassPoints.GetPosibleLonelyPoints(nodeSize1);
+        CullPassPoints.calculateNextPositionShedule.SheduleJobs(nodes, nodeSize, nextNodeSize, SearchPlayData, defenseTeam.teamMaxFieldPlayers/2, CullPassPoints.lineupName, CullPassPoints.pressureName);
+        CullPassPoints.UpdateNextPlayerPoints(ref nodes, nodeSize, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
+        CullPassPoints.CompleteTriangulatorJob(nodes, nodeSize);
     }
 }

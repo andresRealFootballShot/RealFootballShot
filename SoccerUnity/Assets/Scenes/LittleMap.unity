@@ -47531,7 +47531,7 @@ MonoBehaviour:
   FootballPositionCtrl: {fileID: 58440509}
   calculateNextPositionShedule: {fileID: 1875775247}
   triangulatorJob: {fileID: 1875775248}
-  sortLonelyPointsSize: 01000000
+  sortLonelyPointsSize: 010000000a0000000500000003000000
   lineupName: Default
   pressureName: Default
   publicPlayerData: {fileID: 1690164272}
