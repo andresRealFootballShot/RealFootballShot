@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SoccerPlayerData : MonoBehaviour
+public class SoccerPlayerData : SoccerPlayerComponent
 {
-    public float maxKickForce = 33;
-    public Vector3 ballTargetPosition { get; set; }
-    public bool ballIsOrientedControlled { get; set; }
-    public float scopeOffset=0.25f;
+    public new float maxKickForce = 33;
+    public new Vector3 ballTargetPosition { get; set; }
+    public new bool ballIsOrientedControlled { get; set; }
+    public  float scopeOffset=0.25f;
 }

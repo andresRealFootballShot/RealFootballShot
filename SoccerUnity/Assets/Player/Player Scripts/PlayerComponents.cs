@@ -1,3 +1,4 @@
+using DOTS_ChaserDataCalculation;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,6 +30,7 @@ public class PlayerComponents : PlayerComponent
     [HideInInspector]
     public float friction;
     public GetTimeToReachPoint GetTimeToReachPosition;
+    public Team myTeam, rivalTeam;
     public float maxSpeedRotation { get =>movementValues.rotationSpeed; }
     void Start()
     {

@@ -119,6 +119,14 @@ public struct CalculateNextPositionJob : IJobParallelFor
     public NativeArray<PlayerPositionType> playerPositionTypes;
 
     public NativeArray<NextPositionData2> normalNextPosition;
+
+    public void LoadParameters(int size)
+    {
+        normalizedPosition = new NativeArray<Vector2>(size, Allocator.Persistent);
+        offsideLinePosY = new NativeArray<float>(size, Allocator.Persistent);
+        weightOffsideLine = new NativeArray<float>(size, Allocator.Persistent);
+        normalNextPosition = new NativeArray<NextPositionData2>(size, Allocator.Persistent);
+    }
     public void Execute(int i)
     {
         NextPositionData NextPositionData1 = new NextPositionData();
@@ -132,6 +140,13 @@ public struct CalculateNextPositionJob : IJobParallelFor
         nextPositionData.NextPositionData = NextPositionData1;
         nextPositionData.symetricNextPositionData = NextPositionData2;
         normalNextPosition[i] = nextPositionData;
+    }
+    public void Dispose()
+    {
+        normalizedPosition.Dispose();
+        offsideLinePosY.Dispose();
+        weightOffsideLine.Dispose();
+        normalNextPosition.Dispose();
     }
     public void getNextPosition(Vector2 normalizedPosition,ref NativeArray<Point2> points,ref NativeArray<NextPlayerPosition> NextPlayerPositions,ref NextPositionData NextPositionData, float offsideLinePosY,ref NativeArray<PlayerPositionType> playerPositionTypes, float weightOffsideLine,int playerSize)
     {

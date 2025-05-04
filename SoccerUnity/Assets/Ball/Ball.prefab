@@ -203,6 +203,9 @@ MonoBehaviour:
   kickRPCs: {fileID: -4214749390295709167}
   raycastBallGoal: {fileID: 1322839334424030255}
   radio: 0
+  friction: 0
+  dynamicFriction: 0
+  bounciness: 0
 --- !u!114 &1870791226353492746
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,10 +218,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5f2ecafdea0b2542939aeaeb9e53af4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grassSet: {fileID: 11400000, guid: a7e5e544c4a43294e8dc7211c6dc4398, type: 2}
-  others: {fileID: 8300000, guid: 5b4f18e6f31b82d4fa76f8953fcc9ca7, type: 3}
-  body: {fileID: 0}
-  kick: {fileID: 8300000, guid: 3cf8dd55e1693304cab77731dbb527a7, type: 3}
   soundPoints: {fileID: 0}
   maxVolume: 0.2
 --- !u!114 &1322839334424030255

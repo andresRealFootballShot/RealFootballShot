@@ -51,9 +51,12 @@ public class BotSetup : MonoBehaviour
         
         if (ballDriving)
         {
-            BallDriving ballDriving = MyFunctions.GetComponentInChilds<BallDriving>(gameObject, true);
+            /*BallDriving ballDriving = MyFunctions.GetComponentInChilds<BallDriving>(gameObject, true);
             normalState.addEntryFunction(ballDriving.StartProcess);
-            normalState.addExitFunction(ballDriving.StopProcess);
+            normalState.addExitFunction(ballDriving.StopProcess);*/
+            IndividualPlay individualPlay = MyFunctions.GetComponentInChilds<IndividualPlay>(gameObject, true);
+            normalState.addEntryFunction(individualPlay.StartProcess);
+            normalState.addExitFunction(individualPlay.StopProcess);
         }
         if (ballControl)
         {

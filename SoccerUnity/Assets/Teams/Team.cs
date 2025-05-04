@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using DOTS_ChaserDataCalculation;
 
 public class Team : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class Team : MonoBehaviour
     public Variable<string> nameTeamVar=new Variable<string>();
     public List<string> players = new List<string>();
     public List<PublicPlayerData> publicPlayerDatas = new List<PublicPlayerData>();
+    public List<PlayerDataComponent> playerDataComponents = new List<PlayerDataComponent>();
     public List<ChaserData> firstChaserDatas = new List<ChaserData>();
     public Dictionary<TypeFieldPosition.Type, string> fieldPositionOfPlayers = new Dictionary<TypeFieldPosition.Type, string>();
     public SortedDictionary<int, int> spawns = new SortedDictionary<int, int>();
@@ -249,6 +251,8 @@ public class Team : MonoBehaviour
     public void addPublicPlayerData(PublicPlayerData publicPlayerData)
     {
         publicPlayerDatas.Add(publicPlayerData);
+        PublicPlayerData.getPlayerData(publicPlayerData,playerDataComponents.Count, out PlayerDataComponent playerDataComponent);
+        playerDataComponents.Add(playerDataComponent);
     }
     public void addFirstChaserData(ChaserData chaserData)
     {

@@ -16,14 +16,17 @@ public class BallDriving : SoccerPlayerComponent
     public float maxSpeedBodyPercent { get => playerSkills.maxSpeedBodyPercent; }
 
     Coroutine coroutine;
+    public bool enabled;
     public void StartProcess()
     {
+        if(enabled)
         coroutine = StartCoroutine(run());
         
     }
     public void StopProcess()
     {
-        StopCoroutine(coroutine);
+        if (enabled)
+            StopCoroutine(coroutine);
     }
     public IEnumerator run()
     {
@@ -64,6 +67,7 @@ public class BallDriving : SoccerPlayerComponent
             //yield return null;
         }
     }
+
     float getSpeed(float x)
     {
         float result = 0;

@@ -28,7 +28,8 @@ public class MovementPlayerComponent : PlayerComponent
     protected float angleVelocity_DesiredVelocity { get => Vector3.Angle(Y0Velocity, ForwardY0DesiredVelocity); }
     protected float angleBodyForward_DesiredLookDirection { get => Vector3.Angle(bodyY0Forward, DesiredLookDirection); }
     protected float angleBodyTarget_DesiredDirection { get => Vector3.Angle(BodyTargetDirection, DesiredDirection); }
-    
+    protected float angleBodyForwardVelocity { get => Vector3.Angle(bodyY0Forward, VelocityDirection); }
+
     protected float accelerationSkill { get => playerSkills.acceleration; }
     protected float rotAccelerationSkill { get => playerSkills.acceleration; }
     protected float acceleration { get => getAcceleration(); }

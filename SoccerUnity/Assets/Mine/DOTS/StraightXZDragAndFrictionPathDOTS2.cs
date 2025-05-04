@@ -5,6 +5,14 @@ using Unity.Burst;
 using UnityEngine;
 namespace DOTS_ChaserDataCalculation
 {
+    public struct PerfectGetPositionParms
+    {
+        public float v0;
+        public float t;
+        public float u;
+        public float k;
+        public float g;
+    }
     [BurstCompile]
     public class StraightXZDragAndFrictionPathDOTS2
     {
@@ -435,6 +443,26 @@ namespace DOTS_ChaserDataCalculation
                 return ln / -currentPath.k;
             }
         }
+
+
+
+
+
+
+       
+        [BurstCompile]
+        public static float getPerfectPositionAtTime(PerfectGetPositionParms parms)
+        {
+            float v0 = parms.v0;
+            float t = parms.t;
+            float u=parms.u;
+            float k=parms.k;
+            float g = parms.g;
+            float x = (v0/(k*g))*(1-Mathf.Exp(-k*g*t));
+            return x;
+        }
+
+
     }
 
 

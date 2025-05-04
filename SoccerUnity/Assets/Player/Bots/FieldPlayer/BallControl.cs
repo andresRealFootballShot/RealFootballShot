@@ -37,7 +37,6 @@ public class BallControl : SoccerPlayerComponent
         while (true)
         {
             float ballYPosition = ballPosition.y;
-            
             if (((Mathf.Abs(ballVelocity.y)>0.1f && ballYPosition>ballRadio+0.3f) || ballBody_BallTargetAngle> minBallBody_BallTargetAngle || (ballTarget_BallVelocityAngle > minBallTarget_BallVelocityAngle && ballSpeed> minBallSpeedControl)) && reachBall())
             {
                 ballIsOrientedControlled = false;

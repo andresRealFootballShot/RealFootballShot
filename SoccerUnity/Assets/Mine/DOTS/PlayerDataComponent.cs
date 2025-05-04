@@ -29,6 +29,16 @@ namespace DOTS_ChaserDataCalculation
         public float normalMaximumJumpHeight, goalkeeperMaximumJumpHeight;
         public float maxReceiverHeight,maxKickForce;
         public bool has_OptimalPoint;
+
+        public void Update(PublicPlayerData publicPlayerData)
+        {
+            position = publicPlayerData.position;
+            bodyY0Forward = publicPlayerData.bodyTransform.forward;
+            bodyY0Forward.y = 0f;
+            normalizedBodyY0Forward = bodyY0Forward;
+            ForwardVelocity = publicPlayerData.velocity;
+            normalizedForwardVelocity = ForwardVelocity.normalized;
+        }
         public PlayerDataComponent(bool useAccelerationGetTimeToReachPosition, int id, Vector3 position, Vector3 bodyY0Forward, Vector3 forwardVelocity,Vector3 normalizedForwardVelocity, float maxSpeed, float acceleration, float decceleration, float maxJumpHeight, float scope, float currentSpeed, float minSpeedForRotate, float maxAngleForRun, float maxSpeedRotation, float maxSpeedForReachBall, float drag, Vector3 fieldNormal, Vector3 fieldPosition, int segmentedPathSize, float bodyBallRadio, float height, bool isGoalkeeper, float normalMaximumJumpHeight, float goalkeeperMaximumJumpHeight, float maxReceiverHeight,float maxKickForce) : this()
         {
             this.useAccelerationGetTimeToReachPosition = useAccelerationGetTimeToReachPosition;
@@ -58,6 +68,7 @@ namespace DOTS_ChaserDataCalculation
             this.goalkeeperMaximumJumpHeight = goalkeeperMaximumJumpHeight;
             this.maxReceiverHeight = maxReceiverHeight;
             this.maxKickForce = maxKickForce;
+            this.normalizedBodyY0Forward = bodyY0Forward.normalized;
         }
     }
     public struct MyFloatArray

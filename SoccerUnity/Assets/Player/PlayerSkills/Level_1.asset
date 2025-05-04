@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   typePlayerSkills: 1
   acceleration: 0
+  ballControl: 0
   ballForceControl: 0.252
   ballTimeControl: 0.256
   drivingSkill: 0
@@ -55,3 +56,6 @@ MonoBehaviour:
   minHitTime: 0.3
   maxHitTime: 0.4
   maxSpeedBodyPercent: 0.8
+  maxDrivingDistance: 5
+  minDrivingDistance: 0.5
+  lastKickDistanceOffset: 3

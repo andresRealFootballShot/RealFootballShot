@@ -56,3 +56,6 @@ MonoBehaviour:
   minHitTime: 0
   maxHitTime: 0.1
   maxSpeedBodyPercent: 1
+  maxDrivingDistance: 5
+  minDrivingDistance: 0.5
+  lastKickDistanceOffset: 3

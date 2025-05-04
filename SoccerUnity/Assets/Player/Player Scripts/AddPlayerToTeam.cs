@@ -1,8 +1,9 @@
+using DOTS_ChaserDataCalculation;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AddPlayerToTeam : MonoBehaviour
+public class AddPlayerToTeam : PlayerComponent
 {
     public PlayerComponents playerComponents;
     public bool addAwake = true;
@@ -29,6 +30,9 @@ public class AddPlayerToTeam : MonoBehaviour
         {
             //print("addGoalkeeperToTeam " + team.TeamName + " " + playerComponents.publicPlayerData.playerID);
             playerComponents.playerEvents.addTeamEvent.Invoke(team);
+            SoccerPlayerComponent.myTeam = team;
+            SoccerPlayerComponent.rivalTeam = Teams.getRivalTeam(team.TeamName);
+            
         }
     }
     public void AddToTeam(string teamName, TypeFieldPosition.Type typeFieldPosition)
@@ -40,6 +44,9 @@ public class AddPlayerToTeam : MonoBehaviour
             {
                 //print("addGoalkeeperToTeam " + team.TeamName + " " + playerComponents.publicPlayerData.playerID);
                 playerComponents.playerEvents.addTeamEvent.Invoke(team);
+                SoccerPlayerComponent.myTeam = team;
+                SoccerPlayerComponent.rivalTeam = Teams.getRivalTeam(team.TeamName);
+               
             }
         }
     }

@@ -2074,6 +2074,7 @@ GameObject:
   - component: {fileID: 4024597818375132184}
   - component: {fileID: 7110047354578381703}
   - component: {fileID: 6244234487330640569}
+  - component: {fileID: 6704183389520453890}
   m_Layer: 0
   m_Name: Hand
   m_TagString: GoalKeeper
@@ -2121,6 +2122,7 @@ MonoBehaviour:
   pass: {fileID: 655011190266930550}
   test: {fileID: 0}
   enableRandomPass: 0
+  enableMotion: 0
 --- !u!114 &655011190266930550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2399,10 +2401,12 @@ MonoBehaviour:
   resistanceCtrl: {fileID: 0}
   resistanceParameters: {fileID: 0}
   ballControl: {fileID: 0}
-  ballDriving: {fileID: 0}
+  ballDriving: {fileID: 6704183389520453890}
   playerSkills: {fileID: 11400000, guid: 6512255020a373d46a7e83d0c690b936, type: 2}
   playerParameters: {fileID: 11400000, guid: 34ccf7b9b5539f048997ee20523139cc, type: 2}
   friction: 0
+  myTeam: {fileID: 0}
+  rivalTeam: {fileID: 0}
   goalkeeperEvents: {fileID: 4290924186599095116}
   goalkeeperCtrl: {fileID: 5279867306633939449}
   goalkeeperValues: {fileID: 5279867306633939444}
@@ -2690,6 +2694,7 @@ MonoBehaviour:
   minSpeedForRotateBody: 0
   minSpeedForChangeDirection: 1
   directionRotationSpeed: 360
+  maxSpeedForReachBall: 0
   maxAngleForRun: 45
   stopOffset: 0
 --- !u!114 &6244234487330640569
@@ -2705,6 +2710,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxKickForce: 33
+  scopeOffset: 0.25
+--- !u!114 &6704183389520453890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5279867306633939452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c4d57d72d7ae6c4f902a3f5c65efddc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxAngleDriving: 5
+  bodyAdjustAngle: 0
+  bodyAdjustSpeed: 0
 --- !u!1 &5279867306647696566
 GameObject:
   m_ObjectHideFlags: 0

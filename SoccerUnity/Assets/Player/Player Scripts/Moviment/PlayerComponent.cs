@@ -1,3 +1,4 @@
+using DOTS_ChaserDataCalculation;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,7 +32,7 @@ public class PlayerComponent : MonoBehaviour
     protected float bodyRadio { get => playerComponents.playerData.bodyRadio; }
     protected float bodyHeight { get => playerComponents.playerData.height; }
     public float bodyBallRadio { get => bodyRadio + ballRadio; }
-    public float MaxSpeed { get => playerComponents.getMaxSpeed(); }
+    public float MaxSpeed { get => playerComponents.movementValues.maxForwardSpeed; }
     public float MinForwardSpeed { get => playerComponents.movementValues.MinForwardSpeed; set => playerComponents.movementValues.MinForwardSpeed = value; }
     public float ForwardDesiredSpeed { get => playerComponents.movementValues.ForwardDesiredSpeed; set => playerComponents.movementValues.ForwardDesiredSpeed = value; }
     public Vector3 ForwardDesiredDirection { get => movementValues.ForwardDesiredDirection; set => movementValues.ForwardDesiredDirection = value; }
@@ -54,6 +55,7 @@ public class PlayerComponent : MonoBehaviour
     
     public float stopOffset { get => movementValues.stopOffset; set => movementValues.stopOffset = value; }
     public new string name { get => playerComponents.root.name; }
+    public SoccerPlayerComponent SoccerPlayerComponent { get => playerComponents.soccerPlayerData; }
     public float getMaxAcceleration()
     {
         //return movementValues.forwardAcceleration;
@@ -61,7 +63,7 @@ public class PlayerComponent : MonoBehaviour
     }
     public float getMaxDeceleration()
     {
-        //return movementValues.forwardDeceleration;
-        return playerComponents.getMaxDeceleration();
+        return movementValues.forwardDeceleration;
+        //return playerComponents.getMaxDeceleration();
     }
 }

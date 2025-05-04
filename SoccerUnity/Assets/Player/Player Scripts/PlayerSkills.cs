@@ -23,4 +23,8 @@ public class PlayerSkills : ScriptableObject
     public AnimationCurve randomForceAdjust;
     public float minHitTime, maxHitTime;
     public float maxSpeedBodyPercent;
+    public float maxDrivingDistance = 5;
+    public float minDrivingDistance = 0.5f;
+    public float lastKickDistanceOffset = 3.0f;
+
 }

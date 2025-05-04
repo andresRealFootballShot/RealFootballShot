@@ -19,7 +19,7 @@ public class TriangulatorJob : MonoBehaviour
     List<int> positionsSizes = new List<int>();
     //List<Triangulator> triangulators=new List<Triangulator>();
     float fieldOffset = 2;
-    public SearchPlayData searchPlayData;
+    public SearchPlayData searchPlayData { get; set; }
     void Start() {
         points = MyFunctions.GetComponentsInChilds<Transform>(pointsRoot.gameObject, false, true);
         
@@ -78,7 +78,7 @@ public class TriangulatorJob : MonoBehaviour
     }
     public NativeList<Point> GetPoints(int index)
     {
-        var lonelyPoints = searchPlayData.GetPoints(index);
+        var lonelyPoints = searchPlayData.GetLonelyPoints(index);
 
         return lonelyPoints;
     }

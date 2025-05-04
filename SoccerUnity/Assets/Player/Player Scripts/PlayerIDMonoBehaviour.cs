@@ -184,6 +184,7 @@ public class PlayerIDMonoBehaviour : MonoBehaviour
         PlayerID newPlayerID = new PlayerID(typePlayer, onlineActor, localActorCount);
         localActorCount++;
         playerID = newPlayerID;
+        name = playerIDStr;
         playerIDisLoadedEvent.Invoke(gameObject);
     }
     public void LocalLoad(int onlineActor)
@@ -191,6 +192,7 @@ public class PlayerIDMonoBehaviour : MonoBehaviour
         PlayerID newPlayerID = new PlayerID(typePlayer, onlineActor, localActorCount);
         localActorCount++;
         playerID = newPlayerID;
+        name = playerIDStr;
         playerIDisLoadedEvent.Invoke(gameObject);
     }
     public void RemoteLoad(string playerIDStr)

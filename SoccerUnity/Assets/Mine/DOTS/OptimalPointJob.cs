@@ -173,7 +173,7 @@ namespace DOTS_ChaserDataCalculation
             MyFloatArray times = new MyFloatArray();
             if (playerDataComponent.useAccelerationGetTimeToReachPosition)
             {
-                GetOptimalPointForReachTargetDOTS.getOptimalPointForReachTargetWhitAcceleration(path,ref playerDataComponent, t0, scope, 0.1f, ref times);
+                GetOptimalPointForReachTargetDOTS.getOptimalPointForReachTargetWhitAcceleration(path,ref playerDataComponent, t0, scope, 0.1f, ref times,out Vector3 reachPoint);
                 
             }
             else

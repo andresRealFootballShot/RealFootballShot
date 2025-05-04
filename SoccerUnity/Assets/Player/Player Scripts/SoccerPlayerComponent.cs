@@ -1,3 +1,4 @@
+using DOTS_ChaserDataCalculation;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,10 @@ using UnityEngine;
 public class SoccerPlayerComponent : PlayerComponent
 {
     protected SoccerPlayerData soccerPlayerData { get => playerComponents.soccerPlayerData; }
+    public Team myTeam { get=>playerComponents.myTeam; set => playerComponents.myTeam=value; }
+     public Team rivalTeam { get => playerComponents.rivalTeam; set => playerComponents.rivalTeam = value; }
+    public List<PublicPlayerData> rivals { get => rivalTeam.publicPlayerDatas; }
+    public List<PlayerDataComponent> rivalsDataComponents { get => rivalTeam.playerDataComponents; }
     protected Vector3 ballTargetPosition { get=> soccerPlayerData.ballTargetPosition; set => soccerPlayerData.ballTargetPosition = value; }
     protected Vector3 ballTargetDirection { get => ballTargetPosition - ballPosition;}
     protected float ballTargetDistance { get => ballTargetDirection.magnitude; }

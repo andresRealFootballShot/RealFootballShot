@@ -645,6 +645,7 @@ MonoBehaviour:
   minSpeedForRotateBody: 2
   minSpeedForChangeDirection: 2
   directionRotationSpeed: 360
+  maxSpeedForReachBall: 0
   maxAngleForRun: 95
   stopOffset: 0
 --- !u!114 &3747010004157290952
@@ -660,6 +661,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useRigidbody: 1
+  debug: 0
 --- !u!114 &3747010004157290953
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2903,12 +2905,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3747010005515620610}
+  - component: {fileID: 7193358462165263421}
   - component: {fileID: 3747010005515620668}
   - component: {fileID: 3747010005515620669}
   - component: {fileID: 3747010005515620670}
   - component: {fileID: 3747010005515620609}
   - component: {fileID: 3747010005515620667}
   - component: {fileID: 3747010005515620666}
+  - component: {fileID: 8166353082085943081}
   m_Layer: 0
   m_Name: SoccerComponents
   m_TagString: Untagged
@@ -2932,6 +2936,26 @@ Transform:
   m_Father: {fileID: 3747010005541261553}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7193358462165263421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3747010005515620611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43991fd13bf09df499c98cc5197a7d66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxAngleDriving: 5
+  bodyAdjustAngle: 0
+  bodyAdjustSpeed: 0
+  testTransform: {fileID: 0}
+  testTransform2: {fileID: 0}
+  maxAngle: 70
+  driverPublicPlayerData: {fileID: 0}
+  totalTimeDrive: 3
 --- !u!114 &3747010005515620668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2977,6 +3001,7 @@ MonoBehaviour:
   maxAngleDriving: 10
   bodyAdjustAngle: 1.1
   bodyAdjustSpeed: 0.4
+  enabled: 0
 --- !u!114 &3747010005515620609
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3042,6 +3067,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 140b9a2e8b40c514ab0e33a80f5b8c99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8166353082085943081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3747010005515620611}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ab9580da48c7b44db1845cafdbea9ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetPosition: {fileID: 0}
 --- !u!1 &3747010005541261554
 GameObject:
   m_ObjectHideFlags: 0
@@ -3213,6 +3251,8 @@ MonoBehaviour:
   playerSkills: {fileID: 0}
   playerParameters: {fileID: 11400000, guid: 34ccf7b9b5539f048997ee20523139cc, type: 2}
   friction: 0
+  myTeam: {fileID: 0}
+  rivalTeam: {fileID: 0}
 --- !u!114 &3747010005541261547
 MonoBehaviour:
   m_ObjectHideFlags: 0

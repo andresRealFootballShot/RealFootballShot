@@ -319,8 +319,23 @@ public class OptimalPointDOTSCreator : MonoBehaviour
         bool isGoalkeeper = false;
         playerDataComponent = new PlayerDataComponent(publicPlayerData.useAccelerationInChaserDataCalculation, index, publicPlayerData.position, bodyY0Forward, playerComponents.Velocity, playerComponents.Velocity.normalized, maxSpeed, publicPlayerData.playerComponents.movementValues.forwardAcceleration, playerComponents.movementValues.forwardDeceleration, maximumJumpHeight, playerComponents.scope, playerComponents.Speed, movimentValues.minSpeedForRotateBody, movimentValues.maxAngleForRun, playerComponents.maxSpeedRotation, movimentValues.maxSpeedForReachBall,MatchComponents.ballRigidbody.drag, Vector3.up, MatchComponents.footballField.position,0, publicPlayerData.playerComponents.bodyBallRadio, publicPlayerData.playerData.height, isGoalkeeper, publicPlayerData.movimentValues.NormalMaximumJumpHeight,-1, publicPlayerData.playerData.height*0.75f,publicPlayerData.playerComponents.soccerPlayerData.maxKickForce);
     }
-    
-    
+
+    public static void getPlayerData(PublicPlayerData publicPlayerData,int index, out PlayerDataComponent playerDataComponent)
+    {
+
+        float maximumJumpHeight = 0;
+        if (publicPlayerData.maximumJumpHeights.Count > 0)
+        {
+
+            maximumJumpHeight = publicPlayerData.maximumJumpHeights.Keys[0];
+        }
+        MovimentValues movimentValues = publicPlayerData.movimentValues;
+        PlayerComponents playerComponents = publicPlayerData.playerComponents;
+        Vector3 bodyY0Forward = playerComponents.bodyY0Forward;
+        float maxSpeed = publicPlayerData.maxSpeed;
+        bool isGoalkeeper = false;
+        playerDataComponent = new PlayerDataComponent(publicPlayerData.useAccelerationInChaserDataCalculation, index, publicPlayerData.position, bodyY0Forward, playerComponents.Velocity, playerComponents.Velocity.normalized, maxSpeed, publicPlayerData.playerComponents.movementValues.forwardAcceleration, playerComponents.movementValues.forwardDeceleration, maximumJumpHeight, playerComponents.scope, playerComponents.Speed, movimentValues.minSpeedForRotateBody, movimentValues.maxAngleForRun, playerComponents.maxSpeedRotation, movimentValues.maxSpeedForReachBall, MatchComponents.ballRigidbody.drag, Vector3.up, MatchComponents.footballField.position, 0, publicPlayerData.playerComponents.bodyBallRadio, publicPlayerData.playerData.height, isGoalkeeper, publicPlayerData.movimentValues.NormalMaximumJumpHeight, -1, publicPlayerData.playerData.height * 0.75f, publicPlayerData.playerComponents.soccerPlayerData.maxKickForce);
+    }
     void checkEntitiesAreCreated(OptimalPointReference optimalPointReference) {
         if (!optimalPointReference.entitiesAreCreated)
         {
