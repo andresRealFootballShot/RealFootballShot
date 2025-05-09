@@ -316,21 +316,21 @@ public class CullPassPoints : MonoBehaviour
             for (int i = teamAttack_start, j = 0; i < teamAttack_start + teamAttack_size; i++, j++)
             {
 
-                Vector3 position = defenseTeam.publicPlayerDatas[j].position;
-                Vector3 forward = defenseTeam.publicPlayerDatas[j].bodyTransform.forward;
-                //Vector3 normalizedVelocity = teamPlayers.publicPlayerDatas[i].velocity;
-                //normalizedVelocity.Normalize();
-                float speed = defenseTeam.publicPlayerDatas[j].speed;
-                searchPlayData.SetPlayerPosition(Snode, i, position, speed, forward);
-            }
-            for (int i = teamDefense_start, j = 0; i < teamDefense_start + teamDefense_size; i++, j++)
-            {
-
                 Vector3 position = attackTeam.publicPlayerDatas[j].position;
                 Vector3 forward = attackTeam.publicPlayerDatas[j].bodyTransform.forward;
                 //Vector3 normalizedVelocity = teamPlayers.publicPlayerDatas[i].velocity;
                 //normalizedVelocity.Normalize();
                 float speed = attackTeam.publicPlayerDatas[j].speed;
+                searchPlayData.SetPlayerPosition(Snode, i, position, speed, forward);
+            }
+            for (int i = teamDefense_start, j = 0; i < teamDefense_start + teamDefense_size; i++, j++)
+            {
+
+                Vector3 position = defenseTeam.publicPlayerDatas[j].position;
+                Vector3 forward = defenseTeam.publicPlayerDatas[j].bodyTransform.forward;
+                //Vector3 normalizedVelocity = teamPlayers.publicPlayerDatas[i].velocity;
+                //normalizedVelocity.Normalize();
+                float speed = defenseTeam.publicPlayerDatas[j].speed;
                 searchPlayData.SetPlayerPosition(Snode, i, position, speed, forward);
             }
         }
@@ -350,7 +350,8 @@ public class CullPassPoints : MonoBehaviour
                 int SentityIndex = searchPlayData.getCullEntity(node, k);
                 Entity Sentity = entities[SentityIndex];
                 DynamicBuffer<PlayerPositionElement> PlayerPositionElements = entityManager.GetBuffer<PlayerPositionElement>(Sentity);
-                int playerCount = searchPlayData.GetPlayerCount(node);
+                //int playerCount = searchPlayData.GetPlayerCount(node);
+                int playerCount = teamAttack_size+teamDefense_size;
                 for (int j = 0; j < playerCount; j++)
                 {
                     Vector2 playerPos = searchPlayData.GetPlayerPosition(node, j);
@@ -804,10 +805,16 @@ public class CullPassPoints : MonoBehaviour
                 //nextPosition2 = getCloseNextPosition(team, ref lonelyPoint, nextPosition2);
                 nextPosition = getOrderNextPosition(team, ref lonelyPoint, nextPosition, j, 0,out float endSpeed1,out Vector3 endDirection1);
                 nextPosition2 = getOrderNextPosition(team, ref lonelyPoint, nextPosition2, j, 1, out float endSpeed2, out Vector3 endDirection2);
-                SetLonelyPosition2(node, k,nextPosition, endSpeed1, endDirection1);
-                k++;
-                SetLonelyPosition2(node, k, nextPosition2, endSpeed2, endDirection2);
-                k++;
+                if (nextPosition != Vector3.positiveInfinity)
+                {
+                    SetLonelyPosition2(node, k, nextPosition, endSpeed1, endDirection1);
+                    k++;
+                }
+                if (nextPosition2 != Vector3.positiveInfinity)
+                {
+                    SetLonelyPosition2(node, k, nextPosition2, endSpeed2, endDirection2);
+                    k++;
+                }
             }
             PublicPlayerData goalkeeperPublicPlayerData = team.getGoalkeeperPublicPlayerData();
             if (goalkeeperPublicPlayerData != null)
@@ -832,7 +839,11 @@ public class CullPassPoints : MonoBehaviour
         }
         PublicPlayerData publicPlayerData;
         team.getPublicPlayerData(typeFieldPositions, out publicPlayerData);
-
+        if (publicPlayerData == null){
+            endSpeed = 0;
+            endDirection = Vector3.zero;
+            return Vector3.positiveInfinity;
+        }
         Transform playerTransform = publicPlayerData.bodyTransform;
         MovimentValues movimentValues = publicPlayerData.movimentValues;
         Vector3 ballPosition = new Vector3(lonelyPoint.position.x,0, lonelyPoint.position.y);
