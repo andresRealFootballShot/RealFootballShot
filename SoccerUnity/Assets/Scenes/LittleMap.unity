@@ -23,7 +23,7 @@ RenderSettings:
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 0.83
+  m_AmbientIntensity: 1.05
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: a2126534b3a11b34e977105bd9e3cc03, type: 2}
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.54585737, g: 0.55072165, b: 0.52059877, a: 1}
+  m_IndirectSpecularColor: {r: 0.13037226, g: 0.12921397, b: 0.12293324, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &4
 LightmapSettings:
@@ -1190,7 +1190,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 108009132}
   m_HandleRect: {fileID: 108009131}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -7694,7 +7694,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 721031710}
   m_HandleRect: {fileID: 721031709}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -23426,7 +23426,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1981492703}
   m_HandleRect: {fileID: 1981492702}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -32362,7 +32362,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 841198963}
   m_HandleRect: {fileID: 841198962}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -41065,7 +41065,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 277427217}
   m_HandleRect: {fileID: 277427216}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -44032,16 +44032,16 @@ MonoBehaviour:
   testLonelyPoints:
   - {fileID: 1796266505}
   - {fileID: 1563016489}
-  test: 0
   debug: 1
-  debugPointResults: 1
-  debugPassTest: 0
-  debugNextLonelyPoints: 1
-  debugOnlyOrderLonelyPoint: 1
-  debugOrderLonelyPointIndex: 1
-  debugText: 0
-  lonelyPointIndexPassTest: 0
-  searchNodeDebug: 0
+  debugPointResults: 0
+  _debugAllLonelyPointsOfNode: 0
+  _debugLonelyPointIndex: 1
+  debugLonelyPointNode: 1
+  debugLonelyPointIndex: 1
+  debugPlayerIndex: 1
+  debugText: 1
+  lonelyPointIndexPassTest: 1
+  searchNodeDebug: 1
   searchNodeDebugList: 0000000000000000
   posibleLonelyPointsSize: 
   AuxNextPositionPlayerBusiesList: 

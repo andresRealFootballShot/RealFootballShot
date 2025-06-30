@@ -12,6 +12,9 @@ using Unity.Entities.UniversalDelegates;
 using UnityEditor;
 using andywiecko.BurstTriangulator;
 using Unity.Mathematics;
+using UnityEditor.Experimental.GraphView;
+using static UnityEditor.PlayerSettings;
+
 
 public class CullPassPoints : MonoBehaviour
 {
@@ -34,10 +37,13 @@ public class CullPassPoints : MonoBehaviour
     public string teamName_Defense = "Red";
     public string teamName_Attacker = "Blue";
     public List<Transform> testLonelyPoints;
-    public bool test,debug,debugPointResults,debugPassTest,debugNextLonelyPoints;
-    public bool debugOnlyOrderLonelyPoint;
-    public int debugOrderLonelyPointIndex;
-
+    public bool debug,debugPointResults;
+    public bool _debugAllLonelyPointsOfNode;
+    public bool _debugLonelyPointIndex;
+    public int debugLonelyPointNode = 0;
+    public int debugLonelyPointIndex = 0;
+    public bool debugPlayerIndex;
+    public List<LonelyPointElement2> debugWeightLonelyPooints = new List<LonelyPointElement2>();
     public bool debugText;
     public int lonelyPointIndexPassTest;
     public int searchNodeDebug;
@@ -140,8 +146,12 @@ public class CullPassPoints : MonoBehaviour
             entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
         }
         teamA_isAttacker = teamName.Equals("Red");
-        teamAttack_start = teamA_isAttacker ? teamA_size : 0;
+        /*teamAttack_start = teamA_isAttacker ? teamA_size : 0;
         teamDefense_start = teamA_isAttacker ? teamA_size + teamB_size : teamA_size;
+        teamAttack_size = teamA_isAttacker ? teamA_size : teamB_size;
+        teamDefense_size = teamA_isAttacker ? teamB_size : teamA_size;*/
+        teamAttack_start = teamA_isAttacker ? 0 : teamA_size;
+        teamDefense_start = teamA_isAttacker ? teamA_size : 0;
         teamAttack_size = teamA_isAttacker ? teamA_size : teamB_size;
         teamDefense_size = teamA_isAttacker ? teamB_size : teamA_size;
         for (int k = 0; k < searchPlayData.searchPlayNodes.Count; k++)
@@ -338,6 +348,7 @@ public class CullPassPoints : MonoBehaviour
         
         
     }
+   
     public void UpdatePlayerPositions(List<int> nodes,int size,int startNode)
     {
         for (int i = 0; i < size; i++)
@@ -490,100 +501,7 @@ public class CullPassPoints : MonoBehaviour
         //yield return new WaitForSeconds(TestResultComponent.ballReachTargetPositionTime - TestResultComponent.attackReachTime);
         //print(MatchComponents.ballRigidbody.velocity.magnitude);
     }
-#if UNITY_EDITOR
-    private void OnDrawGizmos()
-    {
-        if (Application.isPlaying && debug)
-        {
-
-
-            if (debugPassTest)
-            {
-                Entity entity = entities[0];
-                TestResultComponent TestResultComponent = entityManager.GetComponentData<TestResultComponent>(entity);
-                Gizmos.color = Color.green;
-                Gizmos.DrawSphere(TestResultComponent.closestPosition + Vector3.up * 0.5f, 0.1f);
-
-                GUIStyle style = new GUIStyle();
-                style.fontSize = 10;
-                style.normal.textColor = Color.yellow;
-                Handles.color = Color.green;
-                //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
-                string text = "defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
-                //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
-                Handles.Label(TestResultComponent.closestPosition + Vector3.up * 1.0f, text, style);
-            }
-            if (debugPointResults)
-            {
-                
-                if (searchPlayData.searchPlayNodes.Count > 0)
-                {
-
-                    int node=0;
-                    List<int> nodes = new List<int>();
-                    nodes.Add(node);
-                    for (int i = 0; i < nodes.Count; i++)
-                    {
-                        int nextNode = nodes[i];
-                        nodes.AddRange(searchPlayData.GetNextNodes(nextNode));
-                        LonelyPointElement2 lonelyPointElement = searchPlayData.GetPosibleSortLonelyPoint(nextNode);
-                        int previousNode = searchPlayData.GetPreviousNode(nextNode);
-                        LonelyPointElement2 previousLonelyPoint = searchPlayData.GetPosibleSortLonelyPoint(previousNode);
-                        DrawLonelyPoint(lonelyPointElement, nextNode);
-                        Vector3 pos3 = new Vector3(lonelyPointElement.position.x, 1, lonelyPointElement.position.y);
-                        Vector3 pos4 = new Vector3(previousLonelyPoint.position.x, 1, previousLonelyPoint.position.y);
-                        DrawArrow.ForDebug(pos4, pos3- pos4, 0.5f);
-                    }
-            }
-                    
-
-
-            
-        }
-    }
-    void DrawLonelyPoint(LonelyPointElement2 lonelyPointElement,int node)
-    {
-            Vector3 pos = new Vector3(lonelyPointElement.position.x, 0, lonelyPointElement.position.y);
-            Color color;
-            if (lonelyPointElement.order == 0)
-            {
-                color = Color.cyan;
-            }
-            else if (lonelyPointElement.straightReachBall && lonelyPointElement.parabolicReachBall)
-            {
-                color = Color.green;
-            }
-            else if (lonelyPointElement.straightReachBall && !lonelyPointElement.parabolicReachBall)
-            {
-                color = Color.blue;
-            }
-            else if (!lonelyPointElement.straightReachBall && lonelyPointElement.parabolicReachBall)
-            {
-                color = Color.yellow;
-            }
-            else
-            {
-                color = Color.red;
-            }
-            Gizmos.color = color;
-            Gizmos.DrawSphere(pos + Vector3.up * 0.25f, 0.2f);
-            GUIStyle style = new GUIStyle();
-            style.fontSize = 12;
-            style.normal.textColor = color;
-            //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
-            //string text = "straightReachBall=" + lonelyPointElement.straightReachBall + " parabolicReachBall=" + lonelyPointElement.parabolicReachBall + " i="+lonelyPointElement.index;
-            string text = "i=" + lonelyPointElement.index;
-            //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
-            Handles.Label(pos + Vector3.up * 0.5f, text, style);
-            Color c = Color.Lerp(Color.green, Color.red, lonelyPointElement.weight);
-            style.normal.textColor = c;
-            float value = lonelyPointElement.weight * 100;
-            text = "weight=" + value.ToString("f2") + " order=" + lonelyPointElement.order + " node="+node;
-            if(debugText)
-            Handles.Label(pos + Vector3.up * 1.25f, text, style);
-        }
-    }
-#endif
+ 
     void DebugNextLonelyPoints()
     {
         Team team;
@@ -601,6 +519,7 @@ public class CullPassPoints : MonoBehaviour
         Entity entity = entities[entityIndex];
         CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
         DynamicBuffer<LonelyPointElement2> lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
+        CullPassPointsComponent.node = nodeIndex;
         for (int i = 0; i < bufferSizeComponent.lonelyPointsResultSize; i++)
         {
 
@@ -627,6 +546,7 @@ public class CullPassPoints : MonoBehaviour
             entity = entities[entityIndex];
             CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
             CullPassPointsComponent.sizeLonelyPoints = lonelyPointCount;
+            CullPassPointsComponent.node = nodeIndex;
         }
         entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
         entityManager.SetEnabled(entity, lonelyPointCount > 0);
@@ -645,8 +565,9 @@ public class CullPassPoints : MonoBehaviour
             
             CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
             DynamicBuffer<LonelyPointElement2> lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
+            CullPassPointsComponent.node = node;
 
-            
+
             for (int k = 0; k < lonelyCount; k++)
             {
                 LonelyPointElement2 lonelyPointElement2 = new LonelyPointElement2(points[k], k);
@@ -670,31 +591,33 @@ public class CullPassPoints : MonoBehaviour
                 entity = entities[entityIndex];
                 CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
                 CullPassPointsComponent.sizeLonelyPoints = lonelyPointCount;
+                CullPassPointsComponent.node = node;
                 entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
             }  
             entityManager.SetEnabled(entity, lonelyPointCount>0);
         }  
     }
-    private void TestPlayers()
+    public void getDebugWeightPoints(List<int> Snodes)
     {
-        print("eooo");
-        Team teamRed = Teams.getTeamByName("Red");
-        Team teamBlue = Teams.getTeamByName("Blue");
-        foreach (var publicPlayerData in teamRed.publicPlayerDatas)
+        if (Snodes.Contains(debugLonelyPointNode))
         {
-            print(publicPlayerData.playerID);
-        }
-        foreach (var publicPlayerData in teamBlue.publicPlayerDatas)
-        {
-            print(publicPlayerData.playerID);
-        }
-        print("aaaaa");
-        foreach (var publicPlayerData in players)
-        {
-            print(publicPlayerData.playerID);
+            debugWeightLonelyPooints.Clear();
+            int node = debugLonelyPointNode;
+            int entityCount = searchPlayData.getCullEntityCount(node);
+            for (int i = 0; i < entityCount; i++)
+            {
+                int entityIndex = searchPlayData.getCullEntity(node, i);
+                Entity entity = entities[entityIndex];
+                CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
+                DynamicBuffer<LonelyPointElement2> lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
+                 for (int j = 0; j < CullPassPointsComponent.sizeLonelyPoints; j++)
+                {
+                    LonelyPointElement2 lonelyPointElement2 = lonelyPointElements2[j];
+                    debugWeightLonelyPooints.Add(lonelyPointElement2);
+                }
+            }
         }
     }
-   
     public void SetAllLonelyPointsCalculateNextPositionParameters(FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team, List<int> Snodes, List<int> Fnodes, int nodeSizeTotal,int nodeSizePerNode,out int newNodesCount,int startNode,int nodeCalculationPerFrame, int totalNodeSize,int size2)
     {
         
@@ -782,14 +705,15 @@ public class CullPassPoints : MonoBehaviour
     public void UpdateNextPlayerPoints(int nodeSize,FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team,int nextPlayerPositionSize)
     {
 
-        
+        bool teamIsAttacker = teamName_Attacker.Equals(team.TeamName);
         for (int i = 0; i < nodeSize; i++)
         {
             int node = searchPlayData.posibleNodes[i];
             CalculateNextPositionComponents2 CalculateNextPositionComponents = searchPlayData.GetCalculateNextPositionComponents(node);
             NextPositionData2 nextPositionData = CalculateNextPositionComponents.normalNextPosition;
             LonelyPointElement2 lonelyPoint = searchPlayData.GetPosibleSortLonelyPoint(node);
-            int k = 0;
+            
+            int k = teamIsAttacker ? teamAttack_start : teamDefense_start;
             //clearAuxNextPositionPublicPlayerDatas();
             
             for (int j = 0; j < nextPlayerPositionSize; j++)
@@ -954,4 +878,123 @@ public class CullPassPoints : MonoBehaviour
     {
         searchPlayData.Dispose();
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        if (Application.isPlaying && debug)
+        {
+            if (debugPointResults)
+            {
+
+                if (searchPlayData.searchPlayNodes.Count > 0)
+                {
+
+                    int node = 0;
+                    List<int> nodes = new List<int>();
+                    nodes.Add(node);
+                    for (int i = 0; i < nodes.Count; i++)
+                    {
+                        int nextNode = nodes[i];
+                        nodes.AddRange(searchPlayData.GetNextNodes(nextNode));
+                        LonelyPointElement2 lonelyPointElement = searchPlayData.GetPosibleSortLonelyPoint(nextNode);
+                        int previousNode = searchPlayData.GetPreviousNode(nextNode);
+                        LonelyPointElement2 previousLonelyPoint = searchPlayData.GetPosibleSortLonelyPoint(previousNode);
+                        DrawLonelyPoint(lonelyPointElement, nextNode, 0);
+                        Vector3 pos3 = new Vector3(lonelyPointElement.position.x, 1, lonelyPointElement.position.y);
+                        Vector3 pos4 = new Vector3(previousLonelyPoint.position.x, 1, previousLonelyPoint.position.y);
+                        DrawArrow.ForDebug(pos4, pos3 - pos4, 0.5f);
+                    }
+                }
+            }
+            if (_debugAllLonelyPointsOfNode)
+            {
+                for (int i = 0; i < debugWeightLonelyPooints.Count; i++)
+                {
+                    DrawLonelyPoint(debugWeightLonelyPooints[i], debugLonelyPointNode, i);
+                }
+            }
+            if (_debugLonelyPointIndex)
+            {
+                for (int i = 0; i < debugWeightLonelyPooints.Count; i++)
+                {
+                    if(debugLonelyPointIndex== debugWeightLonelyPooints[i].index)
+                    DrawLonelyPoint(debugWeightLonelyPooints[i], debugLonelyPointNode, i);
+                }
+            }
+            if (debugPlayerIndex)
+            {
+
+                Team defenseTeam = Teams.getTeamByName(teamName_Defense);
+                Team attackTeam = Teams.getTeamByName(teamName_Attacker);
+                DebugPlayerIndex(defenseTeam, attackTeam);
+            }
+        }
+    }
+    public void DebugPlayerIndex(Team defenseTeam, Team attackTeam)
+    {
+        for (int i = teamAttack_start, j = 0; i < teamAttack_start + teamAttack_size; i++, j++)
+        {
+
+            Vector3 position = attackTeam.publicPlayerDatas[j].position;
+            GUIStyle style = new GUIStyle();
+            style.fontSize = 14;
+            style.normal.textColor = Color.cyan;
+            Handles.Label(position + Vector3.up * 1.25f, "player index=" + i, style);
+
+        }
+        for (int i = teamDefense_start, j = 0; i < teamDefense_start + teamDefense_size; i++, j++)
+        {
+
+            Vector3 position = defenseTeam.publicPlayerDatas[j].position;
+            GUIStyle style = new GUIStyle();
+            style.fontSize = 14;
+            style.normal.textColor = Color.white;
+            Handles.Label(position + Vector3.up * 1.25f, "player index=" + i, style);
+        }
+
+    }
+    void DrawLonelyPoint(LonelyPointElement2 lonelyPointElement, int node, int index)
+    {
+        Vector3 pos = new Vector3(lonelyPointElement.position.x, 0, lonelyPointElement.position.y);
+        Color color;
+        if (lonelyPointElement.order == 0)
+        {
+            color = Color.cyan;
+        }
+        else if (lonelyPointElement.straightReachBall && lonelyPointElement.parabolicReachBall)
+        {
+            color = Color.green;
+        }
+        else if (lonelyPointElement.straightReachBall && !lonelyPointElement.parabolicReachBall)
+        {
+            color = Color.blue;
+        }
+        else if (!lonelyPointElement.straightReachBall && lonelyPointElement.parabolicReachBall)
+        {
+            color = Color.yellow;
+        }
+        else
+        {
+            color = Color.red;
+        }
+        Gizmos.color = color;
+        Gizmos.DrawSphere(pos + Vector3.up * 0.25f, 0.2f);
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 14;
+        style.normal.textColor = color;
+        //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
+        //string text = "straightReachBall=" + lonelyPointElement.straightReachBall + " parabolicReachBall=" + lonelyPointElement.parabolicReachBall + " i="+lonelyPointElement.index;
+        string text = "i=" + lonelyPointElement.index;
+        //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
+        Handles.Label(pos + Vector3.up * 0.5f, text, style);
+        Color c = Color.Lerp(Color.green, Color.red, lonelyPointElement.weight);
+        style.normal.textColor = c;
+        float value = lonelyPointElement.weight * 100;
+        text = "weight=" + value.ToString("f2") + " order=" + lonelyPointElement.order + " node=" + node + " index=" + lonelyPointElement.index + " Pos=" + lonelyPointElement.position.ToString("f2");
+        if (debugText)
+            Handles.Label(pos + Vector3.up * 1.25f, text, style);
+
+    }
+#endif
 }

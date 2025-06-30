@@ -6,6 +6,8 @@ using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Jobs;
 using System;
+using static UnityEditor.PlayerSettings;
+using UnityEditor;
 
 public class TriangulatorJob : MonoBehaviour
 {
@@ -96,6 +98,15 @@ public class TriangulatorJob : MonoBehaviour
             Debug.DrawLine(point1, point2, color);
             Debug.DrawLine(point2, point3, color);
             Debug.DrawLine(point3, point1, color);
+
+            
+            GUIStyle style = new GUIStyle();
+            style.fontSize = 14;
+            style.normal.textColor = color;
+            Handles.Label(point1 + Vector3.up * 0.5f, point1.ToString("f2"), style);
+            Handles.Label(point2 + Vector3.up * 0.5f, point2.ToString("f2"), style);
+            Handles.Label(point3 + Vector3.up * 0.5f, point3.ToString("f2"), style);
+
         }
     }
     void DrawLonelyPoints(NativeList<Point> lonelyPoints)

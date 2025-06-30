@@ -54,6 +54,7 @@ namespace CullPositionPoint
     }
     public struct CullPassPointsComponent : IComponentData
     {
+        public int node;
         public int teamASize, teamBSize;
         public bool teamA_IsAttacker;
         public int sizeLonelyPoints;

@@ -10,7 +10,7 @@ using DOTS_ChaserDataCalculation;
 using TMPro;
 using Unity.Entities.UniversalDelegates;
 using System;
-[BurstCompile]
+
 public struct CullPassPointsJob : IJobEntityBatch
 {
     public BufferTypeHandle<LonelyPointElement2> lonelyPointsHandle;
