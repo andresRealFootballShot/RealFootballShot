@@ -13641,7 +13641,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004615711249, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -17.81
+      value: -18.14
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004615711249, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -2.98
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004615711254, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_Icon
@@ -44033,11 +44037,12 @@ MonoBehaviour:
   - {fileID: 1796266505}
   - {fileID: 1563016489}
   debug: 1
-  debugPointResults: 0
-  _debugAllLonelyPointsOfNode: 0
+  debugPointResults: 1
+  _debugNode: 1
+  _debugAllLonelyPointsOfNode: 1
   _debugLonelyPointIndex: 1
-  debugLonelyPointNode: 1
-  debugLonelyPointIndex: 1
+  debugNode: 0
+  debugLonelyPointIndex: 0
   debugPlayerIndex: 1
   debugText: 1
   lonelyPointIndexPassTest: 1
@@ -44051,7 +44056,7 @@ MonoBehaviour:
   FootballPositionCtrl: {fileID: 58440509}
   calculateNextPositionShedule: {fileID: 1875775247}
   triangulatorJob: {fileID: 1875775248}
-  sortLonelyPointsSize: 01000000070000000400000002000000
+  sortLonelyPointsSize: 0100000007000000
   lineupName: Default
   pressureName: Default
   publicPlayerData: {fileID: 0}
@@ -48805,7 +48810,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1322839334424030253, guid: 4600716e881ddd442b459f182df3d352, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 33.93
+      value: 20.85
       objectReference: {fileID: 0}
     - target: {fileID: 1322839334424030253, guid: 4600716e881ddd442b459f182df3d352, type: 3}
       propertyPath: m_LocalPosition.y
@@ -48813,7 +48818,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1322839334424030253, guid: 4600716e881ddd442b459f182df3d352, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 194.37
+      value: 166.47
       objectReference: {fileID: 0}
     - target: {fileID: 1322839334424030253, guid: 4600716e881ddd442b459f182df3d352, type: 3}
       propertyPath: m_LocalRotation.w

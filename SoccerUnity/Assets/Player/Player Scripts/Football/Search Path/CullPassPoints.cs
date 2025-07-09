@@ -37,10 +37,10 @@ public class CullPassPoints : MonoBehaviour
     public string teamName_Defense = "Red";
     public string teamName_Attacker = "Blue";
     public List<Transform> testLonelyPoints;
-    public bool debug,debugPointResults;
+    public bool debug,debugPointResults, _debugNode;
     public bool _debugAllLonelyPointsOfNode;
-    public bool _debugLonelyPointIndex;
-    public int debugLonelyPointNode = 0;
+    public bool _debugLonelyPointIndex,debugReachableLonelyPoints;
+    public int debugNode = 0;
     public int debugLonelyPointIndex = 0;
     public bool debugPlayerIndex;
     public List<LonelyPointElement2> debugWeightLonelyPooints = new List<LonelyPointElement2>();
@@ -599,10 +599,10 @@ public class CullPassPoints : MonoBehaviour
     }
     public void getDebugWeightPoints(List<int> Snodes)
     {
-        if (Snodes.Contains(debugLonelyPointNode))
+        if (Snodes.Contains(debugNode))
         {
             debugWeightLonelyPooints.Clear();
-            int node = debugLonelyPointNode;
+            int node = debugNode;
             int entityCount = searchPlayData.getCullEntityCount(node);
             for (int i = 0; i < entityCount; i++)
             {
@@ -632,14 +632,15 @@ public class CullPassPoints : MonoBehaviour
             int cullEntityCount = searchPlayData.getCullEntityCount(Snode);
             for (int l = 0; l < cullEntityCount; l++)
             {
-                if (order >= nodeSizePerNode) break;
+                //if (order >= nodeSizePerNode) break;
                 int entityIndex = searchPlayData.getCullEntity(Snode, l);
                 Entity entity = entities[entityIndex];
                 DynamicBuffer<LonelyPointElement2> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement2>(entity);
                 CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
                 for (int i = 0; i < CullPassPointsComponent.sizeLonelyPoints; i++)
                 {
-                    if (order >= nodeSizePerNode) break;
+                    order = 0;
+                    bool exit=false;
                     if (lonelyPointElements[i].weight == Mathf.Infinity && !block) continue;
                     if (searchPlayData.posibleNodes.Count >= cullPassPointsParams.maxPosibleLonelyPointsSize) return;
                     float minWeight = lonelyPointElements[i].weight;
@@ -651,21 +652,27 @@ public class CullPassPoints : MonoBehaviour
                         CullPassPointsComponent CullPassPointsComponent2 = entityManager.GetComponentData<CullPassPointsComponent>(entity2);
                         for (int j = 0; j < CullPassPointsComponent2.sizeLonelyPoints; j++)
                         {
+                            if (order >= nodeSizePerNode)
+                            {
+                                exit = true;
+                                break;
+                            }
                             if ((z == l && i == j) || lonelyPointElements2[j].weight == Mathf.Infinity && !block) continue;
                             if (minWeight > lonelyPointElements2[j].weight)
                             {
                                 //order = lonelyPointElements2[j].order;
-                                //order++;
+                                order++;
                             }
                             else
                             {
-                                LonelyPointElement2 lonelyPointElement = lonelyPointElements2[j];
+                                //LonelyPointElement2 lonelyPointElement = lonelyPointElements2[j];
                                 //order = lonelyPointElement.order;
                                 //lonelyPointElement.order++;
-                                lonelyPointElements2[j] = lonelyPointElement;
+                                //lonelyPointElements2[j] = lonelyPointElement;
 
                             }
                         }
+                        if (exit) break;
                     }
                   
                     if (order < nodeSizePerNode)
@@ -687,7 +694,7 @@ public class CullPassPoints : MonoBehaviour
                         //posibleLonelyPointsSize[calculationIndex] = order;
                         if (order >= totalNodeSize)
                         {
-                            return;
+                            //return;
                         }
                     }
                 }
@@ -900,18 +907,41 @@ public class CullPassPoints : MonoBehaviour
                         LonelyPointElement2 lonelyPointElement = searchPlayData.GetPosibleSortLonelyPoint(nextNode);
                         int previousNode = searchPlayData.GetPreviousNode(nextNode);
                         LonelyPointElement2 previousLonelyPoint = searchPlayData.GetPosibleSortLonelyPoint(previousNode);
-                        DrawLonelyPoint(lonelyPointElement, nextNode, 0);
+                        DrawLonelyPoint(lonelyPointElement, nextNode, 0,"",Color.white);
                         Vector3 pos3 = new Vector3(lonelyPointElement.position.x, 1, lonelyPointElement.position.y);
                         Vector3 pos4 = new Vector3(previousLonelyPoint.position.x, 1, previousLonelyPoint.position.y);
                         DrawArrow.ForDebug(pos4, pos3 - pos4, 0.5f);
                     }
                 }
             }
+            if (_debugNode)
+            {
+                int node = 0;
+                List<int> nodes = new List<int>();
+                nodes.Add(node);
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    int nextNode = nodes[i];
+                    nodes.AddRange(searchPlayData.GetNextNodes(nextNode));
+
+                    
+                    
+                    if (nextNode== debugNode)
+                    {
+                        LonelyPointElement2 lonelyPointElement = searchPlayData.GetPosibleSortLonelyPoint(nextNode);
+                        DrawLonelyPoint(lonelyPointElement, nextNode, 0, "Node", new Color(0.5f,0.75f,0.25f));
+                    }
+                }
+            }
             if (_debugAllLonelyPointsOfNode)
             {
+
                 for (int i = 0; i < debugWeightLonelyPooints.Count; i++)
                 {
-                    DrawLonelyPoint(debugWeightLonelyPooints[i], debugLonelyPointNode, i);
+                    if(!debugReachableLonelyPoints)
+                    DrawLonelyPoint(debugWeightLonelyPooints[i], debugNode, i, "", Color.white);
+                    else if(debugWeightLonelyPooints[i].weight!=Mathf.Infinity)
+                        DrawLonelyPoint(debugWeightLonelyPooints[i], debugNode, i, "", Color.white);
                 }
             }
             if (_debugLonelyPointIndex)
@@ -919,7 +949,7 @@ public class CullPassPoints : MonoBehaviour
                 for (int i = 0; i < debugWeightLonelyPooints.Count; i++)
                 {
                     if(debugLonelyPointIndex== debugWeightLonelyPooints[i].index)
-                    DrawLonelyPoint(debugWeightLonelyPooints[i], debugLonelyPointNode, i);
+                    DrawLonelyPoint(debugWeightLonelyPooints[i], debugNode, i, "Lonely Point", new Color(0.6f, 0.9f, 0.75f));
                 }
             }
             if (debugPlayerIndex)
@@ -954,7 +984,7 @@ public class CullPassPoints : MonoBehaviour
         }
 
     }
-    void DrawLonelyPoint(LonelyPointElement2 lonelyPointElement, int node, int index)
+    void DrawLonelyPoint(LonelyPointElement2 lonelyPointElement, int node, int index,string info,Color infoColor)
     {
         Vector3 pos = new Vector3(lonelyPointElement.position.x, 0, lonelyPointElement.position.y);
         Color color;
@@ -981,12 +1011,17 @@ public class CullPassPoints : MonoBehaviour
         Gizmos.color = color;
         Gizmos.DrawSphere(pos + Vector3.up * 0.25f, 0.2f);
         GUIStyle style = new GUIStyle();
+        style.fontSize = 16;
+        style.normal.textColor = infoColor;
+        Handles.Label(pos + Vector3.up * 1.7f, info, style);
         style.fontSize = 14;
         style.normal.textColor = color;
         //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
         //string text = "straightReachBall=" + lonelyPointElement.straightReachBall + " parabolicReachBall=" + lonelyPointElement.parabolicReachBall + " i="+lonelyPointElement.index;
         string text = "i=" + lonelyPointElement.index;
         //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
+     
+
         Handles.Label(pos + Vector3.up * 0.5f, text, style);
         Color c = Color.Lerp(Color.green, Color.red, lonelyPointElement.weight);
         style.normal.textColor = c;

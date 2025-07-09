@@ -86,7 +86,7 @@ public class TriangulatorJob : MonoBehaviour
     }
     void DrawTriangles(NativeList<int> points, NativeArray<float2> positions)
     {
-        Color color = Color.red;
+        Color color = new Color(0,0.9f,0.7f);
         for (int i = 0; i < points.Length; i+=3)
         {
             int index1 = points[i];
