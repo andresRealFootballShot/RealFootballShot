@@ -21,6 +21,7 @@ namespace CullPositionPoint
         public float weight;
         public int order;
         public float ballReachTime;
+        public int attackReachIndex;
         public LonelyPointElement2(Vector2 position, int index)
         {
             this.position = position;
@@ -30,6 +31,18 @@ namespace CullPositionPoint
             weight = Mathf.Infinity;
             order = -1;
             ballReachTime = -1;
+            attackReachIndex = -1;
+        }
+        public LonelyPointElement2(Vector3 position, int index)
+        {
+            this.position = new Vector2(position.x,position.z);
+            this.index = index;
+            straightReachBall = false;
+            parabolicReachBall = false;
+            weight = Mathf.Infinity;
+            order = -1;
+            ballReachTime = -1;
+            attackReachIndex = -1;
         }
         public LonelyPointElement2(LonelyPointElement lonelyPointElement)
         {
@@ -40,6 +53,7 @@ namespace CullPositionPoint
             weight = Mathf.Infinity;
             order = -1;
             ballReachTime = -1;
+            attackReachIndex = -1;
         }
         public LonelyPointElement2(Point point,int index)
         {
@@ -50,6 +64,7 @@ namespace CullPositionPoint
             weight = Mathf.Infinity;
             order = -1;
             ballReachTime = -1;
+            attackReachIndex = -1;
         }
     }
     public struct CullPassPointsComponent : IComponentData

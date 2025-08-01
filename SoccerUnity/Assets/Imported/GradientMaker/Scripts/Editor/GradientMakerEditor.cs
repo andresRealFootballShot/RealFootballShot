@@ -37,8 +37,8 @@ class GradientMakerEditor : EditorWindow {
 	
 	static void Init () {
 		GradientMakerEditor window = (GradientMakerEditor)EditorWindow.GetWindow(typeof (GradientMakerEditor));
-		window.title = "Gradient Maker Lite";
-		window.minSize = new Vector2(260,410);
+		window.titleContent = new GUIContent("Gradient Maker");
+        window.minSize = new Vector2(260,410);
 		
 	}
 

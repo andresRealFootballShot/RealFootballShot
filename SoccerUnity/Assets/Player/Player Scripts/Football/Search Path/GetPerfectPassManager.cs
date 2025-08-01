@@ -29,7 +29,7 @@ public class GetPerfectPassManager : MonoBehaviour, ILoad
     public OptimalPointDOTSCreator OptimalPointDOTSCreator;
     public List<OptimalPointReference> OptimalPointReferences { get; set; } = new List<OptimalPointReference>();
     [Header("Version")]
-    public bool v1 = true;
+    public bool v1 = false;
     [Header("Parameters")]
     public OptimalPointParams firstOptimalPointParams;
     [Space(10)]

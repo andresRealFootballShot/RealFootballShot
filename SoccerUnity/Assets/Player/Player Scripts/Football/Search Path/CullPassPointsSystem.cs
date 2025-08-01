@@ -71,8 +71,15 @@ public class CullPassPointsSystem : SystemBase
         if (reset)
         {
             SearchPlayData.Clear();
-           
-            CullPassPoints.PlacePoints(0);
+            if (CullPassPoints.debugTestLonelyPoints)
+            {
+               CullPassPoints.PlaceTestLonelyPoint();
+
+            }
+            else
+            {
+                CullPassPoints.PlacePoints(0);
+            }
             Snodes.Clear();
             SearchPlayData.getSortedNodes(ref Snodes, 1);
             //SearchPlayData.getNode(Snodes, 0);

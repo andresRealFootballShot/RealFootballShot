@@ -37,9 +37,9 @@ public class CullPassPoints : MonoBehaviour
     public string teamName_Defense = "Red";
     public string teamName_Attacker = "Blue";
     public List<Transform> testLonelyPoints;
-    public bool debug,debugPointResults, _debugNode;
+    public bool debug,debugTestLonelyPoints,debugPointResults, _debugNode;
     public bool _debugAllLonelyPointsOfNode;
-    public bool _debugLonelyPointIndex,debugReachableLonelyPoints;
+    public bool _debugLonelyPointIndex,debugReachableLonelyPoints,debugAttackPass;
     public int debugNode = 0;
     public int debugLonelyPointIndex = 0;
     public bool debugPlayerIndex;
@@ -280,19 +280,48 @@ public class CullPassPoints : MonoBehaviour
     }
     public void PlaceTestLonelyPoint()
     {
-        foreach (var entity in entities)
+        Entity searchLonelyPointsEntity = SearchLonelyPointsManager.teamsSearchLonelyPointsEntitys[teamName_Defense];
+        BufferSizeComponent bufferSizeComponent = entityManager.GetComponentData<BufferSizeComponent>(searchLonelyPointsEntity);
+        DynamicBuffer<LonelyPointElement> lonelyPointElements = entityManager.GetBuffer<LonelyPointElement>(searchLonelyPointsEntity);
+        int nodeIndex = 0;
+        int entityIndex = nodeIndex;
+        int lonelyPointCount = 0;
+        Entity entity = entities[entityIndex];
+        CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
+        DynamicBuffer<LonelyPointElement2> lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
+        CullPassPointsComponent.node = nodeIndex;
+        for (int i = 0; i < testLonelyPoints.Count; i++)
         {
-            DynamicBuffer<LonelyPointElement2> lonelyPointElements= entityManager.GetBuffer<LonelyPointElement2>(entity);
-            CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
-            for (int i = 0; i < testLonelyPoints.Count; i++)
+
+            LonelyPointElement2 lonelyPointElement2 = new LonelyPointElement2(testLonelyPoints[i].position,i);
+
+            lonelyPointElements2[lonelyPointCount] = lonelyPointElement2;
+            lonelyPointCount++;
+            if (lonelyPointCount >= cullPassPointsParams.entityPointSize)
             {
-                Vector2 position = new Vector2(testLonelyPoints[i].position.x, testLonelyPoints[i].position.z);
-                LonelyPointElement2 LonelyPointElement = new LonelyPointElement2(position, 0);
-                lonelyPointElements[i] = LonelyPointElement;
+                searchPlayData.SetCullEntity(nodeIndex, entityIndex);
+                CullPassPointsComponent.sizeLonelyPoints = lonelyPointCount;
+                entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
+                entityIndex++;
+                entity = entities[entityIndex];
+                lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
+                lonelyPointCount = 0;
+
             }
-            CullPassPointsComponent.sizeLonelyPoints = testLonelyPoints.Count;
-            entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
+
         }
+        if (lonelyPointCount > 0)
+        {
+            searchPlayData.SetCullEntity(nodeIndex, entityIndex);
+            entity = entities[entityIndex];
+            CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
+            CullPassPointsComponent.sizeLonelyPoints = lonelyPointCount;
+            CullPassPointsComponent.node = nodeIndex;
+        }
+        entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
+        entityManager.SetEnabled(entity, lonelyPointCount > 0);
+
+
     }
     public void PlacePoints()
     {
@@ -986,6 +1015,7 @@ public class CullPassPoints : MonoBehaviour
     }
     void DrawLonelyPoint(LonelyPointElement2 lonelyPointElement, int node, int index,string info,Color infoColor)
     {
+        //if (!lonelyPointElement.parabolicReachBall) return;
         Vector3 pos = new Vector3(lonelyPointElement.position.x, 0, lonelyPointElement.position.y);
         Color color;
         if (lonelyPointElement.order == 0)
@@ -1029,6 +1059,17 @@ public class CullPassPoints : MonoBehaviour
         text = "weight=" + value.ToString("f2") + " order=" + lonelyPointElement.order + " node=" + node + " index=" + lonelyPointElement.index + " Pos=" + lonelyPointElement.position.ToString("f2");
         if (debugText)
             Handles.Label(pos + Vector3.up * 1.25f, text, style);
+
+        if (debugAttackPass && lonelyPointElement.attackReachIndex!=-1)
+        {
+            Team attackTeam = Teams.getTeamByName(teamName_Attacker);
+            Vector2 playerPos2 = searchPlayData.GetPlayerPosition(0,lonelyPointElement.attackReachIndex);
+            Vector3 playerPos = new Vector3(playerPos2.x,0,playerPos2.y);
+            Debug.DrawLine(playerPos+Vector3.up*0.25f, pos + Vector3.up * 0.25f, Color.black);
+            string pass = "straight=" + lonelyPointElement.straightReachBall + " parabolic=" + lonelyPointElement.parabolicReachBall;
+            Vector3 pos2 = (playerPos - pos)*0.5f;
+            Handles.Label(pos+pos2 + Vector3.up * 0.5f, pass, style);
+        }
 
     }
 #endif

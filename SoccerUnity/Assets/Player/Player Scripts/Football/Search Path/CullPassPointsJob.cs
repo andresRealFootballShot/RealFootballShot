@@ -55,6 +55,7 @@ public struct CullPassPointsJob : IJobEntityBatch
                 Vector3 lonelyPosition = new Vector3(lonelyPoint.position.x, BallParams.BallPosition.y, lonelyPoint.position.y);
                 int attackIndex = -1;
                 float reachTime = GetTimeToReachPosition(ref PlayerPositions, ref PlayerGenericParams, attackIndexStart, attackIndexEnd, lonelyPosition, ref attackIndex);
+                lonelyPoint.attackReachIndex = attackIndex;
                 PathDataDOTS.Pos0 = BallParams.BallPosition;
                 PathDataDOTS.Posf = lonelyPosition;
                 getV0DOTSResult.ballReachTargetPositionTime = reachTime;
@@ -74,7 +75,7 @@ public struct CullPassPointsJob : IJobEntityBatch
                 TestResult.lonelyPosition = lonelyPosition;
                 TestResult.parabolicReachBall = true;
                 TestResult.straightReachBall = true;
-                lonelyPoint.parabolicReachBall = true;
+                lonelyPoint.parabolicReachBall = false;
                 lonelyPoint.straightReachBall = true;
 
                 parabolicMinDistancePlayer_Ball = Mathf.NegativeInfinity;
@@ -162,8 +163,10 @@ public struct CullPassPointsJob : IJobEntityBatch
             float maxSpeed = playerIndexStraightPass == startIndex ? PlayerGenericParams.goalkeeperMaxSpeed : PlayerGenericParams.maxSpeed;
             Vector3 closestPoint2 = MyFunctions.GetClosestPointOnFiniteLine(playerPosition, ballPosition, lonelyPosition);
             parabolicMinDistance_BallPlayer = getPlayerReachDistance_StraightPass(false, playerPosition, closestPoint2, ballPosition, maxSpeed, ref PathDataDOTS, ref ballPositionAtReachTime, ref PlayerGenericParams, ref playerPositionElement, out playerReachTime);
+            if(parabolicMinDistance_BallPlayer>=0)
+                return false;
+            else return true;
 
-            return false;
         }
         bool result = true; ;
         for (int i = startIndex; i < endIndex; i++)     {
@@ -189,13 +192,15 @@ public struct CullPassPointsJob : IJobEntityBatch
                     if (PlayerReachDistance > parabolicMinDistance_BallPlayer)
                     {
                         parabolicMinDistance_BallPlayer = PlayerReachDistance;
-                        result = false;
+                        if(PlayerReachDistance>=0)
+                            result = false;
                     }
                     PlayerReachDistance = getPlayerReachDistance_StraightPass(false, playerPosition, posReachPlayerHeightJump2, ballPosition, maxSpeed, ref PathDataDOTS, ref ballPositionAtReachTime, ref PlayerGenericParams,ref playerPositionElement, out playerReachTime);
                     if (PlayerReachDistance > parabolicMinDistance_BallPlayer)
                     {
                         parabolicMinDistance_BallPlayer = PlayerReachDistance;
-                        result = false;
+                        if (PlayerReachDistance >= 0)
+                            result = false;
                     }
                 }
                 else
@@ -204,14 +209,16 @@ public struct CullPassPointsJob : IJobEntityBatch
                     if (PlayerReachDistance > parabolicMinDistance_BallPlayer)
                     {
                         parabolicMinDistance_BallPlayer = PlayerReachDistance;
-                        result = false;
+                        if (PlayerReachDistance >= 0)
+                            result = false;
                     }
                 }
                 float PlayerReachDistance2 = getPlayerReachDistance_StraightPass(false, playerPosition, lonelyPosition, ballPosition, maxSpeed, ref PathDataDOTS, ref ballPositionAtReachTime, ref PlayerGenericParams,ref playerPositionElement, out playerReachTime);
                 if (PlayerReachDistance2 > parabolicMinDistance_BallPlayer)
                 {
                     parabolicMinDistance_BallPlayer = PlayerReachDistance2;
-                    result = false;
+                    if (PlayerReachDistance2 >= 0)
+                        result = false;
                 }
             }
         }

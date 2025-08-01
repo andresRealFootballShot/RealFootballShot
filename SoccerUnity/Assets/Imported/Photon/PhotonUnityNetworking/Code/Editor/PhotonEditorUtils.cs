@@ -18,6 +18,7 @@ using UnityEngine;
 using System.IO;
 using System.Text;
 using UnityEngine.Networking;
+using UnityEditor.PackageManager.Requests;
 
 
 namespace Photon.Pun
@@ -229,11 +230,12 @@ namespace Photon.Pun
                 while (w.isDone == false)
                     yield return null;
 
-                #if UNITY_2017_1_OR_NEWER
-                if (w.isNetworkError || w.isHttpError)
-                #else
+#if UNITY_2017_1_OR_NEWER
+                if (w.result == UnityWebRequest.Result.ConnectionError ||
+    w.result == UnityWebRequest.Result.ProtocolError)
+#else
                 if (w.isError)
-                #endif
+#endif
                 {
                     if (errorCallback != null)
                     {

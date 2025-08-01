@@ -789,11 +789,8 @@ MonoBehaviour:
   colliderPlayer: {fileID: 5973986198574397779}
   animatorPlayer: {fileID: 2839151432391350637}
   camera: {fileID: 2374372571854316466}
-  photonView: {fileID: 0}
   componentsBall: {fileID: 0}
-  velocityClass: {fileID: 135567052496478648}
   behaviourGObj: {fileID: 0}
-  hudGObj: {fileID: 0}
   cameraBehaviourGObj: {fileID: 0}
   movimentGObj: {fileID: 0}
   kickGObjt: {fileID: 0}
@@ -802,11 +799,10 @@ MonoBehaviour:
   TransparencyGObj: {fileID: 0}
   PlayerModeCtrlGObj: {fileID: 0}
   eventsGObj: {fileID: 0}
-  posCamera: {x: 0, y: 0, z: 0}
   localPositionPivot1: {x: 0, y: 0, z: 0}
   localPositionPivot2: {x: 0, y: 0, z: 0}
   scriptsPlayer: {fileID: 0}
-  enableAll: 0
+  playerComponents: {fileID: 0}
 --- !u!114 &1970036298979253725
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -831,31 +827,15 @@ MonoBehaviour:
   strKeyNormalMove: R
   strJoyFreeRotateBody: JoystickButton0
   strJoyNormalMove: JoystickButton2
-  rotateAround: X
+  strFreeCamera: X
+  strLookingBall: Z
   joyRotateAroundStr: JoystickButton11
   strSprint: LeftShift
   strJoySprint: JoystickButton6
   strRotRight90: 
   strRotLeft90: 
-  keyTouchManaged: 0
-  keyTouch: 0
-  keyShot: 0
-  keyShotEffect: 0
-  joyTouchedManaged: 0
-  joyTouch: 0
-  joyShot: 0
-  joyShotEffect: 0
-  joyFreeRotateBody: 0
-  keyFreeRotateBody: 0
-  keyNormalMove: 0
-  joyNormalMove: 0
-  keyRotateAround: 0
-  joyRotateAround: 0
-  keySprint: 0
-  joySprint: 0
-  keyRotRight: 0
-  keyRotRight90: 0
-  keyRotLeft90: 0
+  useStr: F
+  defensivePositionStr: CapsLock
 --- !u!1 &2216343273679067422
 GameObject:
   m_ObjectHideFlags: 0
@@ -923,7 +903,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2374372571534482961}
-  - component: {fileID: 2374372571534482963}
   - component: {fileID: 2374372571534482965}
   - component: {fileID: 2374372571534482960}
   - component: {fileID: 2374372571534482964}
@@ -949,35 +928,6 @@ Transform:
   m_Father: {fileID: 3609711998467018986}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2374372571534482963
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2374372571534482990}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44f0ce91d3d8aa14b94df50ca413ba84, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  strAim: Q
-  strTouchManaged: V
-  strJoyStickChangeAim: JoystickButton3
-  strJoyManaged: JoystickButton4
-  keys: {fileID: 1970036298979253725}
-  componentsPlayer: {fileID: 0}
-  imagePosition: {fileID: 2374372572484295909}
-  gunSightImage: {fileID: 0}
-  position: {x: 0, y: 0}
-  controllerSpeedAim: {fileID: 2374372571534482964}
-  controllerDistance: {fileID: 2374372571534482965}
-  controllerZoneAim: {fileID: 2374372571534482960}
-  colorEnable: {r: 0, g: 1, b: 0.06773448, a: 1}
-  colorDisable: {r: 1, g: 0, b: 0, a: 1}
-  colorImage: {fileID: 2374372572484295908}
-  eventsGObj: {fileID: 0}
-  losePossession: {fileID: 0}
 --- !u!114 &2374372571534482965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -990,9 +940,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be894d63aece0da44a4b5ae3f7311c12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxDistance: 1.5
-  minDistance: 0
-  heightBody: 1.75
   componentsPlayer: {fileID: 1970036298979253722}
 --- !u!114 &2374372571534482960
 MonoBehaviour:
@@ -1593,7 +1540,10 @@ MonoBehaviour:
   maxAngle: 0
   angleMinPivotmangleMaxPivot: 0
   maxDistanceForward: 0
-  losePossession: {fileID: 0}
+  playerMode: 0
+  lookingBallTransitionDuration: 0
+  a: 10
+  b: 10
 --- !u!114 &542449927060008946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1734,7 +1684,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02cfa03e35c9e5742b4f72811e4b4d81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resistance: 0
   speed: 0
   speedRecover: 0
   min: 0
@@ -1744,19 +1693,73 @@ MonoBehaviour:
   componentsPlayer: {fileID: 0}
   valueCurve:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
   curve1:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
   curve2:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
@@ -1773,10 +1776,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e514fedbd2ac6a14390b5d300914447a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  transBody: {fileID: 0}
-  minVelocity: 0
-  maxVelocity: 10.5
-  stringMy: {fileID: 0}
+  componentsPlayer: {fileID: 0}
+  textHUD: {fileID: 0}
+  previousPos: {x: 0, y: 0, z: 0}
 --- !u!1 &2482760813580009960
 GameObject:
   m_ObjectHideFlags: 0
@@ -2736,7 +2738,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8528909815117351426}
-  - component: {fileID: 4075990867698205490}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -2758,30 +2759,6 @@ Transform:
   m_Father: {fileID: 3609711998467018986}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4075990867698205490
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5161847688678247330}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 237f5429e1d07354483d9296ddc9ea39, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  componentsPlayer: {fileID: 0}
-  menu: {fileID: 0}
-  menuInit: {fileID: 0}
-  options: {fileID: 0}
-  hud: {fileID: 0}
-  nickName: {fileID: 0}
-  volume: {fileID: 0}
-  mouse: {fileID: 0}
-  controller: {fileID: 0}
-  controls: {fileID: 0}
-  playOnline: {fileID: 0}
-  inputField: {fileID: 0}
 --- !u!1 &5180484041144294145
 GameObject:
   m_ObjectHideFlags: 0
@@ -4269,7 +4246,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   kickValues: {fileID: 0}
   componentsPlayer: {fileID: 1970036298979253722}
-  controllerAim: {fileID: 2374372571534482963}
+  controllerAim: {fileID: 0}
   controllerDistance: {fileID: 2374372571534482965}
   sensibilityShot: 1
   speedChangeShot: 10
@@ -4300,7 +4277,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   kickValues: {fileID: 0}
   componentsPlayer: {fileID: 1970036298979253722}
-  controllerAim: {fileID: 2374372571534482963}
+  controllerAim: {fileID: 0}
   controllerDistance: {fileID: 2374372571534482965}
   sensibilityShot: 10
   speedChangeShot: 7
@@ -4327,7 +4304,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   kickValues: {fileID: 0}
   componentsPlayer: {fileID: 1970036298979253722}
-  controllerAim: {fileID: 2374372571534482963}
+  controllerAim: {fileID: 0}
   controllerDistance: {fileID: 2374372571534482965}
   sensibilityShot: 20
   speedChangeShot: 13
@@ -4342,7 +4319,25 @@ MonoBehaviour:
   keys: {fileID: 1970036298979253725}
   curveValue:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
@@ -4361,7 +4356,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   kickValues: {fileID: 0}
   componentsPlayer: {fileID: 1970036298979253722}
-  controllerAim: {fileID: 2374372571534482963}
+  controllerAim: {fileID: 0}
   controllerDistance: {fileID: 2374372571534482965}
   sensibilityShot: 15
   speedChangeShot: 10

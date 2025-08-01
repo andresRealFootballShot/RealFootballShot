@@ -1794,16 +1794,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96f96fb90e2eaaf42b5b58f973986cbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  soundSet: {fileID: 0}
   audioSource:
   - {fileID: 4182519200019903097}
   - {fileID: 6667211502624773799}
-  audioClip:
-  - {fileID: 8300000, guid: 4182371c37ea7b44a84cfccf56bfbe3d, type: 3}
-  - {fileID: 8300000, guid: 4cc47b24cd5e78748aa6cafb668c142f, type: 3}
-  - {fileID: 8300000, guid: 054c726dd964ef141abc456c8007faf6, type: 3}
-  - {fileID: 8300000, guid: 9023398735398a14e8ec4d0f1c081be9, type: 3}
-  - {fileID: 8300000, guid: 4119ee10cf4db16468c5b586dcaf1aaf, type: 3}
-  - {fileID: 8300000, guid: 26eaf27239d9a8e4d9e623bb04760fef, type: 3}
   minVolume: 0
   maxVolume: 0.5
   animationCurve:
@@ -1830,7 +1824,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  velocity: {fileID: 499368212215520129}
+  publicPlayerData: {fileID: 0}
 --- !u!114 &7361311816796149300
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1902,10 +1896,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e514fedbd2ac6a14390b5d300914447a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  transBody: {fileID: 3343427794895226880}
-  minVelocity: 0
-  maxVelocity: 10.5
-  stringMy: {fileID: 0}
+  componentsPlayer: {fileID: 0}
+  textHUD: {fileID: 0}
+  previousPos: {x: 0, y: 0, z: 0}
 --- !u!1 &5855077201995889759
 GameObject:
   m_ObjectHideFlags: 0
@@ -2629,7 +2622,6 @@ GameObject:
   - component: {fileID: 7823825050365141479}
   - component: {fileID: 3589578561891588450}
   - component: {fileID: -6978091160692681345}
-  - component: {fileID: 3312073775286378503}
   - component: {fileID: 1116346720871477537}
   - component: {fileID: 219959995474449324}
   - component: {fileID: 3069896597180562165}
@@ -2874,20 +2866,6 @@ MonoBehaviour:
     InterpolateOption: 0
     InterpolateMoveTowardsSpeed: 1
     InterpolateLerpSpeed: 0
---- !u!114 &3312073775286378503
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7823825050365141477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c8a38e5dfe0d9a4f95972d0190b1249, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  localPositionCamera: {x: 0.5, y: 0, z: -3}
-  localEulerAnglesCamera: {x: 0, y: 0, z: 0}
 --- !u!114 &1116346720871477537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2912,7 +2890,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd64a4b07e73aab4aa579e4b61fad229, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  collisionEvent: {fileID: 1116346720871477537}
+  publicPlayerData: {fileID: 0}
+  pVPlayer: {fileID: 0}
 --- !u!114 &3069896597180562165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2925,8 +2904,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96e43a6e954ce4849b2fb7649280d2b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  collisionEvent: {fileID: 1116346720871477537}
+  publicPlayerData: {fileID: 0}
   tag: ObjectGoal
+  pVPlayer: {fileID: 0}
 --- !u!114 &3890134605993027170
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2940,7 +2920,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nickNameGObj: {fileID: 5030303842339113215}
-  text: {fileID: 7368035440534283267}
+  offsetPos: {x: 0, y: 0, z: 0}
+  publicPlayerData: {fileID: 0}
+  text: {fileID: 0}
 --- !u!1 &7981377168999698559
 GameObject:
   m_ObjectHideFlags: 0
@@ -3554,14 +3536,3 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4960694569637377975, guid: 1cc5d7b832cbd6146af370c22393f946, type: 3}
   m_PrefabInstance: {fileID: 79050337609465672}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7368035440534283267 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7446793169923922763, guid: 1cc5d7b832cbd6146af370c22393f946, type: 3}
-  m_PrefabInstance: {fileID: 79050337609465672}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5030303842339113215}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

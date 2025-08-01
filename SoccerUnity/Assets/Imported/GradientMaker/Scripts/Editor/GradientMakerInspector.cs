@@ -29,12 +29,12 @@ class GradientMakerInspector : Editor {
 	public override void OnInspectorGUI(){
 		DrawDefaultInspector();
 		gradEdit = (GradientMaker)target;
-		
-		EditorGUIUtility.LookLikeControls();
-		//// Gradient GUI element is being provided by GradientEditor class as it's an internal UI element
-		
-		// Gradient Options
-		gradEdit._invertGradient = EditorGUILayout.Toggle("Invert Gradient", gradEdit._invertGradient);
+
+        EditorGUIUtility.labelWidth = 100;
+        //// Gradient GUI element is being provided by GradientEditor class as it's an internal UI element
+
+        // Gradient Options
+        gradEdit._invertGradient = EditorGUILayout.Toggle("Invert Gradient", gradEdit._invertGradient);
 		gradEdit.gradType = (GradType)EditorGUILayout.EnumPopup ("Gradient Type", gradEdit.gradType);
 		
 		// Gradient Falloff

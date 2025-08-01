@@ -2,6 +2,7 @@ using DOTS_ChaserDataCalculation;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using TMPro;
 using Unity.Entities.UniversalDelegates;
 using UnityEngine;
 
@@ -286,5 +287,15 @@ public class MovementCtrl : MovementPlayerComponent
         //anim.SetFloat("vertical", movementValues.forwardAnimCurve.Evaluate(forwardAnim), 0.1f, deltaTime * GeneralPlayerParameters.speedAnim2);
         //anim.SetFloat("sprint", movementValues.sprintAnimCurve.Evaluate(sprintAnim) + 0.5f, 0.1f, deltaTime * GeneralPlayerParameters.speedAnim2);
     }
-
+    public void SetTargetPosition(Vector3 targetPosition)
+    {
+        Vector3 dir = targetPosition - publicPlayerData.position;
+        dir.y = 0;
+        playerComponents.ForwardDesiredDirection = dir;
+        playerComponents.ForwardDesiredSpeed = publicPlayerData.movimentValues.maxForwardSpeed;
+        playerComponents.DesiredLookDirection = dir;
+        playerComponents.MinForwardSpeed = 0;
+        playerComponents.TargetPosition = targetPosition;
+        playerComponents.stopOffset = 0;
+    }
 }
