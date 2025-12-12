@@ -14,6 +14,7 @@ using andywiecko.BurstTriangulator;
 using Unity.Mathematics;
 using UnityEditor.Experimental.GraphView;
 using static UnityEditor.PlayerSettings;
+using static UnityEngine.Rendering.DebugUI;
 
 
 public class CullPassPoints : MonoBehaviour
@@ -988,7 +989,17 @@ public class CullPassPoints : MonoBehaviour
                 Team attackTeam = Teams.getTeamByName(teamName_Attacker);
                 DebugPlayerIndex(defenseTeam, attackTeam);
             }
+            debugBallInfo();
         }
+    }
+    void debugBallInfo()
+    {
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 16;
+        style.normal.textColor = Color.green;
+        Vector3 ballPos = MatchComponents.ballRigidbody.position;
+        string info = ballPos.ToString("f2");
+        Handles.Label(ballPos + Vector3.up * 1.7f, info, style);
     }
     public void DebugPlayerIndex(Team defenseTeam, Team attackTeam)
     {
