@@ -17,7 +17,7 @@ public class BallInterceptionSystem : MonoBehaviour
     private NativeArray<float3> ballPositions;
     private NativeArray<float> ballTimes;
 
-    private NativeArray<int> reachableIndices;
+    public NativeArray<int> reachableIndices;
     private NativeArray<float> timeToReach;
 
     private NativeArray<float> accelerations;
@@ -29,6 +29,7 @@ public class BallInterceptionSystem : MonoBehaviour
 
     private NativeArray<float3> playerPositions;
     private NativeArray<float3> playerVelocities;
+    private NativeArray<float3> playerDirections;
     float timeDebug;
     void Update()
     {
@@ -58,7 +59,7 @@ public class BallInterceptionSystem : MonoBehaviour
 #endif
     }
    
-    void Calculate()
+    public void Calculate()
     {
         trajectory.Simulate();
 
@@ -90,6 +91,7 @@ public class BallInterceptionSystem : MonoBehaviour
             desiredSpeeds[i] = publicPlayerData.maxSpeed;
             playerPositions[i] = publicPlayerData.position;
             playerVelocities[i] = publicPlayerData.playerComponents.Velocity;
+            playerDirections[i] = publicPlayerData.playerComponents.bodyY0Forward;
         }
 
         // Ejecutar el Job
@@ -106,7 +108,8 @@ public class BallInterceptionSystem : MonoBehaviour
             jumpHeights = jumpHeights,
             desiredSpeeds = desiredSpeeds,
             playerPositions = playerPositions,
-            playerVelocities = playerVelocities
+            playerVelocities = playerVelocities,
+            playerDirections = playerDirections,
         };
 
         var handle = job.Schedule(Teams.allPlayers.Count, 1);
@@ -116,9 +119,8 @@ public class BallInterceptionSystem : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            testMovePlayers();
-
-            
+            //testMovePlayers();
+            testKick3();
         }
     }
     void setPlayersTarget()
@@ -169,6 +171,7 @@ public class BallInterceptionSystem : MonoBehaviour
             desiredSpeeds = new NativeArray<float>(playerCount, Allocator.Persistent);
             playerPositions = new NativeArray<float3>(playerCount, Allocator.Persistent);
             playerVelocities = new NativeArray<float3>(playerCount, Allocator.Persistent);
+            playerDirections = new NativeArray<float3>(playerCount, Allocator.Persistent);
         }
     }
 
@@ -184,6 +187,11 @@ public class BallInterceptionSystem : MonoBehaviour
         if (desiredSpeeds.IsCreated) desiredSpeeds.Dispose();
         if (playerPositions.IsCreated) playerPositions.Dispose();
         if (playerVelocities.IsCreated) playerVelocities.Dispose();
+        if (playerDirections.IsCreated) playerDirections.Dispose();
+    }
+    void testKick3()
+    {
+        MatchComponents.ballComponents.rigBall.velocity = forceTransform.forward * force;
     }
     void testKick2()
     {
@@ -207,7 +215,34 @@ public class BallInterceptionSystem : MonoBehaviour
         }
         Invoke(nameof(testKick2), 1);
     }
+    public void getClosePlayerBall(out PublicPlayerData publicPlayerDataResult,out float ballTimeResult, out float playerReachTimeResult, out Vector3 ballPositionResult )
+    {
+        publicPlayerDataResult = null;
+        ballTimeResult = Mathf.Infinity;
+        ballPositionResult = Vector3.positiveInfinity;
+        playerReachTimeResult = Mathf.Infinity;
+        int indexResult=-1;
+        for (int i = 0; i < Teams.allPlayers.Count; i++)
+        {
+            if (i >= reachableIndices.Length) break;
 
+            int index = reachableIndices[i];
+            if (index >= 0)
+            {
+                float ballTime = ballTimes[index];
+                float playerReachTime = timeToReach[i];
+                if (ballTime <= ballTimeResult && playerReachTime <= playerReachTimeResult)
+                {
+                    indexResult = index;
+                    ballTimeResult = ballTime;
+                    playerReachTimeResult = playerReachTime;
+                    ballPositionResult = ballPositions[index];
+                    publicPlayerDataResult = Teams.allPlayers[i];
+                    
+                }
+            }
+        }
+    }
     void OnDestroy()
     {
         if (ballPositions.IsCreated) ballPositions.Dispose();

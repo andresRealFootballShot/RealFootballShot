@@ -18,6 +18,7 @@ public struct PlayerInterceptionJob : IJobParallelFor
 
     [ReadOnly] public NativeArray<float3> playerPositions;
     [ReadOnly] public NativeArray<float3> playerVelocities;
+    [ReadOnly] public NativeArray<float3> playerDirections;
 
     [WriteOnly] public NativeArray<int> reachableIndex;
     [WriteOnly] public NativeArray<float> timeToReachIndex;
@@ -29,6 +30,7 @@ public struct PlayerInterceptionJob : IJobParallelFor
 
         float3 playerPos = playerPositions[index];
         float3 playerVel = playerVelocities[index];
+        float3 playerDir = playerDirections[index];
         float acceleration = accelerations[index];
         float decceleration = deccelerations[index];
         float maxSpeed = maxSpeeds[index];
@@ -50,7 +52,7 @@ public struct PlayerInterceptionJob : IJobParallelFor
 
             float timeToReach = EstimateTimeToReach(horizontalDistance, math.length(new float2(playerVel.x, playerVel.z)), acceleration, decceleration, maxSpeed, desiredSpeed);
 
-            float2 v1 = math.normalize(new float2(playerVel.x, playerVel.z));
+            float2 v1 = math.normalize(new float2(playerDir.x, playerDir.z));
             float2 v2 = math.normalize(new float2(toTarget.x, toTarget.z));
             float angle = math.degrees(math.acos(math.clamp(math.dot(v1, v2), -1f, 1f)));
             float timeToRotate = angle / rotationSpeed;

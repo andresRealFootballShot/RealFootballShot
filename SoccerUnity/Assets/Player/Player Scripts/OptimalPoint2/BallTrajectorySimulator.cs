@@ -57,6 +57,7 @@ public class BallTrajectorySimulator : MonoBehaviour
            
             if (vel.magnitude < 0.01f)
             {
+                times[times.Count - 1] = Mathf.Infinity;
                 break;
 
             }

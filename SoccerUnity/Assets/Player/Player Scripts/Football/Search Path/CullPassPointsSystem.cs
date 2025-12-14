@@ -71,6 +71,7 @@ public class CullPassPointsSystem : SystemBase
         if (reset)
         {
             SearchPlayData.Clear();
+            CullPassPoints.CalculateFirstReachPlayerToBall();
             if (CullPassPoints.debugTestLonelyPoints)
             {
                CullPassPoints.PlaceTestLonelyPoint();
@@ -78,6 +79,7 @@ public class CullPassPointsSystem : SystemBase
             }
             else
             {
+                
                 CullPassPoints.PlacePoints(0);
             }
             Snodes.Clear();

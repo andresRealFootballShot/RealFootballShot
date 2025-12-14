@@ -72,6 +72,7 @@ public class CullPassPoints : MonoBehaviour
     
     public int maxNodes { get; set; } = 0;
     public int maxNodes2 { get; set; } = 0;
+    public BallInterceptionSystem ballInterceptionSystem;
     void Start()
     {
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -885,6 +886,13 @@ public class CullPassPoints : MonoBehaviour
     {
         searchPlayData.UpdatePoints(size);
     }
+    public void CalculateFirstReachPlayerToBall()
+    {
+        ballInterceptionSystem.Calculate();
+        ballInterceptionSystem.getClosePlayerBall(out PublicPlayerData firstPublicPlayerData, out float ballTime,out float playerReachTime, out Vector3 ballPosition);
+        print(firstPublicPlayerData);
+            
+    }
     void DrawPoint(Vector3 position,string info)
     {
         Gizmos.color = Color.gray;
@@ -894,6 +902,7 @@ public class CullPassPoints : MonoBehaviour
         style.normal.textColor = Color.black;
         Handles.Label(position + Vector3.up * 1f, info, style);
     }
+    
     private void footballFieldLoaded()
     {
         for (int i = 0; i < searchPlayData.maxSize; i++)
