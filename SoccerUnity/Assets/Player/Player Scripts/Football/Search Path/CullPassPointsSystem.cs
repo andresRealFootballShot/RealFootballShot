@@ -9,6 +9,7 @@ using static UnityStandardAssets.Utility.TimedObjectActivator;
 using Unity.Collections;
 using System;
 using Unity.Jobs;
+using System.Drawing;
 
 [UpdateAfter(typeof(NextMoveSystem))]
 public class CullPassPointsSystem : SystemBase
@@ -71,8 +72,19 @@ public class CullPassPointsSystem : SystemBase
         if (reset)
         {
             SearchPlayData.Clear();
-            CullPassPoints.CalculateFirstReachPlayerToBall();
-            if (CullPassPoints.debugTestLonelyPoints)
+            CullPassPoints.CalculateFirstReachPlayerToBall(out float playerReachTime, out Vector3 ballPosition);
+                /*
+                SearchPlayData.posibleNodes.Clear();
+                Snodes.Clear();
+                SearchPlayData.getSortedNodes(ref Snodes, 1);
+                CullPassPoints.SetBallPosition(Snodes, 1, ballPosition);
+                SearchPlayData.AddPosibleNode(0);
+                //Calculamos las posiciones del equipo que defiende para la futura posición del balón
+                CullPassPoints.CalculateNextPositions(0, ballPosition, FieldPositionsData.HorizontalPositionType.Right,defenseTeam);
+                CullPassPoints.UpdateNextPlayerPoints(1, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
+                CullPassPoints.CompleteTriangulatorJob(1);
+                RemovePosibleNodes(1);*/
+            if(CullPassPoints.debugTestLonelyPoints)
             {
                CullPassPoints.PlaceTestLonelyPoint();
 
@@ -82,12 +94,12 @@ public class CullPassPointsSystem : SystemBase
                 
                 CullPassPoints.PlacePoints(0);
             }
+
             Snodes.Clear();
             SearchPlayData.getSortedNodes(ref Snodes, 1);
-            //SearchPlayData.getNode(Snodes, 0);
-            CullPassPoints.SetBallPosition(Snodes,1);
+            CullPassPoints.SetBallPosition(Snodes,1, ballPosition);
             nodeCalculationPerFrameTotal = 1;
-            SearchPlayData.posibleNodes.Clear();
+            
 
             CullPassPoints.UpdateInstantPlayerPositions(defenseTeam, attackTeam, Snodes);
             CullPassPoints.UpdatePlayerPositions(Snodes, 1, 0);

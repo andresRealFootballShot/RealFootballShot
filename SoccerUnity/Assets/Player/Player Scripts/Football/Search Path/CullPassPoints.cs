@@ -241,21 +241,21 @@ public class CullPassPoints : MonoBehaviour
             entityManager.SetComponentData<BallParamsComponent>(entity, BallParamsComponent);
         }
     }
-    public void SetBallPosition(List<int> nodes, int sizeNode)
+    public void SetBallPosition(List<int> nodes, int sizeNode,Vector3 ballPosition)
     {
         for (int i = 0; i < sizeNode; i++)
         {
 
             int node = nodes[i];
             int cullCount = searchPlayData.getCullEntityCount(node);
-            searchPlayData.SetBallPosition(node, MatchComponents.ballRigidbody.position);
+            searchPlayData.SetBallPosition(node, ballPosition);
             for (int j = 0; j < cullCount; j++)
             {
                 int entityIndex = searchPlayData.getCullEntity(node, j);
                 Entity entity = entities[entityIndex];
 
                 BallParamsComponent BallParamsComponent = entityManager.GetComponentData<BallParamsComponent>(entity);
-                BallParamsComponent.BallPosition = MatchComponents.ballRigidbody.position;
+                BallParamsComponent.BallPosition = ballPosition;
                 entityManager.SetComponentData<BallParamsComponent>(entity, BallParamsComponent);
                 
             }
@@ -866,6 +866,23 @@ public class CullPassPoints : MonoBehaviour
         searchPlayData.SetCalculateNextPositionParameters(node,normalBallPosition, offsideLineValueY, offsideWeight);
 
     }
+    public void CalculateNextPositions(int node, Vector3 ballPosition, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team)
+    {
+        SetCalculateNextPositionParameters(0, ballPosition, FieldPositionsData.HorizontalPositionType.Right, team);
+        
+        calculateNextPositionShedule.SheduleJobs(1, searchPlayData, team.teamMaxFieldPlayers / 2, lineupName, pressureName);
+    }
+    public void SetCalculateNextPositionParameters(int node, Vector3 ballPosition, FieldPositionsData.HorizontalPositionType horizontalPositionType, Team team)
+    {
+        PressureFieldPositionDatas PressureFieldPositionDatas;
+        if (!FootballPositionCtrl.getCurrentPressureFieldPositions(out PressureFieldPositionDatas)) return;
+        Vector2 normalBallPosition = FootballPositionCtrl.getNormalizedPosition(horizontalPositionType, ballPosition, team.SideOfField);
+        float offsideWeight;
+        float offsideLineValueY = FootballPositionCtrl.GetOffsideLineGetValue(PressureFieldPositionDatas, normalBallPosition, out offsideWeight);
+        //calculateNextPositionShedule.SetCalculateNextPositionParameters(index, normalBallPosition, offsideLineValueY, offsideWeight);
+        searchPlayData.SetCalculateNextPositionParameters(node, normalBallPosition, offsideLineValueY, offsideWeight);
+
+    }
     void SetLonelyPosition(ref DynamicBuffer<PointElement> points,int index,Vector3 position)
     {
         PointElement pointElement = points[index];
@@ -886,12 +903,14 @@ public class CullPassPoints : MonoBehaviour
     {
         searchPlayData.UpdatePoints(size);
     }
-    public void CalculateFirstReachPlayerToBall()
+    public void CalculateFirstReachPlayerToBall(out float playerReachTime, out Vector3 ballPosition)
     {
         ballInterceptionSystem.Calculate();
-        ballInterceptionSystem.getClosePlayerBall(out PublicPlayerData firstPublicPlayerData, out float ballTime,out float playerReachTime, out Vector3 ballPosition);
-        print(firstPublicPlayerData);
-            
+        ballInterceptionSystem.getClosePlayerBall(out PublicPlayerData firstPublicPlayerData,out  playerReachTime, out  ballPosition);
+
+        DrawArrow.ForDebug(ballPosition + Vector3.up*0.5f, Vector3.up);
+        if(firstPublicPlayerData!=null)
+        DrawArrow.ForDebug(firstPublicPlayerData.position, firstPublicPlayerData.bodyTransform.forward,Color.red);
     }
     void DrawPoint(Vector3 position,string info)
     {

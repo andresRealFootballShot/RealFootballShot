@@ -14,110 +14,68 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AppSettings:
     AppIdRealtime: 6909924d-7aa7-4fca-ae16-5f7ac6fd9b0a
+    AppIdFusion: 
     AppIdChat: 
     AppIdVoice: 
     AppVersion: 
     UseNameServer: 1
-    FixedRegion: eu
+    FixedRegion: 
     Server: 
     Port: 0
+    ProxyServer: 
     Protocol: 0
+    EnableProtocolFallback: 1
+    AuthMode: 0
     EnableLobbyStatistics: 0
     NetworkLogging: 1
+  DevRegion: eu
   PunLogging: 0
   EnableSupportLogger: 0
   RunInBackground: 1
   StartInOfflineMode: 0
   RpcList:
-  - ClickRpc
-  - DestroyRpc
-  - DestroySpaceship
-  - Fire
-  - RespawnSpaceship
-  - Touch
-  - AddForceAt
-  - AddForceAtPosition
+  - AcceptFieldPosition
+  - ActorWithPosession
   - AddForceAtPositionRPC
   - AddForceRPC
-  - ChatMessage
-  - CollisionRPC
-  - RequestSpawn
-  - ResponseSpawn
-  - SpawnRPC
-  - SetCurrentSpawn
-  - NextSpawn
-  - SetTeamInfo
-  - TeamCtrlAddPV
-  - GetSpawnsAvailable
-  - GetSpawnsAvailables
-  - ReceiveSpawnsAvailables
-  - SetInSpawn
-  - SetPosSpawnNormal
-  - SetPosSpawnStartMatch
-  - SetPosSpawnStartMatchBlue
-  - SetPosSpawnStartMatchRed
-  - GetTimeRPC
-  - SetTimer
-  - SetTimeRPC
-  - GetAvailables
-  - SendTeamsAvailables
-  - ChooseBlue
-  - ChooseRed
-  - RequestRed
-  - PlayerJoined
-  - RequestJoin
-  - RequestTeamsAvailables
-  - GetPosition
-  - SendSpawn
-  - RefusedJoin
-  - StartMatch
-  - SendStartMatch
-  - RequestStartPart
-  - SendGoal
-  - SetInitialPos
-  - SendSetInitialPos
-  - SetInitialPosBall
-  - EnableKicks
-  - saque
-  - DisableKick
-  - EnableKick
-  - Saque
-  - GetPlayersTeam
-  - SetPlayersTeam
-  - DisableKickCorner
-  - EnableKickCorner
-  - ActorWithPosession
-  - EnableSaqueCornerBanda
-  - StateSaqueCornerBanda
-  - OnEvent
-  - SetFueraDeJuego
-  - BallControl
-  - RequestGetTeamsInfo
-  - RequestTeamsInfo
-  - SendTeamsInfo
-  - RequestFieldPosition
-  - AcceptFieldPosition
-  - DennyFieldPosition
+  - ClickRpc
   - DenyFieldPosition
-  - pruebaRPC
-  - ReadPlayer
-  - NotifyReadPlayer
-  - RequestData
-  - SendData
-  - AddForceRPCObsolete
-  - sendTeamServe
-  - StartPart
-  - ReceiveTeamsData
-  - RequestTeamsData
-  - SendMatchData
-  - SendMatchData2
+  - DestroyRpc
+  - DestroySpaceship
+  - DisableKick
+  - DisableKickCorner
+  - EnableKick
+  - EnableKickCorner
+  - EnableKicks
+  - Fire
   - NotifyCorner
-  - SendGoalkeepersID
-  - SetData
-  - SendRoutineData
   - NotifyGoal
-  - NotifySideline
   - NotifyOffside
+  - NotifyReadPlayer
+  - NotifySideline
+  - pruebaRPC
+  - ReceiveTeamsData
+  - RefusedJoin
+  - RequestData
+  - RequestFieldPosition
+  - RequestJoin
+  - RequestSpawn
+  - RequestTeamsAvailables
+  - RequestTeamsData
+  - RespawnSpaceship
+  - SendGoal
   - SendGoalkeepersData
+  - SendMatchData
+  - SendRoutineData
+  - SendSetInitialPos
+  - SendSpawn
+  - SendStartMatch
+  - SendTeamsAvailables
+  - sendTeamServe
+  - SetData
+  - SetFueraDeJuego
+  - StartPart
+  - StateSaqueCornerBanda
   DisableAutoOpenWizard: 1
-  ShowSettings: 1
+  ShowSettings: 0
+  DevRegionSetOnce: 1

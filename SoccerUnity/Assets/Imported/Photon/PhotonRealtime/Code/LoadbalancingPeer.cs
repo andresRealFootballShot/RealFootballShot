@@ -40,9 +40,19 @@ namespace Photon.Realtime
     /// </remarks>
     public class LoadBalancingPeer : PhotonPeer
     {
-        protected internal static Type PingImplementation = null;
+        /// <summary>Obsolete accessor to the RegionHandler.PingImplementation.</summary>
+        [Obsolete("Use RegionHandler.PingImplementation directly.")]
+        protected internal static Type PingImplementation
+        {
+            get { return RegionHandler.PingImplementation; }
+            set { RegionHandler.PingImplementation = value; }
+        }
 
-        private readonly Dictionary<byte, object> opRaiseEventParameters = new Dictionary<byte, object>(); // used in OpRaiseEvent() (avoids lots of new Dictionary() calls)
+
+        private readonly Pool<ParameterDictionary> paramDictionaryPool = new Pool<ParameterDictionary>(
+            () => new ParameterDictionary(),
+            x => x.Clear(),
+            1); // used in OpRaiseEvent() (avoids lots of new Dictionary() calls)
 
 
         /// <summary>
@@ -71,31 +81,20 @@ namespace Photon.Realtime
         [System.Diagnostics.Conditional("SUPPORTED_UNITY")]
         private void ConfigUnitySockets()
         {
-            #if !NETFX_CORE && !NO_SOCKET
-            PingImplementation = typeof(PingMono);
-            #endif
-            #if UNITY_WEBGL
-            PingImplementation = typeof(PingHttp);
-            #endif
-            #if !UNITY_EDITOR && NETFX_CORE
-            PingImplementation = typeof(PingWindowsStore);
-            #endif
-
-
             Type websocketType = null;
-            #if UNITY_XBOXONE && !UNITY_EDITOR
-            websocketType = Type.GetType("ExitGames.Client.Photon.SocketNativeSource, PhotonRealtime", false);
+            #if (UNITY_XBOXONE || UNITY_GAMECORE) && !UNITY_EDITOR
+            websocketType = Type.GetType("ExitGames.Client.Photon.SocketNativeSource, Assembly-CSharp", false);
             if (websocketType == null)
             {
                 websocketType = Type.GetType("ExitGames.Client.Photon.SocketNativeSource, Assembly-CSharp-firstpass", false);
             }
             if (websocketType == null)
             {
-                websocketType = Type.GetType("ExitGames.Client.Photon.SocketNativeSource, Assembly-CSharp", false);
+                websocketType = Type.GetType("ExitGames.Client.Photon.SocketNativeSource, PhotonRealtime", false);
             }
-            if (websocketType == null)
+            if (websocketType != null)
             {
-                Debug.LogError("UNITY_XBOXONE is defined but peer could not find SocketNativeSource. Check your project files to make sure the native WSS implementation is available. Won't connect.");
+                this.SocketImplementationConfig[ConnectionProtocol.Udp] = websocketType;    // on Xbox, the native socket plugin supports UDP as well
             }
             #else
             // to support WebGL export in Unity, we find and assign the SocketWebTcp class (if it's in the project).
@@ -109,6 +108,12 @@ namespace Photon.Realtime
             {
                 websocketType = Type.GetType("ExitGames.Client.Photon.SocketWebTcp, Assembly-CSharp", false);
             }
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            if (websocketType == null && this.DebugOut >= DebugLevel.ERROR)
+            {
+                this.Listener.DebugReturn(DebugLevel.ERROR, "SocketWebTcp type not found in the usual Assemblies. This is required as wrapper for the browser WebSocket API. Make sure to make the PhotonLibs\\WebSocket code available.");
+            }
+            #endif
             #endif
 
             if (websocketType != null)
@@ -117,10 +122,10 @@ namespace Photon.Realtime
                 this.SocketImplementationConfig[ConnectionProtocol.WebSocketSecure] = websocketType;
             }
 
-            #if NET_4_6 && (UNITY_EDITOR || !ENABLE_IL2CPP)
-            this.SocketImplementationConfig[ConnectionProtocol.Udp] = typeof(SocketUdpAsync);
-            this.SocketImplementationConfig[ConnectionProtocol.Tcp] = typeof(SocketTcpAsync);
-            #endif
+            //#if NET_4_6 && (UNITY_EDITOR || !ENABLE_IL2CPP) && !NETFX_CORE
+            //this.SocketImplementationConfig[ConnectionProtocol.Udp] = typeof(SocketUdpAsync);
+            //this.SocketImplementationConfig[ConnectionProtocol.Tcp] = typeof(SocketTcpAsync);
+            //#endif
         }
 
 
@@ -169,20 +174,9 @@ namespace Photon.Realtime
                 this.Listener.DebugReturn(DebugLevel.INFO, "OpLeaveLobby()");
             }
 
-            return this.SendOperation(OperationCode.LeaveLobby, null, SendOptions.SendReliable);
+            return this.SendOperation(OperationCode.LeaveLobby, (Dictionary<byte, object>)null, SendOptions.SendReliable);
         }
 
-
-        /// <summary>Used in the RoomOptionFlags parameter, this bitmask toggles options in the room.</summary>
-        enum RoomOptionBit : int
-        {
-            CheckUserOnJoin = 0x01,  // toggles a check of the UserId when joining (enabling returning to a game)
-            DeleteCacheOnLeave = 0x02,  // deletes cache on leave
-            SuppressRoomEvents = 0x04,  // suppresses all room events
-            PublishUserId = 0x08,  // signals that we should publish userId
-            DeleteNullProps = 0x10,  // signals that we should remove property if its value was set to null. see RoomOption to Delete Null Properties
-            BroadcastPropsChangeToAll = 0x20,  // signals that we should send PropertyChanged event to all room players including initiator
-        }
 
         /// <summary>Used by OpJoinRoom and by OpCreateRoom alike.</summary>
         private void RoomOptionsToOpParameters(Dictionary<byte, object> op, RoomOptions roomOptions, bool usePropertiesKey = false)
@@ -197,9 +191,16 @@ namespace Photon.Realtime
             gameProperties[GamePropertyKey.IsVisible] = roomOptions.IsVisible;
             gameProperties[GamePropertyKey.PropsListedInLobby] = (roomOptions.CustomRoomPropertiesForLobby == null) ? new string[0] : roomOptions.CustomRoomPropertiesForLobby;
             gameProperties.MergeStringKeys(roomOptions.CustomRoomProperties);
+
+
             if (roomOptions.MaxPlayers > 0)
             {
-                gameProperties[GamePropertyKey.MaxPlayers] = roomOptions.MaxPlayers;
+                // the following code is for compatibility with old and new servers. old use MaxPlayers, which has to be byte typed. MaxPlayersInt is available on new servers to allow int typed MaxPlayer values.
+                // added to server 5.0.19.xyz / 6.0.19.xyz respectively
+                byte maxPlayersAsByte = roomOptions.MaxPlayers <= byte.MaxValue ? (byte)roomOptions.MaxPlayers : (byte)0;
+
+                gameProperties[GamePropertyKey.MaxPlayers] = maxPlayersAsByte;
+                gameProperties[GamePropertyKey.MaxPlayersInt] = roomOptions.MaxPlayers;
             }
 
             if (!usePropertiesKey)
@@ -252,6 +253,11 @@ namespace Photon.Realtime
                 flags = flags | (int)RoomOptionBit.SuppressRoomEvents;
                 op[ParameterCode.SuppressRoomEvents] = true;
             }
+            if (roomOptions.SuppressPlayerInfo)
+            {
+                flags = flags | (int)RoomOptionBit.SuppressPlayerInfo;
+            }
+
             if (roomOptions.Plugins != null)
             {
                 op[ParameterCode.Plugins] = roomOptions.Plugins;
@@ -292,6 +298,7 @@ namespace Photon.Realtime
             }
 
             Dictionary<byte, object> op = new Dictionary<byte, object>();
+            SendOptions sendOptions = new SendOptions() { Reliability = true };
 
             if (!string.IsNullOrEmpty(opParams.RoomName))
             {
@@ -306,20 +313,26 @@ namespace Photon.Realtime
             if (opParams.ExpectedUsers != null && opParams.ExpectedUsers.Length > 0)
             {
                 op[ParameterCode.Add] = opParams.ExpectedUsers;
+                sendOptions.Encrypt = true;
             }
+            if (opParams.Ticket != null)
+            {
+                op[ParameterCode.Ticket] = opParams.Ticket;
+            }
+
             if (opParams.OnGameServer)
             {
                 if (opParams.PlayerProperties != null && opParams.PlayerProperties.Count > 0)
                 {
                     op[ParameterCode.PlayerProperties] = opParams.PlayerProperties;
-                    op[ParameterCode.Broadcast] = true; // TODO: check if this also makes sense when creating a room?! // broadcast actor properties
                 }
+                op[ParameterCode.Broadcast] = true; // broadcast actor properties
 
                 this.RoomOptionsToOpParameters(op, opParams.RoomOptions);
             }
 
             //this.Listener.DebugReturn(DebugLevel.INFO, "OpCreateRoom: " + SupportClass.DictionaryToString(op));
-            return this.SendOperation(OperationCode.CreateGame, op, SendOptions.SendReliable);
+            return this.SendOperation(OperationCode.CreateGame, op, sendOptions);
         }
 
         /// <summary>
@@ -341,13 +354,14 @@ namespace Photon.Realtime
                 this.Listener.DebugReturn(DebugLevel.INFO, "OpJoinRoom()");
             }
             Dictionary<byte, object> op = new Dictionary<byte, object>();
+            SendOptions sendOptions = new SendOptions() { Reliability = true };
 
             if (!string.IsNullOrEmpty(opParams.RoomName))
             {
                 op[ParameterCode.RoomName] = opParams.RoomName;
             }
 
-            if (opParams.CreateIfNotExists)
+            if (opParams.JoinMode == JoinMode.CreateIfNotExists)
             {
                 op[ParameterCode.JoinMode] = (byte)JoinMode.CreateIfNotExists;
                 if (opParams.Lobby != null && !opParams.Lobby.IsDefault)
@@ -356,8 +370,7 @@ namespace Photon.Realtime
                     op[ParameterCode.LobbyType] = (byte)opParams.Lobby.Type;
                 }
             }
-
-            if (opParams.RejoinOnly)
+            else if (opParams.JoinMode == JoinMode.RejoinOnly)
             {
                 op[ParameterCode.JoinMode] = (byte)JoinMode.RejoinOnly; // changed from JoinMode.JoinOrRejoin
             }
@@ -365,6 +378,11 @@ namespace Photon.Realtime
             if (opParams.ExpectedUsers != null && opParams.ExpectedUsers.Length > 0)
             {
                 op[ParameterCode.Add] = opParams.ExpectedUsers;
+                sendOptions.Encrypt = true;
+            }
+            if (opParams.Ticket != null)
+            {
+                op[ParameterCode.Ticket] = opParams.Ticket;
             }
 
             if (opParams.OnGameServer)
@@ -372,17 +390,14 @@ namespace Photon.Realtime
                 if (opParams.PlayerProperties != null && opParams.PlayerProperties.Count > 0)
                 {
                     op[ParameterCode.PlayerProperties] = opParams.PlayerProperties;
-                    op[ParameterCode.Broadcast] = true; // broadcast actor properties
                 }
+                op[ParameterCode.Broadcast] = true; // broadcast actor properties
 
-                if (opParams.CreateIfNotExists)
-                {
-                    this.RoomOptionsToOpParameters(op, opParams.RoomOptions);
-                }
+                this.RoomOptionsToOpParameters(op, opParams.RoomOptions);
             }
 
             //this.Listener.DebugReturn(DebugLevel.INFO, "OpJoinRoom: " + SupportClass.DictionaryToString(op));
-            return this.SendOperation(OperationCode.JoinGame, op, SendOptions.SendReliable);
+            return this.SendOperation(OperationCode.JoinGame, op, sendOptions);
         }
 
 
@@ -402,12 +417,22 @@ namespace Photon.Realtime
 
             Hashtable expectedRoomProperties = new Hashtable();
             expectedRoomProperties.MergeStringKeys(opJoinRandomRoomParams.ExpectedCustomRoomProperties);
+
             if (opJoinRandomRoomParams.ExpectedMaxPlayers > 0)
             {
-                expectedRoomProperties[GamePropertyKey.MaxPlayers] = opJoinRandomRoomParams.ExpectedMaxPlayers;
+                // the following code is for compatibility with old and new servers. old use MaxPlayers, which has to be byte typed. MaxPlayersInt is available on new servers to allow int typed MaxPlayer values.
+                // added to server 5.0.19.xyz / 6.0.19.xyz respectively
+                byte maxPlayersAsByte = opJoinRandomRoomParams.ExpectedMaxPlayers <= byte.MaxValue ? (byte)opJoinRandomRoomParams.ExpectedMaxPlayers : (byte)0;
+
+                expectedRoomProperties[GamePropertyKey.MaxPlayers] = maxPlayersAsByte;
+                if (opJoinRandomRoomParams.ExpectedMaxPlayers > byte.MaxValue)
+                {
+                    expectedRoomProperties[GamePropertyKey.MaxPlayersInt] = opJoinRandomRoomParams.ExpectedMaxPlayers;
+                }
             }
 
             Dictionary<byte, object> opParameters = new Dictionary<byte, object>();
+            SendOptions sendOptions = new SendOptions() { Reliability = true };
             if (expectedRoomProperties.Count > 0)
             {
                 opParameters[ParameterCode.GameProperties] = expectedRoomProperties;
@@ -432,10 +457,18 @@ namespace Photon.Realtime
             if (opJoinRandomRoomParams.ExpectedUsers != null && opJoinRandomRoomParams.ExpectedUsers.Length > 0)
             {
                 opParameters[ParameterCode.Add] = opJoinRandomRoomParams.ExpectedUsers;
+                sendOptions.Encrypt = true;
+            }
+            if (opJoinRandomRoomParams.Ticket != null)
+            {
+                opParameters[ParameterCode.Ticket] = opJoinRandomRoomParams.Ticket;
             }
 
+            opParameters[ParameterCode.AllowRepeats] = true; // enables temporary queueing for low ccu matchmaking situations
+
+
             //this.Listener.DebugReturn(DebugLevel.INFO, "OpJoinRandomRoom: " + SupportClass.DictionaryToString(opParameters));
-            return this.SendOperation(OperationCode.JoinRandomGame, opParameters, SendOptions.SendReliable);
+            return this.SendOperation(OperationCode.JoinRandomGame, opParameters, sendOptions);
         }
 
         /// <summary>
@@ -455,10 +488,19 @@ namespace Photon.Realtime
             expectedRoomProperties.MergeStringKeys(opJoinRandomRoomParams.ExpectedCustomRoomProperties);
             if (opJoinRandomRoomParams.ExpectedMaxPlayers > 0)
             {
-                expectedRoomProperties[GamePropertyKey.MaxPlayers] = opJoinRandomRoomParams.ExpectedMaxPlayers;
+                // the following code is for compatibility with old and new servers. old use MaxPlayers, which has to be byte typed. MaxPlayersInt is available on new servers to allow int typed MaxPlayer values.
+                // added to server 5.0.19.xyz / 6.0.19.xyz respectively
+                byte maxPlayersAsByte = opJoinRandomRoomParams.ExpectedMaxPlayers <= byte.MaxValue ? (byte)opJoinRandomRoomParams.ExpectedMaxPlayers : (byte)0;
+
+                expectedRoomProperties[GamePropertyKey.MaxPlayers] = maxPlayersAsByte;
+                if (opJoinRandomRoomParams.ExpectedMaxPlayers > byte.MaxValue)
+                {
+                    expectedRoomProperties[GamePropertyKey.MaxPlayersInt] = opJoinRandomRoomParams.ExpectedMaxPlayers;
+                }
             }
 
             Dictionary<byte, object> opParameters = new Dictionary<byte, object>();
+            SendOptions sendOptions = new SendOptions() { Reliability = true };
             if (expectedRoomProperties.Count > 0)
             {
                 opParameters[ParameterCode.GameProperties] = expectedRoomProperties;    // used as filter. below, RoomOptionsToOpParameters has usePropertiesKey = true
@@ -483,6 +525,11 @@ namespace Photon.Realtime
             if (opJoinRandomRoomParams.ExpectedUsers != null && opJoinRandomRoomParams.ExpectedUsers.Length > 0)
             {
                 opParameters[ParameterCode.Add] = opJoinRandomRoomParams.ExpectedUsers;
+                sendOptions.Encrypt = true;
+            }
+            if (opJoinRandomRoomParams.Ticket != null)
+            {
+                opParameters[ParameterCode.Ticket] = opJoinRandomRoomParams.Ticket;
             }
 
 
@@ -490,6 +537,7 @@ namespace Photon.Realtime
             // partial copy of OpCreateRoom
 
             opParameters[ParameterCode.JoinMode] = (byte)JoinMode.CreateIfNotExists;
+            opParameters[ParameterCode.AllowRepeats] = true; // enables temporary queueing for low ccu matchmaking situations
 
             if (createRoomParams != null)
             {
@@ -498,11 +546,12 @@ namespace Photon.Realtime
                     opParameters[ParameterCode.RoomName] = createRoomParams.RoomName;
                 }
 
-                this.RoomOptionsToOpParameters(opParameters, createRoomParams.RoomOptions, true);
+                // this operation is always only done on the Master Server, so we skip sending props (commented out line below)
+                //this.RoomOptionsToOpParameters(opParameters, createRoomParams.RoomOptions, true);
             }
 
             //this.Listener.DebugReturn(DebugLevel.INFO, "OpJoinRandomOrCreateRoom: " + SupportClass.DictionaryToString(opParameters, false));
-            return this.SendOperation(OperationCode.JoinRandomGame, opParameters, SendOptions.SendReliable);
+            return this.SendOperation(OperationCode.JoinRandomGame, opParameters, sendOptions);
         }
 
 
@@ -511,7 +560,7 @@ namespace Photon.Realtime
         /// </summary>
         /// <param name="becomeInactive">Async games can be re-joined (loaded) later on. Set to false, if you want to abandon a game entirely.</param>
         /// <param name="sendAuthCookie">WebFlag: Securely transmit the encrypted object AuthCookie to the web service in PathLeave webhook when available</param>
-        /// <returns>If the opteration can be send currently.</returns>
+        /// <returns>If the operation can be sent currently.</returns>
         public virtual bool OpLeaveRoom(bool becomeInactive, bool sendAuthCookie = false)
         {
             Dictionary<byte, object> opParameters = new Dictionary<byte, object>();
@@ -532,7 +581,7 @@ namespace Photon.Realtime
         /// This is an async request which triggers a OnOperationResponse() call.
         /// Returned game list is stored in RoomInfoList.
         /// </remarks>
-        /// <see cref="https://doc.photonengine.com/en-us/realtime/current/reference/matchmaking-and-lobby#sql_lobby_type"/>
+        /// <see href="https://doc.photonengine.com/en-us/realtime/current/reference/matchmaking-and-lobby#sql_lobby_type"/>
         /// <param name="lobby">The lobby to query. Has to be of type SqlLobby.</param>
         /// <param name="queryData">The sql query statement.</param>
         /// <returns>If the operation could be sent (has to be connected).</returns>
@@ -617,7 +666,8 @@ namespace Photon.Realtime
                 opParameters[ParameterCode.FindFriendsOptions] = options.ToIntFlags();
             }
 
-            return this.SendOperation(OperationCode.FindFriends, opParameters, SendOptions.SendReliable);
+            SendOptions sendOptions = new SendOptions() { Reliability = true, Encrypt = true };
+            return this.SendOperation(OperationCode.FindFriends, opParameters, sendOptions);
         }
 
         public bool OpSetCustomPropertiesOfActor(int actorNr, Hashtable actorProperties)
@@ -641,11 +691,11 @@ namespace Photon.Realtime
                 this.Listener.DebugReturn(DebugLevel.INFO, "OpSetPropertiesOfActor()");
             }
 
-            if (actorNr <= 0 || actorProperties == null)
+            if (actorNr <= 0 || actorProperties == null || actorProperties.Count == 0)
             {
                 if (this.DebugOut >= DebugLevel.INFO)
                 {
-                    this.Listener.DebugReturn(DebugLevel.INFO, "OpSetPropertiesOfActor not sent. ActorNr must be > 0 and actorProperties != null.");
+                    this.Listener.DebugReturn(DebugLevel.INFO, "OpSetPropertiesOfActor not sent. ActorNr must be > 0 and actorProperties must be not null nor empty.");
                 }
                 return false;
             }
@@ -668,11 +718,11 @@ namespace Photon.Realtime
         }
 
 
-        protected void OpSetPropertyOfRoom(byte propCode, object value)
+        protected bool OpSetPropertyOfRoom(byte propCode, object value)
         {
             Hashtable properties = new Hashtable();
             properties[propCode] = value;
-            this.OpSetPropertiesOfRoom(properties);
+            return this.OpSetPropertiesOfRoom(properties);
         }
 
         public bool OpSetCustomPropertiesOfRoom(Hashtable gameProperties)
@@ -693,6 +743,14 @@ namespace Photon.Realtime
             if (this.DebugOut >= DebugLevel.INFO)
             {
                 this.Listener.DebugReturn(DebugLevel.INFO, "OpSetPropertiesOfRoom()");
+            }
+            if (gameProperties == null || gameProperties.Count == 0)
+            {
+                if (this.DebugOut >= DebugLevel.INFO)
+                {
+                    this.Listener.DebugReturn(DebugLevel.INFO, "OpSetPropertiesOfRoom not sent. gameProperties must be not null nor empty.");
+                }
+                return false;
             }
 
             Dictionary<byte, object> opParameters = new Dictionary<byte, object>();
@@ -743,7 +801,7 @@ namespace Photon.Realtime
             // shortcut, if we have a Token
             if (authValues != null && authValues.Token != null)
             {
-                opParameters[ParameterCode.Secret] = authValues.Token;
+                opParameters[ParameterCode.Token] = authValues.Token;
                 return this.SendOperation(OperationCode.Authenticate, opParameters, SendOptions.SendReliable); // we don't have to encrypt, when we have a token (which is encrypted)
             }
 
@@ -781,7 +839,7 @@ namespace Photon.Realtime
                 }
             }
 
-            return this.SendOperation(OperationCode.Authenticate, opParameters, new SendOptions() { Reliability = true, Encrypt = this.IsEncryptionAvailable });
+            return this.SendOperation(OperationCode.Authenticate, opParameters, new SendOptions() { Reliability = true, Encrypt = true });
         }
 
 
@@ -805,23 +863,23 @@ namespace Photon.Realtime
         {
             if (this.DebugOut >= DebugLevel.INFO)
             {
-                this.Listener.DebugReturn(DebugLevel.INFO, "OpAuthenticateOnce()");
+                this.Listener.DebugReturn(DebugLevel.INFO, "OpAuthenticateOnce(): authValues = "  + authValues + ", region = " + regionCode + ", encryption = " + encryptionMode);
             }
-
 
             var opParameters = new Dictionary<byte, object>();
 
             // shortcut, if we have a Token
             if (authValues != null && authValues.Token != null)
             {
-                opParameters[ParameterCode.Secret] = authValues.Token;
+                opParameters[ParameterCode.Token] = authValues.Token;
                 return this.SendOperation(OperationCode.AuthenticateOnce, opParameters, SendOptions.SendReliable); // we don't have to encrypt, when we have a token (which is encrypted)
             }
 
-            if (encryptionMode == EncryptionMode.DatagramEncryption && expectedProtocol != ConnectionProtocol.Udp)
+            if (encryptionMode == EncryptionMode.DatagramEncryptionGCM && expectedProtocol != ConnectionProtocol.Udp)
             {
                 // TODO disconnect?!
-                throw new NotSupportedException("Expected protocol set to UDP, due to encryption mode DatagramEncryption.");    // TODO use some other form of callback?!
+                // TODO use some other form of callback?!
+                throw new NotSupportedException("Expected protocol set to UDP, due to encryption mode DatagramEncryptionGCM.");
             }
 
             opParameters[ParameterCode.ExpectedProtocol] = (byte)expectedProtocol;
@@ -845,9 +903,9 @@ namespace Photon.Realtime
                 if (authValues.AuthType != CustomAuthenticationType.None)
                 {
                     opParameters[ParameterCode.ClientAuthenticationType] = (byte)authValues.AuthType;
-                    if (!string.IsNullOrEmpty(authValues.Token))
+                    if (authValues.Token != null)
                     {
-                        opParameters[ParameterCode.Secret] = authValues.Token;
+                        opParameters[ParameterCode.Token] = authValues.Token;
                     }
                     else
                     {
@@ -863,7 +921,7 @@ namespace Photon.Realtime
                 }
             }
 
-            return this.SendOperation(OperationCode.AuthenticateOnce, opParameters, new SendOptions() { Reliability = true, Encrypt = this.IsEncryptionAvailable });
+            return this.SendOperation(OperationCode.AuthenticateOnce, opParameters, new SendOptions() { Reliability = true, Encrypt = true });
         }
 
         /// <summary>
@@ -912,56 +970,63 @@ namespace Photon.Realtime
         /// <returns>If operation could be enqueued for sending. Sent when calling: Service or SendOutgoingCommands.</returns>
         public virtual bool OpRaiseEvent(byte eventCode, object customEventContent, RaiseEventOptions raiseEventOptions, SendOptions sendOptions)
         {
-            this.opRaiseEventParameters.Clear(); // re-used private variable to avoid many new Dictionary() calls (garbage collection)
-            if (raiseEventOptions != null)
+            var paramDict = this.paramDictionaryPool.Acquire();
+            try
             {
-                if (raiseEventOptions.CachingOption != EventCaching.DoNotCache)
+                if (raiseEventOptions != null)
                 {
-                    this.opRaiseEventParameters[(byte)ParameterCode.Cache] = (byte)raiseEventOptions.CachingOption;
+                    if (raiseEventOptions.CachingOption != EventCaching.DoNotCache)
+                    {
+                        paramDict.Add(ParameterCode.Cache, (byte)raiseEventOptions.CachingOption);
+                    }
+                    switch (raiseEventOptions.CachingOption)
+                    {
+                        case EventCaching.SliceSetIndex:
+                        case EventCaching.SlicePurgeIndex:
+                        case EventCaching.SlicePurgeUpToIndex:
+                            //this.opParameters[(byte) ParameterCode.CacheSliceIndex] =
+                            //    (byte) raiseEventOptions.CacheSliceIndex;
+                            return this.SendOperation(OperationCode.RaiseEvent, paramDict, sendOptions);
+                        case EventCaching.SliceIncreaseIndex:
+                        case EventCaching.RemoveFromRoomCacheForActorsLeft:
+                            return this.SendOperation(OperationCode.RaiseEvent, paramDict, sendOptions);
+                        case EventCaching.RemoveFromRoomCache:
+                            if (raiseEventOptions.TargetActors != null)
+                            {
+                                paramDict.Add(ParameterCode.ActorList, raiseEventOptions.TargetActors);
+                            }
+                            break;
+                        default:
+                            if (raiseEventOptions.TargetActors != null)
+                            {
+                                paramDict.Add(ParameterCode.ActorList, raiseEventOptions.TargetActors);
+                            }
+                            else if (raiseEventOptions.InterestGroup != 0)
+                            {
+                                paramDict.Add(ParameterCode.Group, (byte)raiseEventOptions.InterestGroup);
+                            }
+                            else if (raiseEventOptions.Receivers != ReceiverGroup.Others)
+                            {
+                                paramDict.Add(ParameterCode.ReceiverGroup, (byte)raiseEventOptions.Receivers);
+                            }
+                            if (raiseEventOptions.Flags.HttpForward)
+                            {
+                                paramDict.Add(ParameterCode.EventForward, (byte)raiseEventOptions.Flags.WebhookFlags);
+                            }
+                            break;
+                    }
                 }
-                switch (raiseEventOptions.CachingOption)
+                paramDict.Add(ParameterCode.Code, (byte)eventCode);
+                if (customEventContent != null)
                 {
-                    case EventCaching.SliceSetIndex:
-                    case EventCaching.SlicePurgeIndex:
-                    case EventCaching.SlicePurgeUpToIndex:
-                        //this.opParameters[(byte) ParameterCode.CacheSliceIndex] =
-                        //    (byte) raiseEventOptions.CacheSliceIndex;
-                        return this.SendOperation(OperationCode.RaiseEvent, this.opRaiseEventParameters, sendOptions);
-                    case EventCaching.SliceIncreaseIndex:
-                    case EventCaching.RemoveFromRoomCacheForActorsLeft:
-                        return this.SendOperation(OperationCode.RaiseEvent, this.opRaiseEventParameters, sendOptions);
-                    case EventCaching.RemoveFromRoomCache:
-                        if (raiseEventOptions.TargetActors != null)
-                        {
-                            this.opRaiseEventParameters[(byte)ParameterCode.ActorList] = raiseEventOptions.TargetActors;
-                        }
-                        break;
-                    default:
-                        if (raiseEventOptions.TargetActors != null)
-                        {
-                            this.opRaiseEventParameters[(byte)ParameterCode.ActorList] = raiseEventOptions.TargetActors;
-                        }
-                        else if (raiseEventOptions.InterestGroup != 0)
-                        {
-                            this.opRaiseEventParameters[(byte)ParameterCode.Group] = raiseEventOptions.InterestGroup;
-                        }
-                        else if (raiseEventOptions.Receivers != ReceiverGroup.Others)
-                        {
-                            this.opRaiseEventParameters[(byte)ParameterCode.ReceiverGroup] = (byte)raiseEventOptions.Receivers;
-                        }
-                        if (raiseEventOptions.Flags.HttpForward)
-                        {
-                            this.opRaiseEventParameters[(byte)ParameterCode.EventForward] = raiseEventOptions.Flags.WebhookFlags;
-                        }
-                        break;
+                    paramDict.Add(ParameterCode.Data, (object)customEventContent);
                 }
+                return this.SendOperation(OperationCode.RaiseEvent, paramDict, sendOptions);
             }
-            this.opRaiseEventParameters[(byte)ParameterCode.Code] = (byte)eventCode;
-            if (customEventContent != null)
+            finally
             {
-                this.opRaiseEventParameters[(byte)ParameterCode.Data] = customEventContent;
+                this.paramDictionaryPool.Release(paramDict);
             }
-            return this.SendOperation(OperationCode.RaiseEvent, this.opRaiseEventParameters, sendOptions);
         }
 
 
@@ -995,6 +1060,17 @@ namespace Photon.Realtime
         }
     }
 
+    /// <summary>Used in the RoomOptionFlags parameter, this bitmask toggles options in the room.</summary>
+    internal enum RoomOptionBit : int
+    {
+        CheckUserOnJoin = 0x01,  // toggles a check of the UserId when joining (enabling returning to a game)
+        DeleteCacheOnLeave = 0x02,  // deletes cache on leave
+        SuppressRoomEvents = 0x04,  // suppresses all room events
+        PublishUserId = 0x08,  // signals that we should publish userId
+        DeleteNullProps = 0x10,  // signals that we should remove property if its value was set to null. see RoomOption to Delete Null Properties
+        BroadcastPropsChangeToAll = 0x20,  // signals that we should send PropertyChanged event to all room players including initiator
+        SuppressPlayerInfo = 0x40,  // disables events join and leave from the server as well as property broadcasts in a room (to minimize traffic)
+    }
 
     /// <summary>
     /// Options for OpFindFriends can be combined to filter which rooms of friends are returned.
@@ -1030,27 +1106,50 @@ namespace Photon.Realtime
     }
 
 
-
+    /// <summary>
+    /// Parameters for the matchmaking of JoinRandomRoom and JoinRandomOrCreateRoom.
+    /// </summary>
+    /// <remarks>
+    /// More about matchmaking: <see href="https://doc.photonengine.com/en-us/pun/current/manuals-and-demos/matchmaking-and-lobby"/>.
+    /// </remarks>
     public class OpJoinRandomRoomParams
     {
+        /// <summary>The custom room properties a room must have to fit. All key-values must be present to match. In SQL Lobby, use SqlLobbyFilter instead.</summary>
         public Hashtable ExpectedCustomRoomProperties;
-        public byte ExpectedMaxPlayers;
+        /// <summary>Filters by the MaxPlayers value of rooms.</summary>
+        public int ExpectedMaxPlayers;
+        /// <summary>The MatchmakingMode affects how rooms get filled. By default, the server fills rooms.</summary>
         public MatchmakingMode MatchingType;
+        /// <summary>The lobby in which to match. The type affects how filters are applied.</summary>
         public TypedLobby TypedLobby;
+        /// <summary>SQL query to filter room matches. For default-typed lobbies, use ExpectedCustomRoomProperties instead.</summary>
         public string SqlLobbyFilter;
+        /// <summary>The expected users list blocks player slots for your friends or team mates to join the room, too.</summary>
+        /// <remarks>See: https://doc.photonengine.com/en-us/pun/v2/lobby-and-matchmaking/matchmaking-and-lobby#matchmaking_slot_reservation </remarks>
         public string[] ExpectedUsers;
+        /// <summary>Ticket for matchmaking. Provided by a plugin / server and contains a list of party members who should join the same room (among other things).</summary>
+        public object Ticket;
     }
 
+    /// <summary>Parameters for creating rooms.</summary>
     public class EnterRoomParams
     {
+        /// <summary>The name of the room to create. If null, the server generates a unique name. If not null, it must be unique and new or will cause an error.</summary>
         public string RoomName;
+        /// <summary>The RoomOptions define the optional behaviour of rooms.</summary>
         public RoomOptions RoomOptions;
+        /// <summary>A lobby to attach the new room to. If set, this overrides a joined lobby (if any).</summary>
         public TypedLobby Lobby;
+        /// <summary>The custom player properties that describe this client / user. Keys must be strings.</summary>
         public Hashtable PlayerProperties;
+        /// <summary>Internally used value to skip some values when the operation is sent to the Master Server.</summary>
         protected internal bool OnGameServer = true; // defaults to true! better send more parameter than too few (GS needs all)
-        public bool CreateIfNotExists;
-        public bool RejoinOnly;
+        /// <summary>Internally used value to check which join mode we should call.</summary>
+        protected internal JoinMode JoinMode;
+        /// <summary>A list of users who are expected to join the room along with this client. Reserves slots for rooms with MaxPlayers value.</summary>
         public string[] ExpectedUsers;
+        /// <summary>Ticket for matchmaking. Provided by a plugin / server and contains a list of party members who should join the same room (among other things).</summary>
+        public object Ticket;
     }
 
 
@@ -1126,7 +1225,7 @@ namespace Photon.Realtime
         /// <summary>(32758) Join can fail if the room (name) is not existing (anymore). This can happen when players leave while you join.</summary>
         public const int GameDoesNotExist = 0x7FFF - 9;
 
-        /// <summary>(32757) Authorization on the Photon Cloud failed becaus the concurrent users (CCU) limit of the app's subscription is reached.</summary>
+        /// <summary>(32757) Authorization on the Photon Cloud failed because the concurrent users (CCU) limit of the app's subscription is reached.</summary>
         /// <remarks>
         /// Unless you have a plan with "CCU Burst", clients might fail the authentication step during connect.
         /// Affected client are unable to call operations. Please note that players who end a game and return
@@ -1159,8 +1258,11 @@ namespace Photon.Realtime
         public const int AuthenticationTicketExpired = 0x7FF1;
 
         /// <summary>
-        /// (32752) A server-side plugin (or webhook) failed to execute and reported an error. Check the OperationResponse.DebugMessage.
+        /// (32752) A server-side plugin or WebHook failed and reported an error. Check the OperationResponse.DebugMessage.
         /// </summary>
+        /// <remarks>A typical case is when a plugin prevents a user from creating or joining a room.
+        /// If this is prohibited, that reports to the client as a plugin error.<br/>
+        /// Same for WebHooks.</remarks>
         public const int PluginReportedError = 0x7FFF - 15;
 
         /// <summary>
@@ -1194,7 +1296,7 @@ namespace Photon.Realtime
         public const int JoinFailedFoundActiveJoiner = 32746; // 0x7FFF - 21,
 
         /// <summary>
-        /// (32745)  for SetProerties and Raisevent (if flag HttpForward is true) requests. Indicates the maximum allowd http requests per minute was reached.
+        /// (32745)  for SetProperties and RaiseEvent (if flag HttpForward is true) requests. Indicates the maximum allowed http requests per minute was reached.
         /// </summary>
         public const int HttpLimitReached = 32745; // 0x7FFF - 22,
 
@@ -1202,6 +1304,11 @@ namespace Photon.Realtime
         /// (32744) for WebRpc requests. Indicates the the call to the external service failed.
         /// </summary>
         public const int ExternalHttpCallFailed = 32744; // 0x7FFF - 23,
+
+        /// <summary>
+        /// (32743) for operations with defined limits (as in calls per second, content count or size).
+        /// </summary>
+        public const int OperationLimitReached = 32743; // 0x7FFF - 24,
 
         /// <summary>
         /// (32742) Server error during matchmaking with slot reservation. E.g. the reserved slots can not exceed MaxPlayers.
@@ -1225,7 +1332,7 @@ namespace Photon.Realtime
     /// </remarks>
     public class ActorProperties
     {
-        /// <summary>(255) Name of a player/actor.</summary>
+        /// <summary>(255) NickName of a player/actor.</summary>
         public const byte PlayerName = 255; // was: 1
 
         /// <summary>(254) Tells you if the player is currently in this game (getting events live).</summary>
@@ -1248,6 +1355,10 @@ namespace Photon.Realtime
     {
         /// <summary>(255) Max number of players that "fit" into this room. 0 is for "unlimited".</summary>
         public const byte MaxPlayers = 255;
+
+        /// <summary>(243) Integer-typed max number of players that "fit" into a room. 0 is for "unlimited". Important: Code changed. See remarks.</summary>
+        /// <remarks>This was code 244 for a brief time (Realtime v4.1.7.2 to v4.1.7.4) and those versions must be replaced or edited!</remarks>
+        public const byte MaxPlayersInt = 243;
 
         /// <summary>(254) Makes this room listed or not in the lobby on master.</summary>
         public const byte IsVisible = 254;
@@ -1323,11 +1434,11 @@ namespace Photon.Realtime
         [Obsolete("Use PropertiesChanged now.")]
         public const byte SetProperties = (byte)253;
 
-        /// <summary>(252) When player left game unexpected and the room has a playerTtl != 0, this event is fired to let everyone know about the timeout.</summary>
+        /// (252) When player left game unexpected and the room has a playerTtl != 0, this event is fired to let everyone know about the timeout.
         /// Obsolete. Replaced by Leave. public const byte Disconnect = LiteEventCode.Disconnect;
 
-        /// <summary>(251) Sent by Photon Cloud when a plugin-call or webhook-call failed. Usually, the execution on the server continues, despite the issue. Contains: ParameterCode.Info.</summary>
-        /// <seealso cref="https://doc.photonengine.com/en-us/realtime/current/reference/webhooks#options"/>
+        /// <summary>(251) Sent by Photon Cloud when a plugin-call or webhook-call failed or events cache limit exceeded. Usually, the execution on the server continues, despite the issue. Contains: ParameterCode.Info.</summary>
+        /// <seealso href="https://doc.photonengine.com/en-us/realtime/current/reference/webhooks#options"/>
         public const byte ErrorInfo = 251;
 
         /// <summary>(250) Sent by Photon whent he event cache slice was changed. Done by OpRaiseEvent.</summary>
@@ -1395,7 +1506,7 @@ namespace Photon.Realtime
         public const byte GameList = 222;
 
         /// <summary>(221) Internally used to establish encryption</summary>
-        public const byte Secret = 221;
+        public const byte Token = 221;
 
         /// <summary>(220) Version of your application</summary>
         public const byte AppVersion = 220;
@@ -1418,7 +1529,7 @@ namespace Photon.Realtime
         /// <summary>(250) Code for broadcast parameter of OpSetProperties method.</summary>
         public const byte Broadcast = (byte)250;
 
-        /// <summary>(252) Code for list of players in a room. Currently not used.</summary>
+        /// <summary>(252) Code for list of players in a room.</summary>
         public const byte ActorList = (byte)252;
 
         /// <summary>(254) Code of the Actor of an operation. Used for property get and set.</summary>
@@ -1479,7 +1590,7 @@ namespace Photon.Realtime
         /// <summary>(216) This key's (string) value provides parameters sent to the custom authentication type/service the client connects with. Used in OpAuthenticate</summary>
         public const byte ClientAuthenticationParams = 216;
 
-        /// <summary>(215) Makes the server create a room if it doesn't exist. OpJoin uses this to always enter a room, unless it exists and is full/closed.</summary>
+        // /// <summary>(215) Makes the server create a room if it doesn't exist. OpJoin uses this to always enter a room, unless it exists and is full/closed.</summary>
         // public const byte CreateIfNotExists = 215;
 
         /// <summary>(215) The JoinMode enum defines which variant of joining a room will be executed: Join only if available, create if not exists or re-join.</summary>
@@ -1566,6 +1677,18 @@ namespace Photon.Realtime
 
         /// <summary>(191) An int parameter summarizing several boolean room-options with bit-flags.</summary>
         public const byte RoomOptionFlags = 191;
+
+        /// <summary>Matchmaking ticket (type object).</summary>
+        public const byte Ticket = 190;
+
+        /// <summary>Used server side once the group is extracted from the ticket. Clients don't send this.</summary>
+        public const byte MatchMakingGroupId = 189;
+
+        /// <summary>(188) Parameter key to let the server know it may queue the client in low-ccu matchmaking situations.</summary>
+        public const byte AllowRepeats = 188;
+
+        /// <summary>(187) This optional parameter from the server configures the client to send analytics or not.</summary>
+        public const byte ReportQos = 187;
     }
 
 
@@ -1785,7 +1908,7 @@ namespace Photon.Realtime
         private bool isOpen = true;
 
         /// <summary>Max number of players that can be in the room at any time. 0 means "no limit".</summary>
-        public byte MaxPlayers;
+        public int MaxPlayers;
 
         /// <summary>Time To Live (TTL) for an 'actor' in a room. If a client disconnects, this actor is inactive first and removed after this timeout. In milliseconds.</summary>
         public int PlayerTtl;
@@ -1838,6 +1961,9 @@ namespace Photon.Realtime
         /// </remarks>
         public bool SuppressRoomEvents { get; set; }
 
+        /// <summary>Disables events join and leave from the server as well as property broadcasts in a room (to minimize traffic)</summary>
+        public bool SuppressPlayerInfo { get; set; }
+
         /// <summary>
         /// Defines if the UserIds of players get "published" in the room. Useful for FindFriends, if players want to play another game together.
         /// </summary>
@@ -1864,7 +1990,7 @@ namespace Photon.Realtime
         ///
         /// 1) On server, room property ABC is set to value FOO, which triggers notifications to all the clients telling them that the property changed.
         /// 2) While that notification is in flight, a client sets the ABC property to value BAR.
-        /// 3) Client receives notification from the server and changes it�s local copy of ABC to FOO.
+        /// 3) Client receives notification from the server and changes its local copy of ABC to FOO.
         /// 4) Server receives the set operation and changes the official value of ABC to BAR, but never notifies the client that sent the set operation that the value is now BAR.
         ///
         /// Without this option, the client that set the value to BAR never hears from the server that the official copy has been updated to BAR, and thus gets stuck with a value of FOO.
@@ -2021,31 +2147,44 @@ namespace Photon.Realtime
     /// </summary>
     public enum CustomAuthenticationType : byte
     {
-        /// <summary>Use a custom authentification service. Currently the only implemented option.</summary>
+        /// <summary>Use a custom authentication service. Currently the only implemented option.</summary>
         Custom = 0,
 
-        /// <summary>Authenticates users by their Steam Account. Set auth values accordingly!</summary>
+        /// <summary>Authenticates users by their Steam Account. Set Steam's ticket as "ticket" via AddAuthParameter().</summary>
         Steam = 1,
 
-        /// <summary>Authenticates users by their Facebook Account. Set auth values accordingly!</summary>
+        /// <summary>Authenticates users by their Facebook Account.  Set Facebooks's tocken as "token" via AddAuthParameter().</summary>
         Facebook = 2,
 
-        /// <summary>Authenticates users by their Oculus Account and token.</summary>
+        /// <summary>Authenticates users by their Oculus Account and token. Set Oculus' userid as "userid" and nonce as "nonce" via AddAuthParameter().</summary>
         Oculus = 3,
 
-        /// <summary>Authenticates users by their PSN Account and token.</summary>
+        /// <summary>Authenticates users by their PSN Account and token on PS4. Set token as "token", env as "env" and userName as "userName" via AddAuthParameter().</summary>
+        PlayStation4 = 4,
+        [Obsolete("Use PlayStation4 or PlayStation5 as needed")]
         PlayStation = 4,
 
-        /// <summary>Authenticates users by their Xbox Account and XSTS token.</summary>
+        /// <summary>Authenticates users by their Xbox Account. Pass the XSTS token via SetAuthPostData().</summary>
         Xbox = 5,
 
-        /// <summary>Authenticates users by their HTC Viveport Account and user token. Set AuthGetParameters to "userToken=[userToken]"</summary>
+        /// <summary>Authenticates users by their HTC Viveport Account. Set userToken as "userToken" via AddAuthParameter().</summary>
         Viveport = 10,
 
-        /// <summary>Authenticates users by their NSA ID.</summary>
+        /// <summary>Authenticates users by their NSA ID. Set token  as "token" and appversion as "appversion" via AddAuthParameter(). The appversion is optional.</summary>
         NintendoSwitch = 11,
 
-        /// <summary>Disables custom authentification. Same as not providing any AuthenticationValues for connect (more precisely for: OpAuthenticate).</summary>
+        /// <summary>Authenticates users by their PSN Account and token on PS5. Set token as "token", env as "env" and userName as "userName" via AddAuthParameter().</summary>
+        PlayStation5 = 12,
+        [Obsolete("Use PlayStation4 or PlayStation5 as needed")]
+        Playstation5 = 12,
+
+        /// <summary>Authenticates users with Epic Online Services (EOS). Set token as "token" and ownershipToken as "ownershipToken" via AddAuthParameter(). The ownershipToken is optional.</summary>
+        Epic = 13,
+
+        /// <summary>Authenticates users with Facebook Gaming api. Set token as "token" via AddAuthParameter().</summary>
+        FacebookGaming = 15,
+
+        /// <summary>Disables custom authentication. Same as not providing any AuthenticationValues for connect (more precisely for: OpAuthenticate).</summary>
         None = byte.MaxValue
     }
 
@@ -2074,7 +2213,8 @@ namespace Photon.Realtime
         /// <summary>See AuthType.</summary>
         private CustomAuthenticationType authType = CustomAuthenticationType.None;
 
-        /// <summary>The type of custom authentication provider that should be used. Currently only "Custom" or "None" (turns this off).</summary>
+        /// <summary>The type of authentication provider that should be used. Defaults to None (no auth whatsoever).</summary>
+        /// <remarks>Several auth providers are available and CustomAuthenticationType.Custom can be used if you build your own service.</remarks>
         public CustomAuthenticationType AuthType
         {
             get { return authType; }
@@ -2092,8 +2232,9 @@ namespace Photon.Realtime
         /// <remarks>Maps to operation parameter 214.</remarks>
         public object AuthPostData { get; private set; }
 
-        /// <summary>After initial authentication, Photon provides a token for this client / user, which is subsequently used as (cached) validation.</summary>
-        public string Token { get; set; }
+        /// <summary>Internal <b>Photon token</b>. After initial authentication, Photon provides a token for this client, subsequently used as (cached) validation.</summary>
+        /// <remarks>Any token for custom authentication should be set via SetAuthPostData or AddAuthParameter.</remarks>
+        public object Token { get; protected internal set; }
 
         /// <summary>The UserId should be a unique identifier per user. This is for finding friends, etc..</summary>
         /// <remarks>See remarks of AuthValues for info about how this is set and used.</remarks>
@@ -2113,7 +2254,7 @@ namespace Photon.Realtime
         }
 
         /// <summary>Sets the data to be passed-on to the auth service via POST.</summary>
-        /// <remarks>AuthPostData is just one value. Each SetAuthPostData replaces any previous value. It can be either a string, a byte[] or a dictionary. Each SetAuthPostData replaces any previous value.</remarks>
+        /// <remarks>AuthPostData is just one value. Each SetAuthPostData replaces any previous value. It can be either a string, a byte[] or a dictionary.</remarks>
         /// <param name="stringData">String data to be used in the body of the POST request. Null or empty string will set AuthPostData to null.</param>
         public virtual void SetAuthPostData(string stringData)
         {
@@ -2121,7 +2262,7 @@ namespace Photon.Realtime
         }
 
         /// <summary>Sets the data to be passed-on to the auth service via POST.</summary>
-        /// <remarks>AuthPostData is just one value. Each SetAuthPostData replaces any previous value. It can be either a string, a byte[] or a dictionary. Each SetAuthPostData replaces any previous value.</remarks>
+        /// <remarks>AuthPostData is just one value. Each SetAuthPostData replaces any previous value. It can be either a string, a byte[] or a dictionary.</remarks>
         /// <param name="byteData">Binary token / auth-data to pass on.</param>
         public virtual void SetAuthPostData(byte[] byteData)
         {
@@ -2129,7 +2270,7 @@ namespace Photon.Realtime
         }
 
         /// <summary>Sets data to be passed-on to the auth service as Json (Content-Type: "application/json") via Post.</summary>
-        /// <remarks>AuthPostData is just one value. Each SetAuthPostData replaces any previous value. It can be either a string, a byte[] or a dictionary. Each SetAuthPostData replaces any previous value.</remarks>
+        /// <remarks>AuthPostData is just one value. Each SetAuthPostData replaces any previous value. It can be either a string, a byte[] or a dictionary.</remarks>
         /// <param name="dictData">A authentication-data dictionary will be converted to Json and passed to the Auth webservice via HTTP Post.</param>
         public virtual void SetAuthPostData(Dictionary<string, object> dictData)
         {
@@ -2146,9 +2287,32 @@ namespace Photon.Realtime
             this.AuthGetParameters = string.Format("{0}{1}{2}={3}", this.AuthGetParameters, ampersand, System.Uri.EscapeDataString(key), System.Uri.EscapeDataString(value));
         }
 
+        /// <summary>
+        /// Transform this object into string.
+        /// </summary>
+        /// <returns>String info about this object's values.</returns>
         public override string ToString()
         {
-            return string.Format("AuthenticationValues Type: {3} UserId: {0}, GetParameters: {1} Token available: {2}", this.UserId, this.AuthGetParameters, !string.IsNullOrEmpty(this.Token), this.AuthType);
+            return string.Format("AuthenticationValues = AuthType: {0} UserId: {1}{2}{3}{4}",
+                                 this.AuthType,
+                                 this.UserId,
+                                 string.IsNullOrEmpty(this.AuthGetParameters) ? " GetParameters: yes" : "",
+                                 this.AuthPostData == null ? "" : " PostData: yes",
+                                 this.Token == null ? "" : " Token: yes");
+        }
+
+        /// <summary>
+        /// Make a copy of the current object.
+        /// </summary>
+        /// <param name="copy">The object to be copied into.</param>
+        /// <returns>The copied object.</returns>
+        public AuthenticationValues CopyTo(AuthenticationValues copy)
+        {
+            copy.AuthType = this.AuthType;
+            copy.AuthGetParameters = this.AuthGetParameters;
+            copy.AuthPostData = this.AuthPostData;
+            copy.UserId = this.UserId;
+            return copy;
         }
     }
 }

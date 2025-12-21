@@ -2,6 +2,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 
 [BurstCompile]
 public struct PlayerInterceptionJob : IJobParallelFor
@@ -21,7 +22,7 @@ public struct PlayerInterceptionJob : IJobParallelFor
     [ReadOnly] public NativeArray<float3> playerDirections;
 
     [WriteOnly] public NativeArray<int> reachableIndex;
-    [WriteOnly] public NativeArray<float> timeToReachIndex;
+    [WriteOnly] public NativeArray<float> timePlayerToReachIndex;
 
     public void Execute(int index)
     {
@@ -60,7 +61,7 @@ public struct PlayerInterceptionJob : IJobParallelFor
             float totalTime = timeToReach + timeToRotate;
             if (totalTime <= ballTime)
             {
-                bestTime = totalTime;
+                bestTime = ballTime==Mathf.Infinity ? totalTime : ballTime;
                 bestIndex = i;
                 break;
             }
@@ -68,7 +69,7 @@ public struct PlayerInterceptionJob : IJobParallelFor
         }
 
         reachableIndex[index] = bestIndex;
-        timeToReachIndex[index] = bestTime;
+        timePlayerToReachIndex[index] = bestTime;
     }
 
     private float EstimateTimeToReach(float distance, float currentSpeed, float accel, float decel, float maxSpeed, float targetSpeed)

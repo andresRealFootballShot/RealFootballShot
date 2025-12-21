@@ -114,8 +114,8 @@ namespace Photon.Pun.Demo.PunBasics
 				LogFeedback("Connecting...");
 				
 				// #Critical, we must first and foremost connect to Photon Online Server.
-			    PhotonNetwork.GameVersion = this.gameVersion;
 				PhotonNetwork.ConnectUsingSettings();
+                PhotonNetwork.GameVersion = this.gameVersion;
 			}
 		}
 
@@ -215,7 +215,7 @@ namespace Photon.Pun.Demo.PunBasics
 
 				// #Critical
 				// Load the Room Level. 
-				PhotonNetwork.LoadLevel("Level1");
+				PhotonNetwork.LoadLevel("PunBasics-Room for 1");
 
 			}
 		}

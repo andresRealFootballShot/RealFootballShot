@@ -4,6 +4,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine.Experimental.GlobalIllumination;
 using UnityEditor;
+using static UnityEditor.PlayerSettings;
 
 public class BallInterceptionSystem : MonoBehaviour
 {
@@ -31,6 +32,12 @@ public class BallInterceptionSystem : MonoBehaviour
     private NativeArray<float3> playerVelocities;
     private NativeArray<float3> playerDirections;
     float timeDebug;
+
+    private void Start()
+    {
+        //testKick3();
+
+    }
     void Update()
     {
         testKick();
@@ -52,7 +59,9 @@ public class BallInterceptionSystem : MonoBehaviour
                 if (index >= 0)
                 {
                     Debug.DrawLine(Teams.allPlayers[i].position, trajectory.positions[index], Color.green);
+                    
                 }
+                Debug.DrawLine(Teams.allPlayers[i].position, Teams.allPlayers[i].playerComponents.TargetPosition, Color.red);
             }
             timeDebug += Time.deltaTime;
         }
@@ -100,7 +109,7 @@ public class BallInterceptionSystem : MonoBehaviour
             ballPositions = ballPositions,
             ballTimes = ballTimes,
             reachableIndex = reachableIndices,
-            timeToReachIndex = timeToReach,
+            timePlayerToReachIndex = timeToReach,
             accelerations = accelerations,
             deccelerations = deccelerations,
             maxSpeeds = maxSpeeds,
@@ -119,8 +128,9 @@ public class BallInterceptionSystem : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //testMovePlayers();
+           
             testKick3();
+            testKick2();
         }
     }
     void setPlayersTarget()
@@ -191,15 +201,20 @@ public class BallInterceptionSystem : MonoBehaviour
     }
     void testKick3()
     {
+
+        EditorApplication.isPaused = true; // Pausa el Play Mode
+        Time.timeScale = timeScale;
         MatchComponents.ballComponents.rigBall.velocity = forceTransform.forward * force;
+        timeDebug = 0;
+        Calculate();
     }
     void testKick2()
     {
-        MatchComponents.ballComponents.rigBall.velocity = forceTransform.forward * force;
+        //MatchComponents.ballComponents.rigBall.velocity = forceTransform.forward * force;
         Time.timeScale = timeScale;
         timeDebug = 0;
 
-        Calculate();
+        //Calculate();
         setPlayersTarget();
     }
     void testMovePlayers()
@@ -215,10 +230,9 @@ public class BallInterceptionSystem : MonoBehaviour
         }
         Invoke(nameof(testKick2), 1);
     }
-    public void getClosePlayerBall(out PublicPlayerData publicPlayerDataResult,out float ballTimeResult, out float playerReachTimeResult, out Vector3 ballPositionResult )
+    public void getClosePlayerBall(out PublicPlayerData publicPlayerDataResult,out float playerReachTimeResult, out Vector3 ballPositionResult )
     {
         publicPlayerDataResult = null;
-        ballTimeResult = Mathf.Infinity;
         ballPositionResult = Vector3.positiveInfinity;
         playerReachTimeResult = Mathf.Infinity;
         int indexResult=-1;
@@ -229,12 +243,10 @@ public class BallInterceptionSystem : MonoBehaviour
             int index = reachableIndices[i];
             if (index >= 0)
             {
-                float ballTime = ballTimes[index];
                 float playerReachTime = timeToReach[i];
-                if (ballTime <= ballTimeResult && playerReachTime <= playerReachTimeResult)
+                if (playerReachTime <= playerReachTimeResult)
                 {
                     indexResult = index;
-                    ballTimeResult = ballTime;
                     playerReachTimeResult = playerReachTime;
                     ballPositionResult = ballPositions[index];
                     publicPlayerDataResult = Teams.allPlayers[i];
@@ -243,6 +255,7 @@ public class BallInterceptionSystem : MonoBehaviour
             }
         }
     }
+
     void OnDestroy()
     {
         if (ballPositions.IsCreated) ballPositions.Dispose();
@@ -259,6 +272,11 @@ public class BallInterceptionSystem : MonoBehaviour
                 if (t <= timeDebug) {
                     Gizmos.color = Color.yellow;
                     Gizmos.DrawSphere(trajectory.positions[i], 0.1f);
+                    GUIStyle style = new GUIStyle();
+                    style.fontSize = 12;
+                    style.normal.textColor = Color.white;
+                    string info = trajectory.times[i].ToString("f2");
+                    Handles.Label(trajectory.positions[i] + Vector3.up * 0.5f, info, style);
                 }
                
 

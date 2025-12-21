@@ -10,6 +10,7 @@
 // <author>developer@photonengine.com</author>
 // ----------------------------------------------------------------------------
 
+
 #if UNITY_4_7 || UNITY_5 || UNITY_5_3_OR_NEWER
 #define SUPPORTED_UNITY
 #endif
@@ -58,6 +59,12 @@ namespace Photon.Realtime
 
         /// <summary>Only one player is controlled by each client. Others are not local.</summary>
         public readonly bool IsLocal;
+
+
+        public bool HasRejoined
+        {
+            get; internal set;
+        }
 
 
         /// <summary>Background field for nickName.</summary>
@@ -111,7 +118,7 @@ namespace Photon.Realtime
             }
         }
 
-        /// <summary>If this player is active in the room (and getting events which are currently being sent).</summary>
+        /// <summary>If this player in the room is currently inactive (not being connected and not getting "live" events).</summary>
         /// <remarks>
         /// Inactive players keep their spot in a room but otherwise behave as if offline (no matter what their actual connection status is).
         /// The room needs a PlayerTTL != 0. If a player is inactive for longer than PlayerTTL, the server will remove this player from the room.
@@ -238,41 +245,27 @@ namespace Photon.Realtime
         /// This only updates the CustomProperties and doesn't send them to the server.
         /// Mostly used when creating new remote players, where the server sends their properties.
         /// </remarks>
-        public virtual void InternalCacheProperties(Hashtable properties)
+        protected internal virtual void InternalCacheProperties(Hashtable properties)
         {
             if (properties == null || properties.Count == 0 || this.CustomProperties.Equals(properties))
             {
                 return;
             }
 
-            if (properties.ContainsKey(ActorProperties.PlayerName))
+            // only remote player instances update their NickName from the properties
+            if (!this.IsLocal && properties.ContainsKey(ActorProperties.PlayerName))
             {
                 string nameInServersProperties = (string)properties[ActorProperties.PlayerName];
-                if (nameInServersProperties != null)
-                {
-                    if (this.IsLocal)
-                    {
-                        // the local playername is different than in the properties coming from the server
-                        // so the local nickName was changed and the server is outdated -> update server
-                        // update property instead of using the outdated nickName coming from server
-                        if (!nameInServersProperties.Equals(this.nickName))
-                        {
-                            this.SetPlayerNameProperty();
-                        }
-                    }
-                    else
-                    {
-                        this.NickName = nameInServersProperties;
-                    }
-                }
+                this.NickName = nameInServersProperties;
             }
+
             if (properties.ContainsKey(ActorProperties.UserId))
             {
                 this.UserId = (string)properties[ActorProperties.UserId];
             }
             if (properties.ContainsKey(ActorProperties.IsInactive))
             {
-                this.IsInactive = (bool)properties[ActorProperties.IsInactive]; //TURNBASED new well-known propery for players
+                this.IsInactive = (bool)properties[ActorProperties.IsInactive]; //TURNBASED new well-known property for players
             }
 
             this.CustomProperties.MergeStringKeys(properties);
@@ -374,52 +367,90 @@ namespace Photon.Realtime
         /// <param name="propertiesToSet">Hashtable of Custom Properties to be set. </param>
         /// <param name="expectedValues">If non-null, these are the property-values the server will check as condition for this update.</param>
         /// <param name="webFlags">Defines if this SetCustomProperties-operation gets forwarded to your WebHooks. Client must be in room.</param>
-        public void SetCustomProperties(Hashtable propertiesToSet, Hashtable expectedValues = null, WebFlags webFlags = null)
+        /// <returns>
+        /// False if propertiesToSet is null or empty or have zero string keys.
+        /// True in offline mode even if expectedProperties or webFlags are used.
+        /// If not in a room, returns true if local player and expectedValues and webFlags are null.
+        /// (Use this to cache properties to be sent when joining a room).
+        /// Otherwise, returns if this operation could be sent to the server.
+        /// </returns>
+        public bool SetCustomProperties(Hashtable propertiesToSet, Hashtable expectedValues = null, WebFlags webFlags = null)
         {
-            if (propertiesToSet == null)
+            if (propertiesToSet == null || propertiesToSet.Count == 0)
             {
-                return;
+                return false;
             }
 
             Hashtable customProps = propertiesToSet.StripToStringKeys() as Hashtable;
-            Hashtable customPropsToCheck = expectedValues.StripToStringKeys() as Hashtable;
-
-
-            // no expected values -> set and callback
-            bool noCas = customPropsToCheck == null || customPropsToCheck.Count == 0;
-
-
-            if (noCas)
-            {
-                this.CustomProperties.Merge(customProps);
-                this.CustomProperties.StripKeysWithNullValues();
-            }
 
             if (this.RoomReference != null)
             {
                 if (this.RoomReference.IsOffline)
                 {
+                    if (customProps.Count == 0)
+                    {
+                        return false;
+                    }
+                    this.CustomProperties.Merge(customProps);
+                    this.CustomProperties.StripKeysWithNullValues();
                     // invoking callbacks
                     this.RoomReference.LoadBalancingClient.InRoomCallbackTargets.OnPlayerPropertiesUpdate(this, customProps);
+                    return true;
                 }
                 else
                 {
+                    Hashtable customPropsToCheck = expectedValues.StripToStringKeys() as Hashtable;
+
                     // send (sync) these new values if in online room
-                    this.RoomReference.LoadBalancingClient.LoadBalancingPeer.OpSetPropertiesOfActor(this.actorNumber, customProps, customPropsToCheck, webFlags);
+                    return this.RoomReference.LoadBalancingClient.OpSetPropertiesOfActor(this.actorNumber, customProps, customPropsToCheck, webFlags);
                 }
             }
+            if (this.IsLocal)
+            {
+                if (customProps.Count == 0)
+                {
+                    return false;
+                }
+                if (expectedValues == null && webFlags == null)
+                {
+                    this.CustomProperties.Merge(customProps);
+                    this.CustomProperties.StripKeysWithNullValues();
+                    return true;
+                }
+            }
+
+            return false;
         }
 
 
+        /// <summary>Updates the server, if the NickName in the custom properties (coming from the server) is not correct.</summary>
+        internal bool UpdateNickNameOnJoined()
+        {
+            if (this.RoomReference == null || this.RoomReference.CustomProperties == null || !this.IsLocal)
+            {
+                return false;
+            }
+
+            string nickStoredInCustomProps = this.CustomProperties[ActorProperties.PlayerName] as string;
+            if (!string.Equals(this.NickName, nickStoredInCustomProps))
+            {
+                return this.SetPlayerNameProperty();
+            }
+
+            return true;
+        }
+
         /// <summary>Uses OpSetPropertiesOfActor to sync this player's NickName (server is being updated with this.NickName).</summary>
-        private void SetPlayerNameProperty()
+        private bool SetPlayerNameProperty()
         {
             if (this.RoomReference != null && !this.RoomReference.IsOffline)
             {
                 Hashtable properties = new Hashtable();
                 properties[ActorProperties.PlayerName] = this.nickName;
-                this.RoomReference.LoadBalancingClient.LoadBalancingPeer.OpSetPropertiesOfActor(this.ActorNumber, properties);
+                return this.RoomReference.LoadBalancingClient.OpSetPropertiesOfActor(this.ActorNumber, properties);
             }
+
+            return false;
         }
     }
 }

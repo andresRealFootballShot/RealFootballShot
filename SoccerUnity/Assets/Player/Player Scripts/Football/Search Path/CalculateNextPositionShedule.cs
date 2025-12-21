@@ -115,6 +115,7 @@ public class CalculateNextPositionShedule : MonoBehaviour
         }
         jobData.Dispose();
     }
+    
     FieldPositionsData getFieldPositionData(PlayerPositionType playerPositionType,List<FieldPositionsData> FieldPositionDatas)
     {
         foreach (var FieldPositionData in FieldPositionDatas)
