@@ -103,20 +103,21 @@ public class BallTrajectorySimulator : MonoBehaviour
             {
                 pos = GetAnalyticPosition(t0 + timeStep, pos0, v0);
                 vel = GetAnalyticVelocity(t0 + timeStep, v0);
+                
                 // --- CONTACTO CON EL SUELO ---
                 if (pos.y <= groundLevel)
                 {
                     pos.y = groundLevel;
 
                     // 🔑 SI EL IMPACTO ES DÉBIL → RODAR, NO REBOTAR
-                    if (Mathf.Abs(vel.y) < 1f)
+                    if (Mathf.Abs(vel.y) < 2f)
                     {
                         vel.y = 0f;
                         v0 = vel;        // IMPORTANTE
                         v0Magnitude = v0.magnitude;
                         t0 = 0f;
                         pos0 = pos;
-
+                        
                         // salimos: el siguiente frame entrará en el bloque de suelo
                     }
                     else

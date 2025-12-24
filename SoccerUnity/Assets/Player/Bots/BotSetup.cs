@@ -45,8 +45,10 @@ public class BotSetup : MonoBehaviour
             FollowBall followBall = MyFunctions.GetComponentInChilds<FollowBall>(gameObject, true);
             normalState.addUpdateFunction(followBall.runOptimalPointToReachBall);
         }
+        /*
         normalState.addUpdateFunction(movementCtrl.rotation);
-        normalState.addUpdateFunction(movementCtrl.getAdjustedForwardVelocitySpeed);
+        normalState.addUpdateFunction(movementCtrl.getAdjustedForwardVelocitySpeed);*/
+        normalState.addUpdateFunction(movementCtrl.BotMove);
         normalState.addUpdateFunction(movementCtrl.animator);
         
         if (ballDriving)
@@ -65,7 +67,9 @@ public class BotSetup : MonoBehaviour
             normalState.addExitFunction(ballControl.StopProcess);
         }
         //normalState.addFixedUpdateFunctions(movementCtrl.movement);
-        normalState.addUpdateFunction(movementCtrl.movement);
+        
+        //normalState.addUpdateFunction(movementCtrl.movement);
+
         //State defaultState = new State("default State");
         //defaultState.addEntryFunction(() => print("defaultState entry functions"));
         //defaultState.addExitFunction(() => print("defaultState exit functions"));

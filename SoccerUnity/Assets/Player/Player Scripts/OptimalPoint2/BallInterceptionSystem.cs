@@ -27,6 +27,9 @@ public class BallInterceptionSystem : MonoBehaviour
     private NativeArray<float> rotationSpeeds;
     private NativeArray<float> jumpHeights;
     private NativeArray<float> desiredSpeeds;
+    public NativeArray<float> maxAngleForRuns;
+    public NativeArray<float> minSpeedForRotates;
+    public NativeArray<float> scopes;
 
     private NativeArray<float3> playerPositions;
     private NativeArray<float3> playerVelocities;
@@ -41,6 +44,8 @@ public class BallInterceptionSystem : MonoBehaviour
     void Update()
     {
         testKick();
+        setPlayersTarget2();
+
         //Calculate();
 #if UNITY_EDITOR
         if (debug)
@@ -53,6 +58,8 @@ public class BallInterceptionSystem : MonoBehaviour
             // Mostrar resultados
             for (int i = 0; i < Teams.allPlayers.Count; i++)
             {
+
+
                 if (i >= reachableIndices.Length) break; 
                 
                 int index = reachableIndices[i];
@@ -62,12 +69,14 @@ public class BallInterceptionSystem : MonoBehaviour
                     
                 }
                 Debug.DrawLine(Teams.allPlayers[i].position, Teams.allPlayers[i].playerComponents.TargetPosition, Color.red);
+
+
+                
             }
             timeDebug += Time.deltaTime;
         }
 #endif
     }
-   
     public void Calculate()
     {
         trajectory.Simulate();
@@ -98,9 +107,12 @@ public class BallInterceptionSystem : MonoBehaviour
             }
             jumpHeights[i] = maximumJumpHeight;
             desiredSpeeds[i] = publicPlayerData.maxSpeed;
+            maxAngleForRuns[i] = publicPlayerData.playerComponents.movementValues.maxAngleForRun;
+            minSpeedForRotates[i] = publicPlayerData.playerComponents.movementValues.minSpeedForRotateBody;
             playerPositions[i] = publicPlayerData.position;
             playerVelocities[i] = publicPlayerData.playerComponents.Velocity;
             playerDirections[i] = publicPlayerData.playerComponents.bodyY0Forward;
+            scopes[i] = publicPlayerData.playerComponents.scope;
         }
 
         // Ejecutar el Job
@@ -116,6 +128,9 @@ public class BallInterceptionSystem : MonoBehaviour
             rotationSpeeds = rotationSpeeds,
             jumpHeights = jumpHeights,
             desiredSpeeds = desiredSpeeds,
+            maxAngleForRuns = maxAngleForRuns,
+            minSpeedForRotates = minSpeedForRotates,
+            scopes = scopes,
             playerPositions = playerPositions,
             playerVelocities = playerVelocities,
             playerDirections = playerDirections,
@@ -128,9 +143,20 @@ public class BallInterceptionSystem : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-           
-            testKick3();
-            testKick2();
+
+            //testKick2();
+            testMovePlayers();
+        }
+    }
+    void setPlayersTarget2()
+    {
+        for (int i = 0; i < Teams.allPlayers.Count; i++)
+        {
+                PublicPlayerData publicPlayerData = Teams.allPlayers[i];
+                Vector3 pos = MatchComponents.ballPosition;
+                pos.y = 0;
+                publicPlayerData.playerComponents.movementCtrl.SetTargetPosition(pos);
+            
         }
     }
     void setPlayersTarget()
@@ -143,7 +169,9 @@ public class BallInterceptionSystem : MonoBehaviour
             if (index >= 0)
             {
                 PublicPlayerData publicPlayerData = Teams.allPlayers[i];
-                publicPlayerData.playerComponents.movementCtrl.SetTargetPosition(trajectory.positions[index]);
+                Vector3 pos = trajectory.positions[index];
+                pos.y = 0;
+                publicPlayerData.playerComponents.movementCtrl.SetTargetPosition(pos);
             }
         }
     }
@@ -179,6 +207,9 @@ public class BallInterceptionSystem : MonoBehaviour
             rotationSpeeds = new NativeArray<float>(playerCount, Allocator.Persistent);
             jumpHeights = new NativeArray<float>(playerCount, Allocator.Persistent);
             desiredSpeeds = new NativeArray<float>(playerCount, Allocator.Persistent);
+            minSpeedForRotates = new NativeArray<float>(playerCount, Allocator.Persistent);
+            maxAngleForRuns = new NativeArray<float>(playerCount, Allocator.Persistent);
+            scopes = new NativeArray<float>(playerCount, Allocator.Persistent);
             playerPositions = new NativeArray<float3>(playerCount, Allocator.Persistent);
             playerVelocities = new NativeArray<float3>(playerCount, Allocator.Persistent);
             playerDirections = new NativeArray<float3>(playerCount, Allocator.Persistent);
@@ -195,6 +226,9 @@ public class BallInterceptionSystem : MonoBehaviour
         if (rotationSpeeds.IsCreated) rotationSpeeds.Dispose();
         if (jumpHeights.IsCreated) jumpHeights.Dispose();
         if (desiredSpeeds.IsCreated) desiredSpeeds.Dispose();
+        if (minSpeedForRotates.IsCreated) minSpeedForRotates.Dispose();
+        if (maxAngleForRuns.IsCreated) maxAngleForRuns.Dispose();
+        if (scopes.IsCreated) scopes.Dispose();
         if (playerPositions.IsCreated) playerPositions.Dispose();
         if (playerVelocities.IsCreated) playerVelocities.Dispose();
         if (playerDirections.IsCreated) playerDirections.Dispose();
@@ -211,8 +245,8 @@ public class BallInterceptionSystem : MonoBehaviour
     void testKick2()
     {
         //MatchComponents.ballComponents.rigBall.velocity = forceTransform.forward * force;
-        Time.timeScale = timeScale;
-        timeDebug = 0;
+        //Time.timeScale = timeScale;
+        testKick3();
 
         //Calculate();
         setPlayersTarget();
@@ -223,6 +257,7 @@ public class BallInterceptionSystem : MonoBehaviour
         {
             PublicPlayerData publicPlayerData = Teams.allPlayers[i];
             Vector3 pos = publicPlayerData.position + publicPlayerData.bodyTransform.forward*10;
+            pos.y = 0;
             if (publicPlayerData.playerComponents.movementCtrl != null)
             {
                 publicPlayerData.playerComponents.movementCtrl.SetTargetPosition(pos);
@@ -275,7 +310,8 @@ public class BallInterceptionSystem : MonoBehaviour
                     GUIStyle style = new GUIStyle();
                     style.fontSize = 12;
                     style.normal.textColor = Color.white;
-                    string info = trajectory.times[i].ToString("f2");
+                    //string info =i +"-"+ trajectory.times[i].ToString("f2");
+                    string info =i.ToString();
                     Handles.Label(trajectory.positions[i] + Vector3.up * 0.5f, info, style);
                 }
                

@@ -92,6 +92,14 @@ public class MovimentValues : MonoBehaviour
     public float maxSpeedForReachBall;
     public float maxAngleForRun;
     public float stopOffset;
+    public enum MovePhase
+    {
+        Brake,
+        Rotate,
+        Move
+    }
+
+    public MovePhase phase;
     private void Awake()
     {
         maxSpeed.Value = forwardRunSpeed + forwardSprintSpeed;

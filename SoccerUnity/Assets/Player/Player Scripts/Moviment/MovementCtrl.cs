@@ -1,10 +1,11 @@
-using DOTS_ChaserDataCalculation;
+﻿using DOTS_ChaserDataCalculation;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using TMPro;
 using Unity.Entities.UniversalDelegates;
 using UnityEngine;
+using static MovimentValues;
 
 public class MovementCtrl : MovementPlayerComponent
 {
@@ -78,6 +79,134 @@ public class MovementCtrl : MovementPlayerComponent
         //print(speedRotation + )
         //print("adjustedForwardVelocitySpeed=" + adjustedForwardVelocitySpeed + " | speedRotation=" + speedRotation + " | ForwardDesiredVelocitySpeed=" + ForwardDesiredVelocitySpeed + " | acceleration="+ acceleration);
     }
+    public void BotMove(float deltaTime)
+    {
+        UpdateMovementPhase();
+        UpdateRotation(deltaTime);
+        UpdateSpeed(deltaTime);
+        calculateBotVelocity(deltaTime);
+        ApplyMovement(deltaTime);
+    }
+    void UpdateMovementPhase()
+    {
+        if (DesiredLookDirection == Vector3.zero)
+            return;
+
+        float angle = Vector3.Angle(bodyY0Forward, DesiredLookDirection);
+
+        if (angle > maxAngleForRun && EndForwardSpeed > minSpeedForRotate)
+        {
+            phase = MovePhase.Brake;
+        }
+        else if (angle > 1f)
+        {
+            phase = MovePhase.Rotate;
+        }
+        else
+        {
+            phase = MovePhase.Move;
+        }
+    }
+    void UpdateSpeed(float dt)
+    {
+        switch (phase)
+        {
+            case MovePhase.Brake:
+                {
+                    if (EndForwardSpeed > minSpeedForRotate)
+                    {
+                        EndForwardSpeed -= movementValues.forwardDeceleration * dt;
+                        EndForwardSpeed = Mathf.Max(EndForwardSpeed, minSpeedForRotate);
+                    }
+                    break;
+                }
+
+            case MovePhase.Rotate:
+                // velocidad constante
+                break;
+
+            case MovePhase.Move:
+                {
+                    float distance =
+                        Vector3.Distance(
+                            new Vector3(bodyPosition.x, 0, bodyPosition.z),
+                            new Vector3(TargetPosition.x, 0, TargetPosition.z)
+                        ) - scope;
+
+                    float stopDist =
+                        (EndForwardSpeed * EndForwardSpeed) /
+                        (2f * movementValues.forwardDeceleration);
+
+                    if (distance <= stopDist)
+                    {
+                        EndForwardSpeed -= movementValues.forwardDeceleration * dt;
+                        EndForwardSpeed = Mathf.Max(EndForwardSpeed, maxSpeedForReachBall);
+                    }
+                    else
+                    {
+                        EndForwardSpeed += movementValues.forwardAcceleration * dt;
+                        EndForwardSpeed = Mathf.Min(EndForwardSpeed, ForwardDesiredSpeed);
+                    }
+                    break;
+                }
+        }
+    }
+    void UpdateRotation(float dt)
+    {
+        if (DesiredDirection == Vector3.zero)
+            return;
+
+        Vector3 targetDir = TargetPosition - bodyTransform.position;
+        targetDir.y = 0f;
+
+        if (targetDir.sqrMagnitude < 0.0001f)
+            return;
+
+        float angle = Vector3.Angle(direction, targetDir);
+
+        float rotSpeed;
+
+        if (angle > maxAngleForRun)
+        {
+            // Solo rotar si ya hemos frenado
+            if (EndForwardSpeed > minSpeedForRotate + 0.01f)
+                return;
+
+            rotSpeed = movementValues.rotationSpeed;
+        }
+        else
+        {
+            // Rotación combinada con movimiento → lateral permitido
+            //rotSpeed = movementValues.directionRotationSpeed;
+            rotSpeed = movementValues.rotationSpeed;
+        }
+
+        Vector3 newDir = Vector3.RotateTowards(
+            direction,
+            targetDir,
+            rotSpeed * Mathf.Deg2Rad * dt,
+            1f
+        ).normalized;
+
+        direction = newDir;
+
+       
+        bodyTransform.rotation = Quaternion.LookRotation(direction, Vector3.up);
+    }
+    void calculateBotVelocity(float deltaTime)
+    {
+        float forwardSpeed = Vector3.Dot(bodyY0Forward, direction.normalized * EndForwardSpeed);
+        float horizontalSpeed = Vector3.Dot(bodyTransform.right, direction.normalized * EndForwardSpeed);
+        playerData.Velocity = direction.normalized * EndForwardSpeed;
+        playerData.VerticalSpeed = forwardSpeed;
+        playerData.HorizontalSpeed = horizontalSpeed;
+        previousPosition = bodyPosition;
+    }
+    void ApplyMovement(float dt)
+    {
+        Vector3 delta = direction * EndForwardSpeed * dt;
+        bodyRigidbody.MovePosition(bodyRigidbody.position + delta);
+    }
     void testSpeed()
     {
         
@@ -108,6 +237,7 @@ public class MovementCtrl : MovementPlayerComponent
         }
         calculateVelocity(Time.deltaTime);
     }
+
     void calculateDistanceStop()
     {
         float v = maxSpeedForReachBall;

@@ -646,7 +646,7 @@ MonoBehaviour:
   minSpeedForChangeDirection: 2
   directionRotationSpeed: 360
   maxSpeedForReachBall: 0
-  maxAngleForRun: 95
+  maxAngleForRun: 45
   stopOffset: 0
 --- !u!114 &3747010004157290952
 MonoBehaviour:
@@ -3826,7 +3826,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &3747010006063244259
 Animator:
-  serializedVersion: 3
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -3839,10 +3839,12 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &3747010006063244256
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static MovimentValues;
 
 public class MovementPlayerComponent : PlayerComponent
 {
@@ -18,6 +19,7 @@ public class MovementPlayerComponent : PlayerComponent
     protected float Clamp01NormalizedForwardDesiredSpeed { get => movementValues.Clamp01NormalizedForwardDesiredVelocity.magnitude; }
 
     public float EndForwardSpeed { get => movementValues.adjustedForwardVelocitySpeed; set => movementValues.adjustedForwardVelocitySpeed = value; }
+    public MovePhase phase { get => movementValues.phase; set => movementValues.phase = value; }
     
     protected Vector3 LookDirection { get => movementValues.LookDirection; set => movementValues.LookDirection = value; }
     

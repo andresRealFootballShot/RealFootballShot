@@ -905,7 +905,7 @@ public class CullPassPoints : MonoBehaviour
     }
     public void CalculateFirstReachPlayerToBall(out float playerReachTime, out Vector3 ballPosition)
     {
-        ballInterceptionSystem.Calculate();
+        //ballInterceptionSystem.Calculate();
         ballInterceptionSystem.getClosePlayerBall(out PublicPlayerData firstPublicPlayerData,out  playerReachTime, out  ballPosition);
 
         DrawArrow.ForDebug(ballPosition + Vector3.up*0.5f, Vector3.up);
