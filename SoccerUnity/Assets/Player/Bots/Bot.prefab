@@ -646,8 +646,9 @@ MonoBehaviour:
   minSpeedForChangeDirection: 2
   directionRotationSpeed: 360
   maxSpeedForReachBall: 0
-  maxAngleForRun: 45
+  maxAngleForRun: 30
   stopOffset: 0
+  phase: 0
 --- !u!114 &3747010004157290952
 MonoBehaviour:
   m_ObjectHideFlags: 0

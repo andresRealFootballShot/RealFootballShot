@@ -153,10 +153,10 @@ public class MovementCtrl : MovementPlayerComponent
     }
     void UpdateRotation(float dt)
     {
-        if (DesiredDirection == Vector3.zero)
+        if (DesiredLookDirection == Vector3.zero)
             return;
 
-        Vector3 targetDir = TargetPosition - bodyTransform.position;
+        Vector3 targetDir = DesiredLookDirection;
         targetDir.y = 0f;
 
         if (targetDir.sqrMagnitude < 0.0001f)
@@ -421,6 +421,7 @@ public class MovementCtrl : MovementPlayerComponent
     {
         Vector3 dir = targetPosition - publicPlayerData.position;
         dir.y = 0;
+        dir.Normalize();
         playerComponents.ForwardDesiredDirection = dir;
         playerComponents.ForwardDesiredSpeed = publicPlayerData.movimentValues.maxForwardSpeed;
         playerComponents.DesiredLookDirection = dir;

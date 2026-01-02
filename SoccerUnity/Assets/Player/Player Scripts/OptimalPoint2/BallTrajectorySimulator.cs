@@ -57,7 +57,7 @@ public class BallTrajectorySimulator : MonoBehaviour
                 if (outOfFieldCounter > maxOutCount)
                     break;
             }
-
+            
             if (vel.magnitude < 0.01f)
             {
                 times[times.Count - 1] = Mathf.Infinity;
@@ -69,6 +69,9 @@ public class BallTrajectorySimulator : MonoBehaviour
             // =====================================================
             if (Mathf.Abs(vel.y) < 0.1f && pos.y <= groundLevel)
             {
+
+                time += timeStep;
+                t0 += timeStep;
                 vel.y = 0;
                 float t1 = getTofWMax_WithRollDrag(v0Magnitude);
                 if (t0 < t1) t1 = t0;
@@ -101,6 +104,7 @@ public class BallTrajectorySimulator : MonoBehaviour
             // =====================================================
             else
             {
+                
                 pos = GetAnalyticPosition(t0 + timeStep, pos0, v0);
                 vel = GetAnalyticVelocity(t0 + timeStep, v0);
                 
@@ -129,10 +133,11 @@ public class BallTrajectorySimulator : MonoBehaviour
                         pos0 = pos;
                     }
                 }
+                time += timeStep;
+                t0 += timeStep;
             }
+            
 
-            time += timeStep;
-            t0 += timeStep;
         }
     }
 

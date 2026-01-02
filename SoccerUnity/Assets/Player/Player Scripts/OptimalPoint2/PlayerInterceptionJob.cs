@@ -59,7 +59,7 @@ public struct PlayerInterceptionJob : IJobParallelFor
 
             // =========================
             // FASE 0 – FRENO + DESPLAZAMIENTO
-            // =========================
+            // ======================w===
             float3 toTargetInitial = ballPos - playerPos;
             float2 toTargetXZ = new float2(toTargetInitial.x, toTargetInitial.z);
 

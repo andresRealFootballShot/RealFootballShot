@@ -35,7 +35,7 @@ public class BallInterceptionSystem : MonoBehaviour
     private NativeArray<float3> playerVelocities;
     private NativeArray<float3> playerDirections;
     float timeDebug;
-
+    bool enablePlayersGoTarget;
     private void Start()
     {
         //testKick3();
@@ -44,7 +44,8 @@ public class BallInterceptionSystem : MonoBehaviour
     void Update()
     {
         testKick();
-        setPlayersTarget2();
+        if(enablePlayersGoTarget) setPlayersTarget();
+        //setPlayersTarget2();
 
         //Calculate();
 #if UNITY_EDITOR
@@ -236,7 +237,7 @@ public class BallInterceptionSystem : MonoBehaviour
     void testKick3()
     {
 
-        EditorApplication.isPaused = true; // Pausa el Play Mode
+        EditorApplication.isPaused = true;
         Time.timeScale = timeScale;
         MatchComponents.ballComponents.rigBall.velocity = forceTransform.forward * force;
         timeDebug = 0;
@@ -247,7 +248,7 @@ public class BallInterceptionSystem : MonoBehaviour
         //MatchComponents.ballComponents.rigBall.velocity = forceTransform.forward * force;
         //Time.timeScale = timeScale;
         testKick3();
-
+        enablePlayersGoTarget = true;
         //Calculate();
         setPlayersTarget();
     }

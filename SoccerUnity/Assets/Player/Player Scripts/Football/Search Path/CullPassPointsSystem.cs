@@ -91,7 +91,6 @@ public class CullPassPointsSystem : SystemBase
             }
             else
             {
-                
                 CullPassPoints.PlacePoints(0);
             }
 
