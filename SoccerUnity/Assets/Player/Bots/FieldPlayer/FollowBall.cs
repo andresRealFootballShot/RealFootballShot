@@ -74,7 +74,7 @@ public class FollowBall : MovementPlayerComponent
     }
     void calculateDistanceStop()
     {
-        float v = maxSpeedForReachBall;
+        float v = reachBallSpeed;
         
         if (isAccelerating)
         {

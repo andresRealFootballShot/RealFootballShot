@@ -39,8 +39,10 @@ public class MovementPlayerComponent : PlayerComponent
     protected bool isAccelerating { get; set; }
     protected bool isDecelerating { get; set; }
     protected float minSpeedForRotate { get => movementValues.minSpeedForRotateBody; }
-    protected float maxSpeedForReachBall { get => movementValues.maxSpeedForReachBall; }
+    protected float minSpeedForRotate2 { get => movementValues.minSpeedForRotateBody2; }
+    protected float reachBallSpeed { get => movementValues.maxSpeedForReachBall; }
     protected float maxAngleForRun { get => movementValues.maxAngleForRun; }
+    protected float maxAngleForRun2 { get => movementValues.maxAngleForRun2; }
     protected void calculateIsAccelerating()
     {
         float angleBodyBall = getVelocity_DesiredDirectionAngle();

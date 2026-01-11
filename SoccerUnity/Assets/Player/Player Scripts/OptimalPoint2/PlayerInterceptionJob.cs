@@ -15,9 +15,11 @@ public struct PlayerInterceptionJob : IJobParallelFor
     [ReadOnly] public NativeArray<float> maxSpeeds;
     [ReadOnly] public NativeArray<float> rotationSpeeds;
     [ReadOnly] public NativeArray<float> jumpHeights;
-    [ReadOnly] public NativeArray<float> desiredSpeeds;
+    [ReadOnly] public NativeArray<float> reachBallSpeeds;
     [ReadOnly] public NativeArray<float> maxAngleForRuns;
+    [ReadOnly] public NativeArray<float> maxAngleForRuns2;
     [ReadOnly] public NativeArray<float> minSpeedForRotates;
+    [ReadOnly] public NativeArray<float> minSpeedForRotates2;
     [ReadOnly] public NativeArray<float> scopes;
 
     [ReadOnly] public NativeArray<float3> playerPositions;
@@ -41,9 +43,11 @@ public struct PlayerInterceptionJob : IJobParallelFor
         float maxSpeed = maxSpeeds[index];
         float rotationSpeed = rotationSpeeds[index];
         float jumpHeight = jumpHeights[index];
-        float desiredSpeed = desiredSpeeds[index];
+        float reachBallSpeed = reachBallSpeeds[index];
         float maxAngleForRun = maxAngleForRuns[index];
+        float maxAngleForRun2 = maxAngleForRuns2[index];
         float minSpeedForRotate = minSpeedForRotates[index];
+        float minSpeedForRotate2 = minSpeedForRotates2[index];
         float scope = scopes[index];
 
        
@@ -69,17 +73,17 @@ public struct PlayerInterceptionJob : IJobParallelFor
             float tBrake = 0f;
             float dBrake = 0f;
             float3 posAfterBrake = playerPos;
-
             //if (mustBrakeBeforeRotate && currentSpeed > minSpeedForRotate)
             if (mustBrakeBeforeRotate)
             {
-                float deltaV = currentSpeed - minSpeedForRotate;
-                tBrake = (deltaV / decel) + 0.1f;
+                float requiredSpeed = angle > maxAngleForRun2 ? minSpeedForRotate2 : minSpeedForRotate;
+                float deltaV = Mathf.Clamp(currentSpeed - requiredSpeed, 0,Mathf.Infinity);
+                tBrake = (deltaV / decel);
                 dBrake = (deltaV * deltaV) / (2f * decel);
 
                 posAfterBrake += playerDir * dBrake;
                 //currentSpeed = angle>90 ? 0 : minSpeedForRotate;
-                currentSpeed = minSpeedForRotate;
+                currentSpeed = Mathf.Clamp(requiredSpeed, 0, currentSpeed);
             }
 
             // =========================
@@ -103,10 +107,11 @@ public struct PlayerInterceptionJob : IJobParallelFor
                 accel,
                 decel,
                 maxSpeed,
-                desiredSpeed
+                reachBallSpeed
             );
 
-            float totalTime = tBrake + tRotate + tMove;
+            //float totalTime = tBrake + tRotate + tMove;
+            float totalTime = tBrake + tMove;
 
             if (totalTime <= ballTime)
             {
@@ -124,49 +129,49 @@ public struct PlayerInterceptionJob : IJobParallelFor
     // CINEMÁTICA LINEAL (misma que tu Speed())
     // =====================================================
     private float EstimateTimeToReach(
-        float distance,
-        float currentSpeed,
-        float accel,
-        float decel,
-        float maxSpeed,
-        float targetSpeed)
+    float distance,
+    float currentSpeed,
+    float accel,
+    float decel,
+    float maxSpeed,
+    float targetSpeed)
     {
-        targetSpeed = math.clamp(targetSpeed, 0f, maxSpeed);
-        currentSpeed = math.clamp(currentSpeed, 0f, maxSpeed);
+        // --- 1. Calcular la distancia necesaria para desacelerar hasta targetSpeed ---
+        float decelDistance = (currentSpeed * currentSpeed - targetSpeed * targetSpeed) / (2f * decel);
 
-        float tAccel = (maxSpeed - currentSpeed) / accel;
-        float dAccel = (currentSpeed + maxSpeed) * 0.5f * tAccel;
-
-        float tDecel = (maxSpeed - targetSpeed) / decel;
-        float dDecel = (maxSpeed + targetSpeed) * 0.5f * tDecel;
-
-        float totalAccelDecelDist = dAccel + dDecel;
-
-        if (totalAccelDecelDist >= distance)
+        // Si la distancia es menor que la que necesitamos para frenar, ajustamos
+        if (decelDistance > distance)
         {
-            // Pico intermedio
-            float a = 1f / (2f * accel);
-            float b = currentSpeed / accel + targetSpeed / decel;
-            float c = -distance
-                      + (currentSpeed * currentSpeed) / (2f * accel)
-                      + (targetSpeed * targetSpeed) / (2f * decel);
+            // No da tiempo a alcanzar maxSpeed, solo desaceleramos
+            // Usamos fórmula de MRUA invertida: d = (v^2 - u^2) / (2a)
+            return (Mathf.Sqrt(currentSpeed * currentSpeed - 2f * decel * distance) - currentSpeed) / (-decel);
+        }
 
-            float discriminant = b * b - 4f * a * c;
-            if (discriminant < 0f)
-                return float.MaxValue;
+        // --- 2. Distancia disponible para acelerar y velocidad máxima ---
+        float remainingDistance = distance - decelDistance;
 
-            float vPeak = (-b + math.sqrt(discriminant)) / (2f * a);
+        // Distancia para alcanzar maxSpeed desde currentSpeed
+        float accelDistance = (maxSpeed * maxSpeed - currentSpeed * currentSpeed) / (2f * accel);
 
-            float t1 = (vPeak - currentSpeed) / accel;
-            float t2 = (vPeak - targetSpeed) / decel;
-            return t1 + t2;
+        float time = 0f;
+
+        if (accelDistance >= remainingDistance)
+        {
+            // No alcanza velocidad máxima, solo acelera hasta un punto y luego frena
+            float peakSpeed = Mathf.Sqrt(currentSpeed * currentSpeed + 2f * accel * remainingDistance);
+            time += (peakSpeed - currentSpeed) / accel;          // Tiempo acelerando
+            time += (peakSpeed - targetSpeed) / decel;           // Tiempo desacelerando
         }
         else
         {
-            float dCruise = distance - totalAccelDecelDist;
-            float tCruise = dCruise / maxSpeed;
-            return tAccel + tCruise + tDecel;
+            // Alcanzamos velocidad máxima
+            time += (maxSpeed - currentSpeed) / accel;           // Tiempo acelerando
+            float cruiseDistance = remainingDistance - accelDistance;
+            time += cruiseDistance / maxSpeed;                  // Tiempo a velocidad constante
+            time += (maxSpeed - targetSpeed) / decel;           // Tiempo desacelerando
         }
+
+        return time;
     }
 
     private float AngleBetweenXZ(float3 forward, float2 toTarget)

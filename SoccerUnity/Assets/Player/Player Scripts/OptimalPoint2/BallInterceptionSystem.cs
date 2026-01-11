@@ -14,7 +14,8 @@ public class BallInterceptionSystem : MonoBehaviour
     public Transform forceTransform;
     public float force=10;
     public float timeScale=1;
-   
+    public float distanceTestPlayer = 10;
+    public float timeTestPlayer = 1;
     private NativeArray<float3> ballPositions;
     private NativeArray<float> ballTimes;
 
@@ -30,7 +31,8 @@ public class BallInterceptionSystem : MonoBehaviour
     public NativeArray<float> maxAngleForRuns;
     public NativeArray<float> minSpeedForRotates;
     public NativeArray<float> scopes;
-
+    public NativeArray<float> maxAngleForRuns2;
+    public NativeArray<float> minSpeedForRotates2;
     private NativeArray<float3> playerPositions;
     private NativeArray<float3> playerVelocities;
     private NativeArray<float3> playerDirections;
@@ -107,9 +109,11 @@ public class BallInterceptionSystem : MonoBehaviour
                 maximumJumpHeight = publicPlayerData.maximumJumpHeights.Keys[0];
             }
             jumpHeights[i] = maximumJumpHeight;
-            desiredSpeeds[i] = publicPlayerData.maxSpeed;
+            desiredSpeeds[i] = publicPlayerData.movimentValues.maxSpeedForReachBall;
             maxAngleForRuns[i] = publicPlayerData.playerComponents.movementValues.maxAngleForRun;
+            maxAngleForRuns2[i] = publicPlayerData.playerComponents.movementValues.maxAngleForRun2;
             minSpeedForRotates[i] = publicPlayerData.playerComponents.movementValues.minSpeedForRotateBody;
+            minSpeedForRotates2[i] = publicPlayerData.playerComponents.movementValues.minSpeedForRotateBody2;
             playerPositions[i] = publicPlayerData.position;
             playerVelocities[i] = publicPlayerData.playerComponents.Velocity;
             playerDirections[i] = publicPlayerData.playerComponents.bodyY0Forward;
@@ -128,9 +132,11 @@ public class BallInterceptionSystem : MonoBehaviour
             maxSpeeds = maxSpeeds,
             rotationSpeeds = rotationSpeeds,
             jumpHeights = jumpHeights,
-            desiredSpeeds = desiredSpeeds,
+            reachBallSpeeds = desiredSpeeds,
             maxAngleForRuns = maxAngleForRuns,
             minSpeedForRotates = minSpeedForRotates,
+            minSpeedForRotates2 = minSpeedForRotates2,
+            maxAngleForRuns2 = maxAngleForRuns2,
             scopes = scopes,
             playerPositions = playerPositions,
             playerVelocities = playerVelocities,
@@ -209,7 +215,9 @@ public class BallInterceptionSystem : MonoBehaviour
             jumpHeights = new NativeArray<float>(playerCount, Allocator.Persistent);
             desiredSpeeds = new NativeArray<float>(playerCount, Allocator.Persistent);
             minSpeedForRotates = new NativeArray<float>(playerCount, Allocator.Persistent);
+            minSpeedForRotates2 = new NativeArray<float>(playerCount, Allocator.Persistent);
             maxAngleForRuns = new NativeArray<float>(playerCount, Allocator.Persistent);
+            maxAngleForRuns2 = new NativeArray<float>(playerCount, Allocator.Persistent);
             scopes = new NativeArray<float>(playerCount, Allocator.Persistent);
             playerPositions = new NativeArray<float3>(playerCount, Allocator.Persistent);
             playerVelocities = new NativeArray<float3>(playerCount, Allocator.Persistent);
@@ -228,7 +236,9 @@ public class BallInterceptionSystem : MonoBehaviour
         if (jumpHeights.IsCreated) jumpHeights.Dispose();
         if (desiredSpeeds.IsCreated) desiredSpeeds.Dispose();
         if (minSpeedForRotates.IsCreated) minSpeedForRotates.Dispose();
+        if (minSpeedForRotates2.IsCreated) minSpeedForRotates2.Dispose();
         if (maxAngleForRuns.IsCreated) maxAngleForRuns.Dispose();
+        if (maxAngleForRuns2.IsCreated) maxAngleForRuns2.Dispose();
         if (scopes.IsCreated) scopes.Dispose();
         if (playerPositions.IsCreated) playerPositions.Dispose();
         if (playerVelocities.IsCreated) playerVelocities.Dispose();
@@ -241,6 +251,13 @@ public class BallInterceptionSystem : MonoBehaviour
         Time.timeScale = timeScale;
         MatchComponents.ballComponents.rigBall.velocity = forceTransform.forward * force;
         timeDebug = 0;
+
+        for (int i = 0; i < Teams.allPlayers.Count; i++)
+        {
+            PublicPlayerData publicPlayerData = Teams.allPlayers[i];
+            publicPlayerData.movimentValues.maxSpeedForReachBall = 10.5f;
+        }
+
         Calculate();
     }
     void testKick2()
@@ -257,14 +274,14 @@ public class BallInterceptionSystem : MonoBehaviour
         for (int i = 0; i < Teams.allPlayers.Count; i++)
         {
             PublicPlayerData publicPlayerData = Teams.allPlayers[i];
-            Vector3 pos = publicPlayerData.position + publicPlayerData.bodyTransform.forward*10;
+            Vector3 pos = publicPlayerData.position + publicPlayerData.bodyTransform.forward* distanceTestPlayer;
             pos.y = 0;
             if (publicPlayerData.playerComponents.movementCtrl != null)
             {
                 publicPlayerData.playerComponents.movementCtrl.SetTargetPosition(pos);
             }
         }
-        Invoke(nameof(testKick2), 1);
+        Invoke(nameof(testKick2), timeTestPlayer);
     }
     public void getClosePlayerBall(out PublicPlayerData publicPlayerDataResult,out float playerReachTimeResult, out Vector3 ballPositionResult )
     {

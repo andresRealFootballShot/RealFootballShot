@@ -85,12 +85,12 @@ public class MovimentValues : MonoBehaviour
     public float rotationSpeed=600;
     public float minRotationSpeedWhileRun = 300;
     public float maxSpeedWhileRun_AngularLerp = 4;
-    public float minSpeedForRotateBody;
+    public float minSpeedForRotateBody,minSpeedForRotateBody2;
     public float minSpeedForChangeDirection=1;
     public float directionRotationSpeed=360;
 
     public float maxSpeedForReachBall;
-    public float maxAngleForRun;
+    public float maxAngleForRun,maxAngleForRun2;
     public float stopOffset;
     public enum MovePhase
     {
@@ -98,7 +98,7 @@ public class MovimentValues : MonoBehaviour
         Rotate,
         Move
     }
-
+    [HideInInspector]
     public MovePhase phase;
     private void Awake()
     {
