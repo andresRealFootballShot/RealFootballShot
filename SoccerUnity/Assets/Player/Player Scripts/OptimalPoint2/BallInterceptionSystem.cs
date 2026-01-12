@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using UnityEngine.Experimental.GlobalIllumination;
 using UnityEditor;
 using static UnityEditor.PlayerSettings;
+using System.Reflection;
 
 public class BallInterceptionSystem : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class BallInterceptionSystem : MonoBehaviour
     public float timeScale=1;
     public float distanceTestPlayer = 10;
     public float timeTestPlayer = 1;
+    public float maxSpeedForReachBall;
     private NativeArray<float3> ballPositions;
     private NativeArray<float> ballTimes;
 
@@ -46,7 +48,7 @@ public class BallInterceptionSystem : MonoBehaviour
     void Update()
     {
         testKick();
-        if(enablePlayersGoTarget) setPlayersTarget();
+        //if(enablePlayersGoTarget) setPlayersTarget();
         //setPlayersTarget2();
 
         //Calculate();
@@ -80,6 +82,7 @@ public class BallInterceptionSystem : MonoBehaviour
         }
 #endif
     }
+
     public void Calculate()
     {
         trajectory.Simulate();
@@ -152,7 +155,7 @@ public class BallInterceptionSystem : MonoBehaviour
         {
 
             //testKick2();
-            testMovePlayers();
+            testMovePlayers2();
         }
     }
     void setPlayersTarget2()
@@ -183,6 +186,77 @@ public class BallInterceptionSystem : MonoBehaviour
         }
     }
    
+    
+    void testKick3()
+    {
+
+        EditorApplication.isPaused = true;
+        Time.timeScale = timeScale;
+        MatchComponents.ballComponents.rigBall.velocity = forceTransform.forward * force;
+        timeDebug = 0;
+
+        for (int i = 0; i < Teams.allPlayers.Count; i++)
+        {
+            PublicPlayerData publicPlayerData = Teams.allPlayers[i];
+            publicPlayerData.movimentValues.maxSpeedForReachBall = maxSpeedForReachBall;
+        }
+
+        Calculate();
+    }
+    void testKick2()
+    {
+        testKick3();
+        setPlayersTarget();
+    }
+    void testMovePlayers2()
+    {
+        for (int i = 0; i < Teams.allPlayers.Count; i++)
+        {
+            PublicPlayerData publicPlayerData = Teams.allPlayers[i];
+            publicPlayerData.playerComponents.movementCtrl.SetInstantVelocity(publicPlayerData.playerComponents.bodyY0Forward,publicPlayerData.maxSpeed);
+            publicPlayerData.movimentValues.maxSpeedForReachBall = 10.5f;
+        }
+        testKick2();
+    }
+    void testMovePlayers()
+    {
+        for (int i = 0; i < Teams.allPlayers.Count; i++)
+        {
+            PublicPlayerData publicPlayerData = Teams.allPlayers[i];
+            Vector3 pos = publicPlayerData.position + publicPlayerData.bodyTransform.forward* distanceTestPlayer;
+            pos.y = 0;
+            if (publicPlayerData.playerComponents.movementCtrl != null)
+            {
+                publicPlayerData.playerComponents.movementCtrl.SetTargetPosition(pos);
+            }
+        }
+        Invoke(nameof(testKick2), timeTestPlayer);
+    }
+    public void getClosePlayerBall(out PublicPlayerData publicPlayerDataResult,out float playerReachTimeResult, out Vector3 ballPositionResult )
+    {
+        publicPlayerDataResult = null;
+        ballPositionResult = Vector3.positiveInfinity;
+        playerReachTimeResult = Mathf.Infinity;
+        int indexResult=-1;
+        for (int i = 0; i < Teams.allPlayers.Count; i++)
+        {
+            if (i >= reachableIndices.Length) break;
+
+            int index = reachableIndices[i];
+            if (index >= 0)
+            {
+                float playerReachTime = timeToReach[i];
+                if (playerReachTime <= playerReachTimeResult)
+                {
+                    indexResult = index;
+                    playerReachTimeResult = playerReachTime;
+                    ballPositionResult = ballPositions[index];
+                    publicPlayerDataResult = Teams.allPlayers[i];
+                    
+                }
+            }
+        }
+    }
     void ResizeIfNeeded()
     {
         int trajectoryLength = trajectory.positions.Count;
@@ -244,71 +318,6 @@ public class BallInterceptionSystem : MonoBehaviour
         if (playerVelocities.IsCreated) playerVelocities.Dispose();
         if (playerDirections.IsCreated) playerDirections.Dispose();
     }
-    void testKick3()
-    {
-
-        EditorApplication.isPaused = true;
-        Time.timeScale = timeScale;
-        MatchComponents.ballComponents.rigBall.velocity = forceTransform.forward * force;
-        timeDebug = 0;
-
-        for (int i = 0; i < Teams.allPlayers.Count; i++)
-        {
-            PublicPlayerData publicPlayerData = Teams.allPlayers[i];
-            publicPlayerData.movimentValues.maxSpeedForReachBall = 10.5f;
-        }
-
-        Calculate();
-    }
-    void testKick2()
-    {
-        //MatchComponents.ballComponents.rigBall.velocity = forceTransform.forward * force;
-        //Time.timeScale = timeScale;
-        testKick3();
-        enablePlayersGoTarget = true;
-        //Calculate();
-        setPlayersTarget();
-    }
-    void testMovePlayers()
-    {
-        for (int i = 0; i < Teams.allPlayers.Count; i++)
-        {
-            PublicPlayerData publicPlayerData = Teams.allPlayers[i];
-            Vector3 pos = publicPlayerData.position + publicPlayerData.bodyTransform.forward* distanceTestPlayer;
-            pos.y = 0;
-            if (publicPlayerData.playerComponents.movementCtrl != null)
-            {
-                publicPlayerData.playerComponents.movementCtrl.SetTargetPosition(pos);
-            }
-        }
-        Invoke(nameof(testKick2), timeTestPlayer);
-    }
-    public void getClosePlayerBall(out PublicPlayerData publicPlayerDataResult,out float playerReachTimeResult, out Vector3 ballPositionResult )
-    {
-        publicPlayerDataResult = null;
-        ballPositionResult = Vector3.positiveInfinity;
-        playerReachTimeResult = Mathf.Infinity;
-        int indexResult=-1;
-        for (int i = 0; i < Teams.allPlayers.Count; i++)
-        {
-            if (i >= reachableIndices.Length) break;
-
-            int index = reachableIndices[i];
-            if (index >= 0)
-            {
-                float playerReachTime = timeToReach[i];
-                if (playerReachTime <= playerReachTimeResult)
-                {
-                    indexResult = index;
-                    playerReachTimeResult = playerReachTime;
-                    ballPositionResult = ballPositions[index];
-                    publicPlayerDataResult = Teams.allPlayers[i];
-                    
-                }
-            }
-        }
-    }
-
     void OnDestroy()
     {
         if (ballPositions.IsCreated) ballPositions.Dispose();
@@ -337,4 +346,5 @@ public class BallInterceptionSystem : MonoBehaviour
             }
         }
     }
+
 }

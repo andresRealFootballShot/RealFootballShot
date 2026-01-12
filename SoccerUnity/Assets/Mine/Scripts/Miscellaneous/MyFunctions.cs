@@ -545,6 +545,10 @@ public static class MyFunctions
     {
         return new Vector3(vector3.x, 0, vector3.z);
     }
+    public static float AngleXZ(Vector3 dir1,Vector3 dir2)
+    {
+        return  Vector3.Angle(new Vector3(dir1.x,0,dir2.z), new Vector3(dir2.x,0,dir2.z));
+    }
     public static Vector3 setYToVector3WithClamp(Vector3 vector3, float y, float min, float max)
     {
         return new Vector3(vector3.x, Mathf.Clamp(y, min, max), vector3.z);

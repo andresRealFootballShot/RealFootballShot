@@ -134,7 +134,6 @@ public class GetPerfectPass : SoccerPlayerComponent
         {
             Vector3 dir = rivalChaserData.OptimalPoint - rivalChaserData.position;
             dir.Normalize();
-            rivalChaserData.publicPlayerData.playerComponents.ForwardDesiredDirection = dir;
             rivalChaserData.publicPlayerData.playerComponents.ForwardDesiredSpeed = rivalChaserData.publicPlayerData.playerComponents.MaxSpeed;
             
             rivalChaserData.publicPlayerData.playerComponents.DesiredLookDirection = dir;
@@ -148,7 +147,6 @@ public class GetPerfectPass : SoccerPlayerComponent
         ChaserData myChaserData = passParameters.ReceiverChaserData;
         Vector3 dir = passParameters.Posf - myChaserData.position;
         dir.Normalize();
-        myChaserData.publicPlayerData.playerComponents.ForwardDesiredDirection = dir;
         myChaserData.publicPlayerData.playerComponents.ForwardDesiredSpeed = movementValues.maxForwardSpeed;
         myChaserData.publicPlayerData.playerComponents.DesiredLookDirection = dir;
         myChaserData.publicPlayerData.playerComponents.MinForwardSpeed = 0;
@@ -231,7 +229,6 @@ public class GetPerfectPass : SoccerPlayerComponent
         ballRigidbody.velocity = testKickDirection.forward * force;
         
         yield return new WaitForSeconds(1);*/
-        ForwardDesiredDirection = initPlayerDirection.forward;
         movementValues.DesiredLookDirection = initPlayerDirection.forward;
         ForwardDesiredSpeed = MaxSpeed;
         yield return new WaitForSeconds(1);
@@ -252,7 +249,6 @@ public class GetPerfectPass : SoccerPlayerComponent
             {
                 Vector3 optimalPoint = chaserData.OptimalPoint;
                 Vector3 chaserDirection = MyFunctions.setY0ToVector3(optimalPoint - bodyPosition);
-                ForwardDesiredDirection = chaserDirection;
 
                 movementValues.DesiredLookDirection = chaserDirection;
                 ForwardDesiredSpeed = MaxSpeed;

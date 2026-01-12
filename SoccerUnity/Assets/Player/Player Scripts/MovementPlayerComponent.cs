@@ -11,8 +11,9 @@ public class MovementPlayerComponent : PlayerComponent
 
     
     protected Vector3 NormalizedForwardDesiredVelocity { get => movementValues.NormalizedForwardDesiredVelocity; }
-    public Vector3 DesiredDirection { get => movementValues.ForwardDesiredDirection; set => movementValues.ForwardDesiredDirection = value; }
-    public Vector3 ForwardDesiredVelocity { get => movementValues.ForwardDesiredVelocity; set => movementValues.ForwardDesiredVelocity = value; }
+    public Vector3 DesiredDirection { get => movementValues.DesiredDirection;}
+    public Vector3 DesiredY0Direction { get => movementValues.DesiredY0Direction;}
+    public Vector3 ForwardDesiredVelocity { get => movementValues.DesiredVelocity;}
     protected Vector3 ForwardY0DesiredVelocity { get => MyFunctions.setY0ToVector3(ForwardDesiredVelocity);}
     protected float ForwardDesiredVelocitySpeed { get => movementValues.ForwardDesiredSpeed; }
     protected Vector3 Clamp01NormalizedForwardDesiredVelocity { get => movementValues.Clamp01NormalizedForwardDesiredVelocity; }
@@ -26,10 +27,9 @@ public class MovementPlayerComponent : PlayerComponent
     protected float distanceStopMoveBallPlayer { get => stopOffset + movementValues.distanceStopMoveBallPlayerOffset; }
     //protected float distanceStopMoveBallPlayer { get => 3.289582f; }
     protected float angleBallForwardDesiredVelocity { get => Vector3.Angle(bodyBallDirection,ForwardDesiredVelocity); }
-    protected float angleBodyForwardDesiredVelocity { get => Vector3.Angle(bodyY0Forward, ForwardY0DesiredVelocity); }
+    protected float angleBodyForwardDesiredVelocity { get => Vector3.Angle(bodyY0Forward, DesiredY0Direction); }
     protected float angleVelocity_DesiredVelocity { get => Vector3.Angle(Y0Velocity, ForwardY0DesiredVelocity); }
     protected float angleBodyForward_DesiredLookDirection { get => Vector3.Angle(bodyY0Forward, DesiredLookDirection); }
-    protected float angleBodyTarget_DesiredDirection { get => Vector3.Angle(BodyTargetDirection, DesiredDirection); }
     protected float angleBodyForwardVelocity { get => Vector3.Angle(bodyY0Forward, VelocityDirection); }
 
     protected float accelerationSkill { get => playerSkills.acceleration; }

@@ -393,6 +393,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   info: ultimate
+  PublicPlayerData: {fileID: 3747010005541261552}
   forwardRunSpeed: 7
   forwardSprintSpeed: 3.5
   backRunSpeed: 4
@@ -636,7 +637,7 @@ MonoBehaviour:
   forwardAccelerationDistance: 4
   horizontalAccelerationDistance: 0.5
   backAccelerationDistance: 0.5
-  forwardDecelerationDistance: 1
+  forwardDecelerationDistance: 2
   horizontalDecelerationDistance: 0.5
   backDecelerationDistance: 0.5
   rotationSpeed: 800
@@ -665,6 +666,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   useRigidbody: 1
   debug: 0
+  debugMoveTimes: 0
+  breakTime: 0
+  moveTime: 0
+  rotationTime: 0
 --- !u!114 &3747010004157290953
 MonoBehaviour:
   m_ObjectHideFlags: 0

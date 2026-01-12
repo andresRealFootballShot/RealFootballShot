@@ -53,7 +53,7 @@ public class PlayerComponents : PlayerComponent
     }
     public float getMaxSpeed()
     {
-        float angle = Vector3.Angle(bodyY0Forward, ForwardDesiredDirection.normalized);
+        float angle = Vector3.Angle(bodyY0Forward, DesiredDirection.normalized);
         float maxSpeed = Mathf.Lerp(movementValues.maxForwardSpeed, movementValues.maxHorizontalSpeed, angle / 90);
         maxSpeed = Mathf.Lerp(maxSpeed, movementValues.maxBackSpeed, (angle-90) / 90);
         
@@ -61,28 +61,28 @@ public class PlayerComponents : PlayerComponent
     }
     public float getRunSpeed()
     {
-        float angle = Vector3.Angle(bodyY0Forward, ForwardDesiredDirection.normalized);
+        float angle = Vector3.Angle(bodyY0Forward, DesiredDirection.normalized);
         float maxSpeed = Mathf.Lerp(movementValues.forwardRunSpeed, movementValues.horizontalRunSpeed, angle / 90);
         maxSpeed = Mathf.Lerp(maxSpeed, movementValues.backRunSpeed, (angle - 90) / 90);
         return maxSpeed;
     }
     public float getSprintSpeed()
     {
-        float angle = Vector3.Angle(bodyY0Forward, ForwardDesiredDirection.normalized);
+        float angle = Vector3.Angle(bodyY0Forward, DesiredDirection.normalized);
         float maxSpeed = Mathf.Lerp(movementValues.forwardSprintSpeed, movementValues.horizontalSprintSpeed, angle / 90);
         maxSpeed = Mathf.Lerp(maxSpeed, movementValues.backSprintSpeed, (angle - 90) / 90);
         return maxSpeed;
     }
     public new float getMaxAcceleration()
     {
-        float angle = Vector3.Angle(bodyY0Forward, ForwardDesiredDirection.normalized);
+        float angle = Vector3.Angle(bodyY0Forward, DesiredDirection.normalized);
         float acceleration = Mathf.Lerp(movementValues.forwardAcceleration, movementValues.horizontalAcceleration, angle / 90);
         acceleration = Mathf.Lerp(acceleration, movementValues.backAcceleration, (angle - 90) / 90);
         return acceleration;
     }
     public new float getMaxDeceleration()
     {
-        float angle = Vector3.Angle(bodyY0Forward, ForwardDesiredDirection.normalized);
+        float angle = Vector3.Angle(bodyY0Forward, DesiredDirection.normalized);
         float deceleration = Mathf.Lerp(movementValues.forwardDeceleration, movementValues.horizontalDeceleration, angle / 90);
         deceleration = Mathf.Lerp(deceleration, movementValues.backDeceleration, (angle - 90) / 90);
         return deceleration;

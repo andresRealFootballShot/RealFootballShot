@@ -53,19 +53,19 @@ public class LookingBallMoviment : Moviment
         }
         if (movementValues.isDefensivePosition)
         {
-            DesiredLookDirection = BodyTargetDirection;
-            Vector3 dirRotated = Quaternion.AngleAxis(angle, Vector3.up) * BodyTargetDirection;
-            ForwardDesiredDirection = dirRotated;
+            DesiredLookDirection = DesiredDirection;
+            Vector3 dirRotated = Quaternion.AngleAxis(angle, Vector3.up) * DesiredDirection;
+            DesiredDirection = dirRotated;
         }
         else if (vertical != 0)
         {
             //speedRotation = Mathf.Lerp(movimentValues.minRotAcceleration, movimentValues.maxRotAcceleration, 1 - (verticalRig / (movimentValues.MaxForwardRunSpeed + movimentValues.MaxForwardSprintSpeed)));
             //speedRotation = Mathf.Lerp(10, 20, 1 - (verticalRig / (movimentValues.MaxForwardRunSpeed + movimentValues.MaxForwardSprintSpeed)));
-            Vector3 dirRotated = Quaternion.AngleAxis(angle, Vector3.up) * BodyTargetDirection;
+            Vector3 dirRotated = Quaternion.AngleAxis(angle, Vector3.up) * DesiredDirection;
             //Quaternion transModeloRotation = Quaternion.Lerp(transModelo.rotation, Quaternion.LookRotation(dirRotated), Time.deltaTime *speedRotation);
             //transModelo.rotation = transModeloRotation;
             DesiredLookDirection = dirRotated;
-            ForwardDesiredDirection = dirRotated;
+            DesiredDirection = dirRotated;
             
         }
 

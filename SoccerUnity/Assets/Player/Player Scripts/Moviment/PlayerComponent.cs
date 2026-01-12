@@ -15,15 +15,21 @@ public class PlayerComponent : MonoBehaviour
     protected Transform bodyTransform { get => playerComponents.bodyTransform; }
     protected Vector3 bodyForward { get => playerComponents.bodyTransform.forward; }
     protected Vector3 bodyRight { get => playerComponents.bodyTransform.right; }
-    public Vector3 bodyY0Forward { get => MyFunctions.setYToVector3(bodyForward, 0); }
-    public Vector3 Velocity { get => playerData.Velocity; set => playerData.Velocity = value; }
-    public Vector3 VelocityDirection { get => playerData.Velocity.normalized;}
+    public Vector3 bodyY0Forward { get => MyFunctions.setYToVector3(bodyForward, 0).normalized; }
+    public Vector3 Velocity { get => playerData.Velocity; set { 
+            playerData.Velocity = value; playerData.VerticalSpeed = Vector3.Dot(bodyY0Forward,value);
+            playerData.HorizontalSpeed = Vector3.Dot(bodyTransform.right, value);
+        } 
+    }
+    public Vector3 VelocityDirection { get => playerData.NormalizedVelocity;}
+    public Vector3 VelocityY0Direction { get => new Vector3(VelocityDirection.x,0, VelocityDirection.z);}
     public Vector3 Y0Velocity { get => MyFunctions.setY0ToVector3(playerData.Velocity); }
     public float Speed { get => playerData.Speed; }
     public float AngularSpeed { get => playerData.AngularSpeed; set => playerData.AngularSpeed = value; }
     public float VerticalSpeed { get => playerData.VerticalSpeed; }
     public float HorizontalSpeed { get => playerData.HorizontalSpeed; }
     public Vector3 DesiredLookDirection { get => movementValues.DesiredLookDirection; set => movementValues.DesiredLookDirection = value; }
+    public bool LookTarget { get => movementValues.LookTarget; set => movementValues.LookTarget = value; }
     protected float bodyRotationSpeed { get => playerData.RotationSpeed; set => playerData.RotationSpeed = value; }
     protected Vector3 ballPosition { get => MatchComponents.ballTransform.position; set => MatchComponents.ballTransform.position = value; }
     protected Vector3 ballVelocity { get => MatchComponents.ballRigidbody.velocity; }
@@ -35,7 +41,7 @@ public class PlayerComponent : MonoBehaviour
     public float MaxSpeed { get => playerComponents.movementValues.maxForwardSpeed; }
     public float MinForwardSpeed { get => playerComponents.movementValues.MinForwardSpeed; set => playerComponents.movementValues.MinForwardSpeed = value; }
     public float ForwardDesiredSpeed { get => playerComponents.movementValues.ForwardDesiredSpeed; set => playerComponents.movementValues.ForwardDesiredSpeed = value; }
-    public Vector3 ForwardDesiredDirection { get => movementValues.ForwardDesiredDirection; set => movementValues.ForwardDesiredDirection = value; }
+    public Vector3 DesiredDirection { get => movementValues.DesiredDirection; set => movementValues.DesiredDirection = value; }
     protected Vector3 bodyPosition { get => playerComponents.bodyTransform.position; }
     protected Vector3 bodyY0Position { get => MyFunctions.setY0ToVector3(playerComponents.bodyTransform.position); }
     protected Vector3 headPosition { get => playerComponents.bodyTransform.position + Vector3.up*playerComponents.playerData.height; }
@@ -43,7 +49,7 @@ public class PlayerComponent : MonoBehaviour
     protected Vector3 bodyBallY0Direction { get => MyFunctions.setYToVector3(bodyBallDirection,0); }
     protected Vector3 bodyBallNormalizedDirection { get => bodyBallDirection.normalized; }
     public Vector3 TargetPosition { get => movementValues.TargetPosition; set => movementValues.TargetPosition = value; }
-    public Vector3 BodyTargetDirection { get => MyFunctions.setY0ToVector3(movementValues.TargetPosition - bodyPosition).normalized; }
+    
     protected float BodyTargetXZDistance { get => Vector3.Distance(MyFunctions.setYToVector3(bodyPosition, 0), MyFunctions.setYToVector3(TargetPosition, 0)); }
     protected float BodyBallXZDistance { get => Vector3.Distance(MyFunctions.setYToVector3(bodyPosition, 0), MyFunctions.setYToVector3(ballPosition, 0)); }
     protected Quaternion bodyRotation { get => playerComponents.bodyTransform.rotation; set => playerComponents.bodyTransform.rotation = value; }

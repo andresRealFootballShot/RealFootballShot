@@ -5,6 +5,7 @@ using UnityEngine;
 public class MovimentValues : MonoBehaviour
 {
     public string info;
+    public PublicPlayerData PublicPlayerData;
     public Variable<float> maxSpeed = new Variable<float>();
     //public Variable<Vector3> forwardDesiredVelocityVar = new Variable<Vector3>();
     public Variable<Vector3> forwardVelocityVar = new Variable<Vector3>();
@@ -23,12 +24,15 @@ public class MovimentValues : MonoBehaviour
     public float horizontalRunSpeed = 3, horizontalSprintSpeed = 1f;
     public float maxHorizontalSpeed { get; set; }
     public float adjustedForwardVelocitySpeed;
+
     public Vector3 TargetPosition { get; set ; }
-    public Vector3 ForwardDesiredDirection { get; set; }
-    public Vector3 ForwardDesiredVelocity { get => ForwardDesiredDirection.normalized * ForwardDesiredSpeed; set { ForwardDesiredDirection = value.normalized; ForwardDesiredSpeed = value.magnitude; } }
-    public Vector3 DesiredLookDirection { get => DesiredLookDirectionVar.Value; set => DesiredLookDirectionVar.Value = value; }
+    public Vector3 DesiredDirection { get => (TargetPosition - PublicPlayerData.position).normalized; set => TargetPosition = PublicPlayerData.position + value * 1000;}
+    public Vector3 DesiredY0Direction { get => new Vector3(DesiredDirection.x,0, DesiredDirection.z).normalized;}
+    public Vector3 DesiredVelocity { get => DesiredDirection * ForwardDesiredSpeed; }
+    public bool LookTarget { get; set; }
+    public Vector3 DesiredLookDirection { get=> LookTarget ? DesiredY0Direction : DesiredLookDirectionVar.Value;  set => DesiredLookDirectionVar.Value = value; }
     public Vector3 LookDirection { get => LookDirectionVar.Value; set => LookDirectionVar.Value = value; }
-    public Vector3 NormalizedForwardDesiredVelocity { get => ForwardDesiredVelocity/ maxForwardSpeed; }
+    public Vector3 NormalizedForwardDesiredVelocity { get => DesiredVelocity/ maxForwardSpeed; }
     public Vector3 Clamp01NormalizedForwardDesiredVelocity { get => Vector3.ClampMagnitude(NormalizedForwardDesiredVelocity,1); }
     public bool isDefensivePosition { get; set; }
 

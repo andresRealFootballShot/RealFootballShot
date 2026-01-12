@@ -453,7 +453,6 @@ public class GetPerfectPassManager : MonoBehaviour, ILoad
         Vector3 dir = targetPosition.position - publicPlayerTest.position;
         dir.y = 0;
         dir.Normalize();
-        publicPlayerTest.playerComponents.ForwardDesiredDirection = dir;
         publicPlayerTest.playerComponents.ForwardDesiredSpeed = publicPlayerTest.movimentValues.maxForwardSpeed;
         publicPlayerTest.playerComponents.DesiredLookDirection = dir;
         publicPlayerTest.playerComponents.MinForwardSpeed = 0;
@@ -472,7 +471,6 @@ public class GetPerfectPassManager : MonoBehaviour, ILoad
                     Vector3 dir2 = chaserDataElements[i].OptimalPoint - publicPlayerData.position;
                     dir2.y = 0;
                     dir2.Normalize();
-                    publicPlayerData.playerComponents.ForwardDesiredDirection = dir2;
                     publicPlayerData.playerComponents.ForwardDesiredSpeed = publicPlayerTest.movimentValues.maxForwardSpeed;
                     publicPlayerData.playerComponents.DesiredLookDirection = dir2;
                     publicPlayerData.playerComponents.MinForwardSpeed = 0;

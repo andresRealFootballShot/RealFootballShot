@@ -13,7 +13,6 @@ public class DefensiveMovementCtrl : SoccerPlayerComponent
     }
     private void Update()
     {
-        ForwardDesiredDirection = bodyBallY0Direction;
         DesiredLookDirection = bodyBallY0Direction;
         ForwardDesiredSpeed = 10;
         TargetPosition = ballPosition;

@@ -60,7 +60,6 @@ public class FollowBall : MovementPlayerComponent
         //float speed = BodyBallXZDistance <= distanceStopMoveBallPlayer ? minSpeed : MaxForwardFullSpeed;
         //float speed = BodyBallXZDistance < distanceStopMoveBallPlayer ? ballSpeed : MaxForwardFullSpeed;
         //speed = speed < 0.001f ? 0 : speed;
-        DesiredDirection = direction.normalized ;
         ForwardDesiredSpeed = MaxSpeed;
         MinForwardSpeed = ballSpeed;
         //print("speed=" + speed);

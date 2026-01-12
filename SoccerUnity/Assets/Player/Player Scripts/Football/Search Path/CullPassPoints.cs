@@ -450,7 +450,6 @@ public class CullPassPoints : MonoBehaviour
         Vector3 attackPosition = attackTransform.position;
         Vector3 dir = TestResultComponent.lonelyPosition - attackPosition;
         publicPlayerData.playerComponents.TargetPosition = TestResultComponent.lonelyPosition;
-        publicPlayerData.playerComponents.ForwardDesiredDirection =dir;
         publicPlayerData.playerComponents.ForwardDesiredSpeed = publicPlayerData.maxSpeed;
         publicPlayerData.playerComponents.DesiredLookDirection = dir;
     }
@@ -463,7 +462,6 @@ public class CullPassPoints : MonoBehaviour
         Vector3 reachPosition = TestResultComponent.closestPosition;
         Vector3 dir = reachPosition - defensePosition;
         publicPlayerData.playerComponents.TargetPosition = reachPosition;
-        publicPlayerData.playerComponents.ForwardDesiredDirection = dir;
         publicPlayerData.playerComponents.ForwardDesiredSpeed = publicPlayerData.maxSpeed;
         publicPlayerData.playerComponents.DesiredLookDirection = dir;
     }

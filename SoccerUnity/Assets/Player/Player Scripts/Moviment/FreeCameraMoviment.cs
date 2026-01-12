@@ -49,7 +49,7 @@ public class FreeCameraMoviment : Moviment
             Vector3 dir = MyFunctions.setY0ToVector3(transCamera.forward);
             DesiredLookDirection = dir;
             directionResult = getDirection(dir, axesDirection);
-            ForwardDesiredDirection = directionResult;
+            DesiredDirection = directionResult;
         }else if (vertical != 0)
         {
             //speedRotation = Mathf.Lerp(movimentValues.minRotAcceleration, movimentValues.maxRotAcceleration, 1 - (verticalRig / (movimentValues.MaxForwardRunSpeed + movimentValues.MaxForwardSprintSpeed)));
@@ -62,7 +62,7 @@ public class FreeCameraMoviment : Moviment
             //transModelo.rotation = transModeloRotation;
             //transModelo.rotation = transModeloRotation;
             DesiredLookDirection = directionResult;
-            ForwardDesiredDirection = directionResult;
+            DesiredDirection = directionResult;
         }
         float magnitudeBallVelocity = Mathf.Clamp01(ballVelocity.magnitude / movimentValues.maxVelocityBall);
         targetVelocityBall = Mathf.Lerp(targetVelocityBall, magnitudeBallVelocity, deltaTime * movimentValues.speedChangeVelocityBall);
@@ -75,7 +75,7 @@ public class FreeCameraMoviment : Moviment
         verticalRig = vertical * (playerComponents.getRunSpeed() + sprintAxes* playerComponents.getSprintSpeed());
 
         ForwardDesiredSpeed = verticalRig;
-        TargetPosition = ballPosition;
+        //TargetPosition = ballPosition;
         playerComponents.movementCtrl.rotation(deltaTime);
         playerComponents.movementCtrl.getAdjustedForwardVelocitySpeed(deltaTime);
         playerComponents.movementCtrl.animator(deltaTime);

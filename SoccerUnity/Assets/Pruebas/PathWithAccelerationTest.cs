@@ -117,7 +117,6 @@ public class PathWithAccelerationTest : MonoBehaviour
     }
     IEnumerator withAccelerationTest3()
     {
-        movementCtrl.DesiredDirection = chaserPublicPlayerData.bodyTransform.forward;
         movementCtrl.ForwardDesiredSpeed = chaserPublicPlayerData.movimentValues.maxForwardSpeed;
         movementCtrl.MinForwardSpeed = 0;
         yield return new WaitForSeconds(time);
@@ -132,7 +131,6 @@ public class PathWithAccelerationTest : MonoBehaviour
             {
                 Vector3 optimalPoint = chaserData.OptimalPoint;
                 Vector3 chaserDirection = MyFunctions.setY0ToVector3(optimalPoint - chaserPublicPlayerData.position);
-                movementCtrl.DesiredDirection = chaserDirection;
 
                 movementCtrl.DesiredLookDirection = chaserDirection;
                 movementCtrl.ForwardDesiredSpeed = chaserPublicPlayerData.movimentValues.maxForwardSpeed;
@@ -150,7 +148,6 @@ public class PathWithAccelerationTest : MonoBehaviour
         ballRigidbody.velocity = testKickDirection.forward * force;
         
         yield return new WaitForSeconds(1);*/
-        movementCtrl.DesiredDirection = chaserPublicPlayerData.bodyTransform.forward;
         movementCtrl.ForwardDesiredSpeed = chaserPublicPlayerData.movimentValues.maxForwardSpeed;
         movementCtrl.MinForwardSpeed = 0;
 
@@ -181,7 +178,6 @@ public class PathWithAccelerationTest : MonoBehaviour
 
                 Vector3 targetDirection = (optimalPoint - targetPosition).normalized;
                 Vector3 chaserDirection = (optimalPoint - chaserPublicPlayerData.position).normalized;
-                movementCtrl.DesiredDirection = chaserDirection;
                 movementCtrl.DesiredLookDirection = chaserDirection;
                 movementCtrl.ForwardDesiredSpeed = chaserPublicPlayerData.movimentValues.maxForwardSpeed;
                 movementCtrl.MinForwardSpeed = 0;
@@ -296,7 +292,6 @@ public class PathWithAccelerationTest : MonoBehaviour
         yield return new WaitForSeconds(1);*/
         if (true)
         {
-            movementCtrl.DesiredDirection = chaserPublicPlayerData.bodyTransform.forward;
             movementCtrl.ForwardDesiredSpeed = chaserPublicPlayerData.movimentValues.maxForwardSpeed;
             movementCtrl.Velocity = chaserPublicPlayerData.bodyTransform.forward * v0;
             movementCtrl.EndForwardSpeed = v0;
@@ -338,7 +333,6 @@ public class PathWithAccelerationTest : MonoBehaviour
                 }
                 Vector3 targetDirection = (optimalPoint - targetPosition).normalized;
                 Vector3 chaserDirection = (optimalPoint - chaserPublicPlayerData.position).normalized;
-                movementCtrl.DesiredDirection = chaserDirection;
                 movementCtrl.DesiredLookDirection = chaserDirection;
                 movementCtrl.ForwardDesiredSpeed = chaserPublicPlayerData.movimentValues.maxForwardSpeed;
                 movementCtrl.MinForwardSpeed = 0;

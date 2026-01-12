@@ -343,14 +343,12 @@ public class IndividualPlay : SoccerPlayerComponent
         defenseDir.y = 0;
         defenseDir.Normalize();
         rivals[defenseIndex].playerComponents.TargetPosition = defenseReachPosition;
-        rivals[defenseIndex].playerComponents.ForwardDesiredDirection = defenseDir;
         rivals[defenseIndex].playerComponents.ForwardDesiredSpeed = 10.5f;
         rivals[defenseIndex].playerComponents.DesiredLookDirection = defenseDir;
 
         for (int i = 0; i < kickCountDrive; i++)
         {
             driverPublicPlayerData.playerComponents.TargetPosition = driverPublicPlayerData.position + dir2 * playerSkills.maxDrivingDistance;
-            driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir2;
             driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
             driverPublicPlayerData.playerComponents.DesiredLookDirection = dir2;
 
@@ -391,7 +389,6 @@ public class IndividualPlay : SoccerPlayerComponent
         dir.Normalize();
 
         driverPublicPlayerData.playerComponents.TargetPosition = reachTargetPosition;
-        driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir;
         driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
         driverPublicPlayerData.playerComponents.DesiredLookDirection = dir;
 
@@ -429,7 +426,6 @@ public class IndividualPlay : SoccerPlayerComponent
         defenseDir.y = 0;
         defenseDir.Normalize();
         rivals[defenseIndex].playerComponents.TargetPosition = reachTargetPosition;
-        rivals[defenseIndex].playerComponents.ForwardDesiredDirection = defenseDir;
         rivals[defenseIndex].playerComponents.ForwardDesiredSpeed = 10.5f;
         rivals[defenseIndex].playerComponents.DesiredLookDirection = defenseDir;
 
@@ -440,7 +436,6 @@ public class IndividualPlay : SoccerPlayerComponent
 
         publicPlayerData.playerComponents.TargetPosition = driverTargetPosition;
         //driverPublicPlayerData.playerComponents.TargetPosition = driverPublicPlayerData.position + dir *100;
-        publicPlayerData.playerComponents.ForwardDesiredDirection = dir3;
 
         publicPlayerData.playerComponents.DesiredLookDirection = dir3;
         publicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
@@ -481,7 +476,6 @@ public class IndividualPlay : SoccerPlayerComponent
         for (int i = 0; i < kickCountDefenseReach2 + 3; i++)
         {
             driverPublicPlayerData.playerComponents.TargetPosition = driverPublicPlayerData.position + dir2 * playerSkills.maxDrivingDistance;
-            driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir2;
             driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
             driverPublicPlayerData.playerComponents.DesiredLookDirection = dir2;
 
@@ -696,14 +690,12 @@ public class IndividualPlay : SoccerPlayerComponent
         defenseDir.y = 0;
         defenseDir.Normalize();
         rivals[defenseIndex].playerComponents.TargetPosition = defenseReachPosition;
-        rivals[defenseIndex].playerComponents.ForwardDesiredDirection = defenseDir;
         rivals[defenseIndex].playerComponents.ForwardDesiredSpeed = 10.5f;
         rivals[defenseIndex].playerComponents.DesiredLookDirection = defenseDir;
 
         for (int i = 0; i < kickCountDrive; i++)
         {
             driverPublicPlayerData.playerComponents.TargetPosition = driverPublicPlayerData.position + dir2 * playerSkills.maxDrivingDistance;
-            driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir2;
             driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
             driverPublicPlayerData.playerComponents.DesiredLookDirection = dir2;
 
@@ -744,7 +736,6 @@ public class IndividualPlay : SoccerPlayerComponent
         dir.Normalize();
 
         driverPublicPlayerData.playerComponents.TargetPosition = reachTargetPosition;
-        driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir;
         driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
         driverPublicPlayerData.playerComponents.DesiredLookDirection = dir;
 
@@ -782,7 +773,6 @@ public class IndividualPlay : SoccerPlayerComponent
         defenseDir.y = 0;
         defenseDir.Normalize();
         rivals[defenseIndex].playerComponents.TargetPosition = reachTargetPosition;
-        rivals[defenseIndex].playerComponents.ForwardDesiredDirection = defenseDir;
         rivals[defenseIndex].playerComponents.ForwardDesiredSpeed = 10.5f;
         rivals[defenseIndex].playerComponents.DesiredLookDirection = defenseDir;
 
@@ -793,7 +783,6 @@ public class IndividualPlay : SoccerPlayerComponent
 
         publicPlayerData.playerComponents.TargetPosition = reachTargetPosition;
         //driverPublicPlayerData.playerComponents.TargetPosition = driverPublicPlayerData.position + dir *100;
-        publicPlayerData.playerComponents.ForwardDesiredDirection = dir3;
 
         publicPlayerData.playerComponents.DesiredLookDirection = dir3;
         publicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
@@ -1039,14 +1028,12 @@ public class IndividualPlay : SoccerPlayerComponent
         defenseDir.y = 0;
         defenseDir.Normalize();
         rivals[defenseIndex].playerComponents.TargetPosition = defenseReachPosition;
-        rivals[defenseIndex].playerComponents.ForwardDesiredDirection = defenseDir;
         rivals[defenseIndex].playerComponents.ForwardDesiredSpeed = 10.5f;
         rivals[defenseIndex].playerComponents.DesiredLookDirection = defenseDir;
 
         for (int i = 0; i < kickCountDrive; i++)
         {
             driverPublicPlayerData.playerComponents.TargetPosition = driverPublicPlayerData.position + dir2 * playerSkills.maxDrivingDistance;
-            driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir2;
             driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
             driverPublicPlayerData.playerComponents.DesiredLookDirection = dir2;
 
@@ -1085,7 +1072,6 @@ public class IndividualPlay : SoccerPlayerComponent
         dir.Normalize();
 
         driverPublicPlayerData.playerComponents.TargetPosition = lastKickDistanceOffsetPosition;
-        driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir;
         driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
         driverPublicPlayerData.playerComponents.DesiredLookDirection = dir;
 
@@ -1123,7 +1109,6 @@ public class IndividualPlay : SoccerPlayerComponent
         defenseDir.y = 0;
         defenseDir.Normalize();
         rivals[defenseIndex].playerComponents.TargetPosition = reachTargetPosition;
-        rivals[defenseIndex].playerComponents.ForwardDesiredDirection = defenseDir;
         rivals[defenseIndex].playerComponents.ForwardDesiredSpeed = 10.5f;
         rivals[defenseIndex].playerComponents.DesiredLookDirection = defenseDir;
 
@@ -1134,7 +1119,6 @@ public class IndividualPlay : SoccerPlayerComponent
 
         publicPlayerData.playerComponents.TargetPosition = reachTargetPosition;
         //driverPublicPlayerData.playerComponents.TargetPosition = driverPublicPlayerData.position + dir *100;
-        publicPlayerData.playerComponents.ForwardDesiredDirection = dir3;
         
         publicPlayerData.playerComponents.DesiredLookDirection = dir3;
         publicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
@@ -1185,7 +1169,6 @@ public class IndividualPlay : SoccerPlayerComponent
         dir.y = 0;
         dir.Normalize();
         driverPublicPlayerData.playerComponents.TargetPosition = testTransform.position;
-        driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir;
         driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
         driverPublicPlayerData.playerComponents.DesiredLookDirection = dir;
 
@@ -1200,7 +1183,6 @@ public class IndividualPlay : SoccerPlayerComponent
         dir.y = 0;
         dir.Normalize();
         driverPublicPlayerData.playerComponents.TargetPosition = testTransform.position;
-        driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir;
         driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
         driverPublicPlayerData.playerComponents.DesiredLookDirection = dir;
 
@@ -1242,7 +1224,6 @@ public class IndividualPlay : SoccerPlayerComponent
         dir.y = 0;
         dir.Normalize();
         driverPublicPlayerData.playerComponents.TargetPosition = testTransform.position;
-        driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir;
         driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
         driverPublicPlayerData.playerComponents.DesiredLookDirection = dir;
 
@@ -1270,7 +1251,6 @@ public class IndividualPlay : SoccerPlayerComponent
         dir.y = 0;
         dir.Normalize();
         driverPublicPlayerData.playerComponents.TargetPosition = testTransform.position;
-        driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir;
         driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
         driverPublicPlayerData.playerComponents.DesiredLookDirection = dir;
 
@@ -1304,7 +1284,6 @@ public class IndividualPlay : SoccerPlayerComponent
         for (int i = 0; i < kickCount; i++)
         {
             driverPublicPlayerData.playerComponents.TargetPosition = driverPublicPlayerData.position + dir2 * playerSkills.maxDrivingDistance;
-            driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir2;
             driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
             driverPublicPlayerData.playerComponents.DesiredLookDirection = dir2;
 
@@ -1344,7 +1323,6 @@ public class IndividualPlay : SoccerPlayerComponent
 
         driverPublicPlayerData.playerComponents.TargetPosition = reachPositionDrive;
         //driverPublicPlayerData.playerComponents.TargetPosition = driverPublicPlayerData.position + dir *100;
-        driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir;
         driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
         driverPublicPlayerData.playerComponents.DesiredLookDirection = dir;
 
@@ -1391,7 +1369,6 @@ public class IndividualPlay : SoccerPlayerComponent
         dir.y = 0;
         dir.Normalize();
         rivals[defenseIndex].playerComponents.TargetPosition = defenseReachPosition;
-        rivals[defenseIndex].playerComponents.ForwardDesiredDirection = dir;
         rivals[defenseIndex].playerComponents.ForwardDesiredSpeed = 10.5f;
         rivals[defenseIndex].playerComponents.DesiredLookDirection = dir;
 
@@ -1402,7 +1379,6 @@ public class IndividualPlay : SoccerPlayerComponent
         dir2.Normalize();
 
         rivals[defenseIndex].playerComponents.TargetPosition = reachPositionDriftDefense;
-        rivals[defenseIndex].playerComponents.ForwardDesiredDirection = dir2;
         rivals[defenseIndex].playerComponents.ForwardDesiredSpeed = 10.5f;
         rivals[defenseIndex].playerComponents.DesiredLookDirection = dir2;
     }
@@ -1427,7 +1403,6 @@ public class IndividualPlay : SoccerPlayerComponent
         for (int i = 0; i < 3; i++)
         {
             driverPublicPlayerData.playerComponents.TargetPosition = driverPublicPlayerData.position + dir * (playerSkills.maxDrivingDistance);
-            driverPublicPlayerData.playerComponents.ForwardDesiredDirection = dir;
             driverPublicPlayerData.playerComponents.ForwardDesiredSpeed = 10.5f;
             driverPublicPlayerData.playerComponents.DesiredLookDirection = dir;
             driverPublicPlayerData.movimentValues.maxSpeedForReachBall = 0;
@@ -1495,7 +1470,6 @@ public class IndividualPlay : SoccerPlayerComponent
         dir2.y = 0;
         dir2.Normalize();
         rivals[index].playerComponents.TargetPosition = targetPosition;
-        rivals[index].playerComponents.ForwardDesiredDirection = dir2;
         rivals[index].playerComponents.ForwardDesiredSpeed = rivals[index].maxSpeed;
         rivals[index].playerComponents.DesiredLookDirection = dir2;
         testTransform.position = segmentedPath.Pos0;

@@ -55,7 +55,7 @@ public class PossessionBallMoviment : Moviment
 
             DesiredLookDirection = dirRotated;
 
-            ForwardDesiredDirection = dirRotated;
+            //DesiredDirection = dirRotated;
         }
 
         float magnitudeBallVelocity = Mathf.Clamp01(ballVelocity.magnitude / movimentValues.maxVelocityBall);
