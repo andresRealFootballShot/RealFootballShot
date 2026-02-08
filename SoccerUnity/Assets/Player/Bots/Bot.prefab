@@ -666,6 +666,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   useRigidbody: 1
   debug: 0
+  debugMove: 0
   debugMoveTimes: 0
   breakTime: 0
   moveTime: 0

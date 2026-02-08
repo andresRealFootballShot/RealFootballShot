@@ -103,6 +103,14 @@ public class Teams : MonoBehaviour,ILoad,IClearBeforeLoadScene
         int index = Random.Range(0, teamsNotFull.Count);
        return teamsNotFull[index];
     }
+    public static int GetIndexOfPlayer(Team team,string playerID)
+    {
+        for (int i = 0; i < team.publicPlayerDatas.Count; i++)
+        {
+            if (team.publicPlayerDatas[i].playerID.Equals(playerID)) return i;
+        }
+        return -1;
+    }
     public static string getRandomTeam()
     {
         int random = Random.Range(0, Teams.teamsDictionary.Count);
@@ -183,6 +191,7 @@ public class Teams : MonoBehaviour,ILoad,IClearBeforeLoadScene
         }
         return false;
     }
+
     public static List<string> getPlayersOfAllTeams()
     {
         List<string> players = new List<string>();

@@ -51,7 +51,9 @@ public class PlayerComponent : MonoBehaviour
     public Vector3 TargetPosition { get => movementValues.TargetPosition; set => movementValues.TargetPosition = value; }
     
     protected float BodyTargetXZDistance { get => Vector3.Distance(MyFunctions.setYToVector3(bodyPosition, 0), MyFunctions.setYToVector3(TargetPosition, 0)); }
+    protected float BodyTargetXZScpDistance { get => BodyTargetXZDistance-scope; }
     protected float BodyBallXZDistance { get => Vector3.Distance(MyFunctions.setYToVector3(bodyPosition, 0), MyFunctions.setYToVector3(ballPosition, 0)); }
+    public float BodyBallXZScpDistance { get => BodyBallXZDistance-scope; }
     protected Quaternion bodyRotation { get => playerComponents.bodyTransform.rotation; set => playerComponents.bodyTransform.rotation = value; }
     protected Rigidbody bodyRigidbody { get => playerComponents.rigidbody; }
     protected Rigidbody ballRigidbody { get => MatchComponents.ballRigidbody; }

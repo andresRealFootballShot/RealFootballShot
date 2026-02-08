@@ -39,6 +39,7 @@ public class MatchEvents : MonoBehaviour,IClearBeforeLoadScene
     public static MyEvent cameraIsInThirtPersonPosition = new MyEvent(nameof(cameraIsInThirtPersonPosition));
     public static MyEvent endStartingScreen = new MyEvent(nameof(endStartingScreen));
     public static MyEvent enableMenu = new MyEvent(nameof(enableMenu));
+    public static MyEvent CullPassPointsEnd = new MyEvent(nameof(CullPassPointsEnd));
     public void Clear()
     {
         
@@ -77,5 +78,6 @@ public class MatchEvents : MonoBehaviour,IClearBeforeLoadScene
         stopMatch = new MyEvent(nameof(stopMatch));
         endStartingScreen = new MyEvent(nameof(endStartingScreen));
         enableMenu = new MyEvent(nameof(enableMenu));
+        CullPassPointsEnd = new MyEvent(nameof(CullPassPointsEnd));
     }
 }

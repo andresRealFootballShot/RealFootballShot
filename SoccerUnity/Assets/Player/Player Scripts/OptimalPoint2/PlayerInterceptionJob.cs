@@ -1,4 +1,5 @@
 
+using CullPositionPoint;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -29,12 +30,12 @@ public struct PlayerInterceptionJob : IJobParallelFor
 
     [WriteOnly] public NativeArray<int> reachableIndex;
     [WriteOnly] public NativeArray<float> timePlayerToReachIndex;
-
+    [WriteOnly] public NativeArray<float3> endPlayerDirections;
     public void Execute(int index)
     {
-        float bestTime = float.MaxValue;
+        float bestTime = -1;
         int bestIndex = -1;
-
+        float3 toTargetAfterBrake = float3.zero;
         float3 playerPos = playerPositions[index];
         float3 playerVel = playerVelocities[index];
         float3 playerDir = math.normalizesafe(new float3(playerDirections[index].x, 0f, playerDirections[index].z));
@@ -51,8 +52,6 @@ public struct PlayerInterceptionJob : IJobParallelFor
         float minSpeedForRotate2 = minSpeedForRotates2[index];
         float scope = scopes[index];
 
-       
-
         for (int i = 0; i < ballPositions.Length; i++)
         {
             float3 ballPos = ballPositions[i];
@@ -64,12 +63,9 @@ public struct PlayerInterceptionJob : IJobParallelFor
 
             // =========================
             // FASE 0 – FRENO + DESPLAZAMIENTO
-            // ======================w===
+            // =========================
             float3 toTargetInitial = ballPos - playerPos;
             float2 toTargetXZ = new float2(toTargetInitial.x, toTargetInitial.z);
-
-
-            
 
             float angle = AngleBetweenXZ(playerDir, toTargetXZ);
             bool mustBrakeBeforeRotate = angle > maxAngleForRun;
@@ -99,7 +95,8 @@ public struct PlayerInterceptionJob : IJobParallelFor
             // =========================
             // FASE 1 – ROTACIÓN
             // =========================
-            float3 toTargetAfterBrake = ballPos - posAfterBrake;
+            toTargetAfterBrake = ballPos - posAfterBrake;
+            
             float2 toTargetXZAfterBrake = new float2(toTargetAfterBrake.x, toTargetAfterBrake.z);
 
             float angleAfterBrake = AngleBetweenXZ(playerDir, toTargetXZAfterBrake);
@@ -108,8 +105,8 @@ public struct PlayerInterceptionJob : IJobParallelFor
             // =========================
             // FASE 2 – DESPLAZAMIENTO REAL
             // =========================
-            float distanceToTarget =
-                math.length(toTargetXZAfterBrake) - scope;
+            float distanceToTarget = math.max(
+                math.length(toTargetXZAfterBrake) - scope,0);
 
             float tMove = EstimateTimeToReach(
                 distanceToTarget,
@@ -122,20 +119,21 @@ public struct PlayerInterceptionJob : IJobParallelFor
 
             //float totalTime = tBrake + tRotate + tMove;
             float totalTime = tBrake + tMove;
-
-            Debug.Log("bT=" + tBrake + " mT=" + tMove + " rT=" + tRotate+ " distanceToTarget="+ distanceToTarget + " angle=" + angleAfterBrake);
+            //Debug.Log("bT=" + tBrake + " mT=" + tMove + " rT=" + tRotate+ " distanceToTarget="+ distanceToTarget + " angle=" + angleAfterBrake);
             if (totalTime <= ballTime)
             {
-                bestTime = ballTime == Mathf.Infinity ? totalTime : ballTime;
+                //bestTime = ballTime == Mathf.Infinity ? totalTime : ballTime;
+                bestTime = totalTime;
                 bestIndex = i;
+                
                 break;
             }
         }
-
+        endPlayerDirections[index] = toTargetAfterBrake;
         reachableIndex[index] = bestIndex;
         timePlayerToReachIndex[index] = bestTime;
     }
-    bool EstimateBrakeMove(float3 playerPos,float3 playerDir,float3 ballPos,float currentSpeed,float maxAngleForRun,float minSpeedForRotate, float decel,out float3 posAfterBrake,out float time)
+    public static bool EstimateBrakeMove(float3 playerPos,float3 playerDir,float3 ballPos,float currentSpeed,float maxAngleForRun,float minSpeedForRotate, float decel,out float3 posAfterBrake,out float time)
     {
 
         float deltaV = Mathf.Clamp(currentSpeed, 0, Mathf.Infinity);
@@ -151,7 +149,7 @@ public struct PlayerInterceptionJob : IJobParallelFor
     // =====================================================
     // CINEMÁTICA LINEAL (misma que tu Speed())
     // =====================================================
-    private float EstimateTimeToReach(
+    public static float EstimateTimeToReach(
     float distance,
     float currentSpeed,
     float accel,
@@ -159,7 +157,6 @@ public struct PlayerInterceptionJob : IJobParallelFor
     float maxSpeed,
     float targetSpeed)
     {
-        // --- 1. Calcular la distancia necesaria para desacelerar hasta targetSpeed ---
         float decelDistance = (currentSpeed * currentSpeed - targetSpeed * targetSpeed) / (2f * decel);
         decelDistance = Mathf.Max(decelDistance, 0);
         // Si la distancia es menor que la que necesitamos para frenar, ajustamos
@@ -170,34 +167,36 @@ public struct PlayerInterceptionJob : IJobParallelFor
             return (Mathf.Sqrt(currentSpeed * currentSpeed - 2f * decel * distance) - currentSpeed) / (-decel);
         }
 
-        // --- 2. Distancia disponible para acelerar y velocidad máxima ---
-        float remainingDistance = Mathf.Max(distance - decelDistance,0);
-
-        // Distancia para alcanzar maxSpeed desde currentSpeed
-        float accelDistance = (maxSpeed * maxSpeed - currentSpeed * currentSpeed) / (2f * accel);
-        accelDistance = Mathf.Max(accelDistance, 0);
         float time = 0f;
-
-        if (accelDistance >= remainingDistance)
+        float d = Mathf.Max(AccelerationPath.getDistanceWhereStartDecelerate(currentSpeed, targetSpeed, accel, -decel, distance),0);
+        
+        float acelX = Mathf.Abs(AccelerationPath.getX2(currentSpeed, maxSpeed, accel));
+        if (acelX >= d)
         {
-            // No alcanza velocidad máxima, solo acelera hasta un punto y luego frena
-            float peakSpeed = Mathf.Sqrt(currentSpeed * currentSpeed + 2f * accel * remainingDistance);
-            time += Mathf.Max(peakSpeed - currentSpeed,0) / accel;          // Tiempo acelerando
-            time += Mathf.Max(peakSpeed - targetSpeed,0) / decel;           // Tiempo desacelerando
+            
+            float t3;
+            AccelerationPath.getT(d, currentSpeed, accel, out t3);
+            float v1 = currentSpeed + accel * t3;
+            float t4 = AccelerationPath.getT(targetSpeed, v1, decel);
+            time = t3 + t4;
+
+            //Debug.Log("Not Reach MaxSpeed DistanceStartDecelerate=" + d+" time_startDecelerate="+t3 + " speed_startDecelerate=" + v1);
         }
         else
         {
-            // Alcanzamos velocidad máxima
-            time += Mathf.Max(maxSpeed - currentSpeed,0) / accel;           // Tiempo acelerando
-            float cruiseDistance = Mathf.Max(remainingDistance - accelDistance,0);
-            time += cruiseDistance / maxSpeed;                  // Tiempo a velocidad constante
-            time += Mathf.Max(maxSpeed - targetSpeed,0) / decel;           // Tiempo desacelerando
+            float t5 = AccelerationPath.getT(maxSpeed, currentSpeed, accel);
+            float decelX = Mathf.Abs(AccelerationPath.getX2(maxSpeed, targetSpeed, decel));
+            float x5 = distance - acelX - decelX;
+            float t6 = x5 / maxSpeed;
+            float t7 = AccelerationPath.getT(targetSpeed, maxSpeed, decel);
+            time = t5 + t6 + t7;
+            //Debug.Log("Reach MaxSpeed DistanceStartDecelerate=" + d+" distanceTarget="+(distance - acelX) + " timeA=" + t5 + " timeMaxSpeed="+t6);
         }
 
         return time;
     }
 
-    private float AngleBetweenXZ(float3 forward, float2 toTarget)
+    private static float AngleBetweenXZ(float3 forward, float2 toTarget)
     {
         float2 f = math.normalize(new float2(forward.x, forward.z));
         float2 t = math.normalize(toTarget);
@@ -206,128 +205,3 @@ public struct PlayerInterceptionJob : IJobParallelFor
         return math.degrees(math.acos(dot));
     }
 }
-
-
-/*using Unity.Burst;
-using Unity.Collections;
-using Unity.Jobs;
-using Unity.Mathematics;
-using UnityEngine;
-
-[BurstCompile]
-public struct PlayerInterceptionJob : IJobParallelFor
-{
-    [ReadOnly] public NativeArray<float3> ballPositions;
-    [ReadOnly] public NativeArray<float> ballTimes;
-
-    [ReadOnly] public NativeArray<float> accelerations;
-    [ReadOnly] public NativeArray<float> deccelerations;
-    [ReadOnly] public NativeArray<float> maxSpeeds;
-    [ReadOnly] public NativeArray<float> rotationSpeeds;
-    [ReadOnly] public NativeArray<float> jumpHeights;
-    [ReadOnly] public NativeArray<float> desiredSpeeds;
-
-    [ReadOnly] public NativeArray<float3> playerPositions;
-    [ReadOnly] public NativeArray<float3> playerVelocities;
-    [ReadOnly] public NativeArray<float3> playerDirections;
-
-    [WriteOnly] public NativeArray<int> reachableIndex;
-    [WriteOnly] public NativeArray<float> timePlayerToReachIndex;
-
-    public void Execute(int index)
-    {
-        float bestTime = float.MaxValue;
-        int bestIndex = -1;
-
-        float3 playerPos = playerPositions[index];
-        float3 playerVel = playerVelocities[index];
-        float3 playerDir = playerDirections[index];
-        float acceleration = accelerations[index];
-        float decceleration = deccelerations[index];
-        float maxSpeed = maxSpeeds[index];
-        float rotationSpeed = rotationSpeeds[index];
-        float jumpHeight = jumpHeights[index];
-        float desiredSpeed = desiredSpeeds[index];
-
-        for (int i = 0; i < ballPositions.Length; i++)
-        {
-            float3 ballPos = ballPositions[i];
-            float ballTime = ballTimes[i];
-
-            float3 toTarget = ballPos - playerPos;
-            float horizontalDistance = math.length(new float2(toTarget.x, toTarget.z));
-            float verticalDistance = toTarget.y;
-
-            if (verticalDistance > jumpHeight)
-                continue;
-
-            float timeToReach = EstimateTimeToReach(horizontalDistance, math.length(new float2(playerVel.x, playerVel.z)), acceleration, decceleration, maxSpeed, desiredSpeed);
-
-            float2 v1 = math.normalize(new float2(playerDir.x, playerDir.z));
-            float2 v2 = math.normalize(new float2(toTarget.x, toTarget.z));
-            float angle = math.degrees(math.acos(math.clamp(math.dot(v1, v2), -1f, 1f)));
-            float timeToRotate = angle / rotationSpeed;
-
-            float totalTime = timeToReach + timeToRotate;
-            if (totalTime <= ballTime)
-            {
-                bestTime = ballTime==Mathf.Infinity ? totalTime : ballTime;
-                bestIndex = i;
-                break;
-            }
-
-        }
-
-        reachableIndex[index] = bestIndex;
-        timePlayerToReachIndex[index] = bestTime;
-    }
-
-    private float EstimateTimeToReach(float distance, float currentSpeed, float accel, float decel, float maxSpeed, float targetSpeed)
-    {
-        targetSpeed = math.clamp(targetSpeed, 0f, maxSpeed);
-        currentSpeed = math.clamp(currentSpeed, 0f, maxSpeed);
-
-        // Fase 1: aceleración hasta maxSpeed
-        float tAccel = (maxSpeed - currentSpeed) / accel;
-        float dAccel = (currentSpeed + maxSpeed) * 0.5f * tAccel;
-
-        // Fase 3: desaceleración desde maxSpeed hasta targetSpeed
-        float tDecel = (maxSpeed - targetSpeed) / decel;
-        float dDecel = (maxSpeed + targetSpeed) * 0.5f * tDecel;
-
-        float totalAccelDecelDist = dAccel + dDecel;
-
-        if (totalAccelDecelDist >= distance)
-        {
-            // No hay espacio suficiente para llegar a maxSpeed
-            // Entonces se calcula el punto intermedio donde acelera y luego desacelera
-            // Encontramos velocidad pico alcanzable v_peak usando conservación de distancia
-
-            // Fórmula: d = (v0 + v) * t1/2 + (v + vt) * t2/2
-            // Pero v_peak es la incógnita, y queremos una transición suave: aceleración hasta v_peak, luego deceleración a targetSpeed
-
-            float a = 1f / (2f * accel);
-            float b = currentSpeed / accel + targetSpeed / decel;
-            float c = -distance + (currentSpeed * currentSpeed) / (2f * accel) + (targetSpeed * targetSpeed) / (2f * decel);
-
-            float discriminant = b * b - 4 * a * c;
-            if (discriminant < 0f)
-                return float.MaxValue; // No alcanzable
-
-            float v_peak = (-b + math.sqrt(discriminant)) / (2f * a);
-
-            // Tiempos para llegar a v_peak y luego desacelerar a targetSpeed
-            float t1 = (v_peak - currentSpeed) / accel;
-            float t2 = (v_peak - targetSpeed) / decel;
-            return t1 + t2;
-        }
-        else
-        {
-            // Fase 2: tramo a velocidad constante
-            float dCruise = distance - totalAccelDecelDist;
-            float tCruise = dCruise / maxSpeed;
-            return tAccel + tCruise + tDecel;
-        }
-    }
-
-}*/

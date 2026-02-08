@@ -19,9 +19,11 @@ public class MovementCtrl : MovementPlayerComponent
     Vector3 lookDirection;
     public bool debug,debugMove,debugMoveTimes;
     MovePhase previousPhase;
+    float previousSpeed;
     [HideInInspector]
     public float breakTime, moveTime, rotationTime;
     bool startMove;
+    bool startDecelerate;
     // Update is called once per frame
     private void Start()
     {
@@ -88,6 +90,7 @@ public class MovementCtrl : MovementPlayerComponent
         ApplyMovement(deltaTime);
         calculateTimesMove();
     }
+
     void UpdateMovementPhase()
     {
         if (DesiredDirection == Vector3.zero)
@@ -137,10 +140,10 @@ public class MovementCtrl : MovementPlayerComponent
                         ) - scope;
 
                     float stopDist =
-                        (EndForwardSpeed * EndForwardSpeed - reachBallSpeed* reachBallSpeed) /
+                        (EndForwardSpeed * EndForwardSpeed - reachBallSpeed * reachBallSpeed) /
                         (2f * movementValues.forwardDeceleration);
 
-                    if (distance <= stopDist)
+                    if (distance < stopDist)
                     {
                         
                         EndForwardSpeed -= movementValues.forwardDeceleration * dt;
@@ -219,9 +222,8 @@ public class MovementCtrl : MovementPlayerComponent
         float desiredSpeed_rot = angleBodyForward_DesiredLookDirection >= playerComponents.movementValues.maxAngleForRun ? minSpeedForRotate : ForwardDesiredSpeed;
         MovimentValues movimentValues = playerComponents.movementValues;
         //print(BodyTargetXZDistance+" "+stopDistance + " "+scope);
-        if (BodyTargetXZDistance < stopDistance+scope)
+        if (BodyTargetXZDistance < stopDistance + scope)
         {
-
             EndForwardSpeed -= movementValues.forwardDeceleration * Time.deltaTime;
             EndForwardSpeed = Mathf.Clamp(EndForwardSpeed, maxSpeedForReachBall_rot, Mathf.Infinity);
         }
@@ -414,26 +416,47 @@ public class MovementCtrl : MovementPlayerComponent
     }
     void calculateTimesMove()
     {
-        if (BodyTargetXZDistance <= scope) startMove = false;
+        if (!debug) return;
+        if (BodyTargetXZDistance <= scope && startMove)
+        {
+            print("MovementCtrl"+"\nTotal Time= " + (moveTime + breakTime) + " mT=" + moveTime + " bT=" + breakTime + " rT=" + rotationTime + " Speed="+EndForwardSpeed+" TargetDistance="+ BodyTargetXZScpDistance + " BallDistance=" + BodyBallXZScpDistance);
+            startMove = false;
+            startDecelerate = false;
+        }
         if (startMove)
         {
             if (previousPhase == MovePhase.Brake && phase != MovePhase.Brake)
             {
-                print("Angle= " + angleBodyForwardDesiredVelocity + " speed="+Speed + " distanceTarget="+(BodyTargetXZDistance-scope));
+                //print("Angle= " + angleBodyForwardDesiredVelocity + " speed="+Speed + " distanceTarget="+(BodyTargetXZDistance-scope));
             }
             previousPhase = phase;
             if (phase == MovePhase.Brake)
             {
                 breakTime += Time.deltaTime;
             }
-            else if (phase == MovePhase.Rotate)
-            {
-                rotationTime += Time.deltaTime;
-                moveTime += Time.deltaTime;
-            }
             else
             {
-                moveTime += Time.deltaTime;
+                /*
+                if (Speed >= MaxSpeed && previousSpeed < MaxSpeed)
+                {
+                    print("Reach MaxSpeed | speed=" + Speed + " distanceTarget=" + (BodyTargetXZDistance - scope) + " currentTime=" + moveTime);
+                }else if (previousSpeed > Speed && !startDecelerate)
+                {
+                    print("Start Decelerate | speed=" + Speed + " distanceTarget=" + (BodyTargetXZDistance - scope)+ " currentTime=" + moveTime);
+                    startDecelerate = true;
+                }*/
+                previousSpeed = Speed;
+                if (phase == MovePhase.Rotate)
+                {
+                    rotationTime += Time.deltaTime;
+                    moveTime += Time.deltaTime;
+                    //print("speed="+Speed);
+                }
+                else
+                {
+                    //print("speed=" + Speed);
+                    moveTime += Time.deltaTime;
+                }
             }
 
         }
@@ -461,7 +484,7 @@ public class MovementCtrl : MovementPlayerComponent
             }
             if (debugMoveTimes)
             {
-                info += "bT=" + breakTime.ToString("f3") + " mT=" + moveTime.ToString("f3") + " rT=" + rotationTime.ToString("f3");
+                info += "Total time=" + (breakTime+ moveTime).ToString("f3")+ " bT=" + breakTime.ToString("f3") + " mT=" + moveTime.ToString("f3") + " rT=" + rotationTime.ToString("f3");
             }
             Handles.Label(bodyPosition + Vector3.up * 1.5f, info, style);
         }

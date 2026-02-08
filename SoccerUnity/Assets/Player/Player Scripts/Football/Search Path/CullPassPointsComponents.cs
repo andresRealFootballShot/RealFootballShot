@@ -10,9 +10,31 @@ using Unity.Mathematics;
 using Unity.Jobs;
 using CullPositionPoint;
 using System;
+using System.Drawing;
+using UnityEngine.UIElements;
 
 namespace CullPositionPoint
 {
+    public struct PassData
+    {
+        public float ballReachTime;
+        public int defenseReachIndex;
+        public float defenseReachTime;
+        public Vector2 defenseReachPosition;
+        public Vector3 passVelocity;
+        public void Clear()
+        {
+            ballReachTime = -1;
+            defenseReachIndex = -1;
+            defenseReachTime = -1;
+            defenseReachPosition = Vector2.positiveInfinity;
+            passVelocity = Vector3.zero;
+        }
+        public Vector3 GetDefenseReach3DPosition(float y = 0)
+        {
+            return new Vector3(defenseReachPosition.x, y, defenseReachPosition.y);
+        }
+    }
     public struct LonelyPointElement2 : IBufferElementData
     {
         public Vector2 position;
@@ -20,8 +42,9 @@ namespace CullPositionPoint
         public bool straightReachBall, parabolicReachBall;
         public float weight;
         public int order;
-        public float ballReachTime;
         public int attackReachIndex;
+        public float attackReachTime;
+        public PassData straightPassData,parabolicPassData;
         public LonelyPointElement2(Vector2 position, int index)
         {
             this.position = position;
@@ -30,8 +53,10 @@ namespace CullPositionPoint
             parabolicReachBall = false;
             weight = Mathf.Infinity;
             order = -1;
-            ballReachTime = -1;
+            straightPassData = new PassData();
+            parabolicPassData = new PassData();
             attackReachIndex = -1;
+            attackReachTime = -1;
         }
         public LonelyPointElement2(Vector3 position, int index)
         {
@@ -41,8 +66,10 @@ namespace CullPositionPoint
             parabolicReachBall = false;
             weight = Mathf.Infinity;
             order = -1;
-            ballReachTime = -1;
+            straightPassData = new PassData();
+            parabolicPassData = new PassData();
             attackReachIndex = -1;
+            attackReachTime = -1;
         }
         public LonelyPointElement2(LonelyPointElement lonelyPointElement)
         {
@@ -52,8 +79,10 @@ namespace CullPositionPoint
             parabolicReachBall = false;
             weight = Mathf.Infinity;
             order = -1;
-            ballReachTime = -1;
+            straightPassData = new PassData();
+            parabolicPassData = new PassData();
             attackReachIndex = -1;
+            attackReachTime = -1;
         }
         public LonelyPointElement2(Point point,int index)
         {
@@ -63,9 +92,40 @@ namespace CullPositionPoint
             parabolicReachBall = false;
             weight = Mathf.Infinity;
             order = -1;
-            ballReachTime = -1;
+            straightPassData = new PassData();
+            parabolicPassData = new PassData();
             attackReachIndex = -1;
+            attackReachTime = -1;
         }
+        public void Clear()
+        {
+            position = Vector2.positiveInfinity;
+            straightReachBall = false;
+            parabolicReachBall = false;
+            weight = Mathf.Infinity;
+            order = -1;
+            straightPassData.Clear();
+            parabolicPassData.Clear();
+            attackReachIndex = -1;
+            attackReachTime = -1;
+        }
+        public Vector3 Get3DPosition(float y=0)
+        {
+            return new Vector3(position.x,y,position.y);
+        }
+        public bool GetPassData(bool straightPass,out PassData passData){
+            if (straightPass){
+                passData = straightPassData;
+                return true;
+            }
+            else{
+                passData = parabolicPassData;
+                return !straightReachBall;
+            }
+        }
+        public PassData GetPassData() => straightReachBall || !parabolicReachBall ? straightPassData : parabolicPassData;
+
+        public float GetBallReachTime()=> straightReachBall || !parabolicReachBall ? straightPassData.ballReachTime : parabolicPassData.ballReachTime;
     }
     public struct CullPassPointsComponent : IComponentData
     {
@@ -81,12 +141,28 @@ namespace CullPositionPoint
         public Vector2 position;
         public Vector2 bodyForward,normalizedVelocity;
         public float currentSpeed;
-        public PlayerPositionElement(Vector2 position, Vector2 bodyForward, Vector2 normalizedVelocity, float currentSpeed)
+        public float maxSpeedForReachBall;
+        public float scope;
+        public float acceleration;
+        public float decceleration;
+        public float maxAngleForRun, maxAngleForRun2;
+        public float maxSpeedRotation;
+        public float minSpeedForRotate, minSpeedForRotate2;
+        public PlayerPositionElement(Vector2 position, Vector2 bodyForward, Vector2 normalizedVelocity, float currentSpeed, float maxSpeedForReachBall,float scope=0,float acceleration = 0, float decceleration = 0,float maxAngleForRun = 0,float maxSpeedRotation = 0, float minSpeedForRotate = 0)
         {
             this.position = position;
             this.bodyForward = bodyForward;
             this.normalizedVelocity = normalizedVelocity;
             this.currentSpeed = currentSpeed;
+            this.maxSpeedForReachBall = maxSpeedForReachBall;
+            this.scope = scope;
+            this.acceleration = acceleration;
+            this.decceleration = decceleration;
+            this.maxAngleForRun = maxAngleForRun;
+            maxAngleForRun2 = 0;
+            this.maxSpeedRotation = maxSpeedRotation;
+            this.minSpeedForRotate = minSpeedForRotate;
+            minSpeedForRotate2 = 0;
         }
     }
     public struct PlayerGenericParams
@@ -94,15 +170,8 @@ namespace CullPositionPoint
         public float maxSpeed;
         public float goalkeeperMaxSpeed;
         public float maxKickForce;
-        public float minSpeedForRotate;
-        public float acceleration;
-        public float decceleration;
-        public float maxAngleForRun;
-        public float maxSpeedRotation;
-        public float scope;
         public float heightJump;
         public float heightBallControl;
-        public float maxSpeedForReachBall;
     }
     public struct TestResultComponent : IComponentData
     {
@@ -116,7 +185,7 @@ namespace CullPositionPoint
 }
 public struct BallParamsComponent : IComponentData
 {
-    public float k, friction, ballRadio, g, mass, groundY, dynamicFriction, bounciness;
+    public float k, friction, ballRadio, g, mass, groundY, dynamicFriction, bounciness, t0;
     public Vector3 BallPosition;
 }
 public struct GetStraightV0Params
@@ -170,6 +239,11 @@ public class SearchPlayData
         public List<int> nextNodes;
         public int index;
         public int cullEntityBusySize;
+        public Vector3 ballReachPosition { get=> ballPosition;}
+        public PublicPlayerData attackPublicPlayerData;
+        public float attackReachTime;
+        public PublicPlayerData defensePublicPlayerData;
+        public float defenseReachTime;
         public SearchPlayNode(int initSize,int playerSize, int index)
         {
             maxPointsSize = initSize;
@@ -212,6 +286,16 @@ public class SearchPlayData
             isBusy = false;
             isSearched = false;
             cullEntities.Clear();
+            defensePublicPlayerData = null;
+            attackPublicPlayerData = null;
+            attackReachTime = Mathf.Infinity;
+            defenseReachTime = Mathf.Infinity;
+            ballLonelyPoint.Clear();
+        }
+        public Vector2 GetPlayerPosition(int index)
+        {
+            float2 pos = playerPositions[index + 4];
+            return new Vector2(pos.x, pos.y);
         }
     }
 
@@ -232,7 +316,7 @@ public class SearchPlayData
     public List<int> posibleNodes = new List<int>();
     public int nextCullEntity;
     public int nextFreeNode;
-    public LonelyPointElement2 GetPosibleSortLonelyPoint(int node) => searchPlayNodes[node].ballLonelyPoint;
+    public LonelyPointElement2 GetBallLonelyPoint(int node) => searchPlayNodes[node].ballLonelyPoint;
     public void AddPosibleNode(int posibleNode) => posibleNodes.Add(posibleNode);
     public CalculateNextPositionComponents2 GetCalculateNextPositionComponents(int node)
     {
@@ -388,5 +472,6 @@ public class SearchPlayData
         {
             searchPlayNode.Clear();
         }
+        posibleNodes.Clear();
     }
 }

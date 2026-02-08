@@ -58,7 +58,7 @@ public class BallTrajectorySimulator : MonoBehaviour
                     break;
             }
             
-            if (vel.magnitude < 0.01f)
+            if (vel.magnitude < 0.01f&&pos.y<= groundLevel)
             {
                 times[times.Count - 1] = Mathf.Infinity;
                 break;

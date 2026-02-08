@@ -10,6 +10,7 @@ using Unity.Collections;
 using System;
 using Unity.Jobs;
 using System.Drawing;
+using static Photon.Pun.UtilityScripts.PunTeams;
 
 [UpdateAfter(typeof(NextMoveSystem))]
 public class CullPassPointsSystem : SystemBase
@@ -32,6 +33,8 @@ public class CullPassPointsSystem : SystemBase
     int nextNodeSize2;
     int previous;
     bool reset=true;
+    Team defenseTeam{ get => CullPassPoints.defenseTeam; }
+    Team attackTeam { get => CullPassPoints.attackTeam; }
     protected override void OnCreate()
     {
         var description1 = new EntityQueryDesc()
@@ -51,7 +54,7 @@ public class CullPassPointsSystem : SystemBase
     }
     bool checkParameters()
     {
-        if (CullPassPoints==null||!enable||!CullPassPoints.enableCullPassPointsSystem)
+        if (CullPassPoints==null || !enable || !CullPassPoints.enableCullPassPointsSystem || !CullPassPoints.startCullPassPointsSystem)
         {
             enable = true;
             return false;
@@ -65,14 +68,13 @@ public class CullPassPointsSystem : SystemBase
         if (!checkParameters()) return;
         try
         {
-            
-        Team defenseTeam = Teams.getTeamByName(CullPassPoints.teamName_Defense);
-        Team attackTeam = Teams.getTeamByName(CullPassPoints.teamName_Attacker);
-        //SearchPlayData.ClearCullEntities();
+
+        
+            //SearchPlayData.ClearCullEntities();
         if (reset)
         {
             SearchPlayData.Clear();
-            CullPassPoints.CalculateFirstReachPlayerToBall(out float playerReachTime, out Vector3 ballPosition);
+            
                 /*
                 SearchPlayData.posibleNodes.Clear();
                 Snodes.Clear();
@@ -84,6 +86,7 @@ public class CullPassPointsSystem : SystemBase
                 CullPassPoints.UpdateNextPlayerPoints(1, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
                 CullPassPoints.CompleteTriangulatorJob(1);
                 RemovePosibleNodes(1);*/
+            //if(CullPassPoints.debugTestLonelyPoints)
             if(CullPassPoints.debugTestLonelyPoints)
             {
                CullPassPoints.PlaceTestLonelyPoint();
@@ -96,12 +99,15 @@ public class CullPassPointsSystem : SystemBase
 
             Snodes.Clear();
             SearchPlayData.getSortedNodes(ref Snodes, 1);
-            CullPassPoints.SetBallPosition(Snodes,1, ballPosition);
+            CullPassPoints.CalculateFirstReachPlayerToBall(Snodes);
+            CullPassPoints.SetBallPosition(Snodes, 1, CullPassPoints.ballReachPosition, CullPassPoints.firstPlayerReachTime);
             nodeCalculationPerFrameTotal = 1;
             
 
             CullPassPoints.UpdateInstantPlayerPositions(defenseTeam, attackTeam, Snodes);
             CullPassPoints.UpdatePlayerPositions(Snodes, 1, 0);
+            
+
             SearchPlayData.SetIsSearched(Snodes[0], true);
             SearchPlayData.SetIsBusy(Snodes[0], true);
             currentNodeSize = 1;
@@ -133,9 +139,9 @@ public class CullPassPointsSystem : SystemBase
             CullPassPointsJob.BallParamsComponentHandle = this.GetComponentTypeHandle<BallParamsComponent>(true);
             CullPassPointsJob.TestResultComponentHandle = this.GetComponentTypeHandle<TestResultComponent>(false);
             //Dependency = CullPassPointsJob.ScheduleParallel(cullPassPointsQuery, CullPassPoints.batchesPerChunk, this.Dependency);
-                //Dependency.Complete();
-                JobHandle handle = CullPassPointsJob.Schedule(cullPassPointsQuery, Dependency);
-                handle.Complete();
+            //Dependency.Complete();
+            JobHandle handle = CullPassPointsJob.Schedule(cullPassPointsQuery, Dependency);
+            handle.Complete();
                 
             
             if(nodeSizeIndex < CullPassPoints.sortLonelyPointsSize.Count-1)
@@ -150,21 +156,19 @@ public class CullPassPointsSystem : SystemBase
                         nodeCount = 0;
                         nodeSizeIndex++;
                     }
-                    CullPassPoints.getDebugWeightPoints(Snodes);
 
-                    CullPassPoints.SetAllLonelyPointsCalculateNextPositionParameters(FieldPositionsData.HorizontalPositionType.Right, defenseTeam, Snodes, Fnodes, nodeCalculationPerFrameTotal, nextNodeSize, out int calculateNodeCount3, startNode, nodeCalculationPerFrame, nextNodeSize2, previous);
+                    CullPassPoints.SetAllLonelyPointsCalculateNextPositionParameters(FieldPositionsData.HorizontalPositionType.Right, defenseTeam, Snodes, nodeCalculationPerFrameTotal, nextNodeSize, out int calculateNodeCount3, startNode, nodeCalculationPerFrame, nextNodeSize2, previous);
                     calculateNodeCount += calculateNodeCount3;
-
-               
-
-                startNode += currentNodeSize;
+                    CullPassPoints.getDebugWeightPoints(Snodes);
+                    Snodes.Clear();
+                    startNode += currentNodeSize;
                 SearchPlayData.ClearCullEntities();
             }
 
             if(nodeCalculationPerFrameTotal < CullPassPoints.maxNodes2)
             {
                 int size = Mathf.Clamp(calculateNodeCount, 0, nodeCalculationPerFrame);
-                UpdateNextPlayerPositions(Snodes, Fnodes, nodeCalculationPerFrameTotal, nextNodeSize, size, defenseTeam, nodeCalculationPerFrameTotal);
+                UpdateNextPlayerPositions(nodeCalculationPerFrameTotal, nextNodeSize, size, defenseTeam, nodeCalculationPerFrameTotal);
                 CullPassPoints.PlacePoints2(SearchPlayData.posibleNodes, size, nodeCalculationPerFrameTotal);
                 CullPassPoints.UpdatePlayerPositions(SearchPlayData.posibleNodes, size, nodeCalculationPerFrameTotal);
                 CullPassPoints.SetBallPosition2(SearchPlayData.posibleNodes, size);
@@ -183,6 +187,8 @@ public class CullPassPointsSystem : SystemBase
             if(nodeCalculationPerFrameTotal >= CullPassPoints.maxNodes2)
             {
                 reset = true;
+                CullPassPoints.teamBrains.Play();
+                MatchEvents.CullPassPointsEnd.Invoke();
                 break;
             }
             
@@ -225,7 +231,7 @@ public class CullPassPointsSystem : SystemBase
         Dependency.Complete();
         //SearchLonelyPointsManager.setEntitiesEnable(false);
     }
-    void UpdateNextPlayerPositions(List<int> Snodes, List<int> Fnodes , int nodeSizeTotal,int newNodeSize,int nodeCalculationPerFrame, Team defenseTeam,int startNode)
+    void UpdateNextPlayerPositions(int nodeSizeTotal,int newNodeSize,int nodeCalculationPerFrame, Team defenseTeam,int startNode)
     {
         if (defenseTeam.publicPlayerDatas.Count == 0) return;
         
