@@ -168,8 +168,9 @@ public class ChaserData
             return false;
         }
     }
-    float selectOptimalTime()
+    public float GetOptimalTime()
     {
+        if(OptimalTargetTime==Mathf.Infinity) { return OptimalTime; }
         if (OptimalTime <= OptimalTargetTime)
         {
             //El chaser llega antes que el target al optimalPoint,por lo tanto, no importa el tiempo que tarde en llegar al optimalPoint ya que tendrá que esperar hasta el OptimalTargetTime
@@ -210,7 +211,14 @@ public class ChaserData
         }
         else
         {
-            return chaser1.getGlobalOptimalTime().CompareTo(chaser2.getGlobalOptimalTime());
+            if (chaser1.OptimalTargetTime == chaser2.OptimalTargetTime)
+            {
+                return chaser1.OptimalTime.CompareTo(chaser2.OptimalTime);
+            }
+            else
+            {
+                return chaser1.OptimalTargetTime.CompareTo(chaser2.OptimalTargetTime);
+            }
         }
     }
     public static int CompareByChaserTime(ChaserData chaser1, ChaserData chaser2)
@@ -247,10 +255,10 @@ public class ChaserData
             chaserDatasReachTarget.AddRange(chaserDatas.FindAll(x=>x.ReachTheTarget));
             if (chaserDatasReachTarget.Count > 0)
             {
-                float firstOptimalTime = chaserDatasReachTarget[0].OptimalTargetTime;
+                float firstOptimalTime = chaserDatasReachTarget[0].GetOptimalTime();
                 foreach (var chaserData in chaserDatasReachTarget)
                 {
-                    if (chaserData.OptimalTargetTime - firstOptimalTime <= range)
+                    if (chaserData.GetOptimalTime() - firstOptimalTime <= range)
                     {
                         result.Add(chaserData);
                     }

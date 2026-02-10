@@ -104,7 +104,7 @@ public class CullPassPointsSystem : SystemBase
             nodeCalculationPerFrameTotal = 1;
             
 
-            CullPassPoints.UpdateInstantPlayerPositions(defenseTeam, attackTeam, Snodes);
+            CullPassPoints.UpdateInstantPlayerPositions2(defenseTeam, attackTeam, Snodes);
             CullPassPoints.UpdatePlayerPositions(Snodes, 1, 0);
             
 

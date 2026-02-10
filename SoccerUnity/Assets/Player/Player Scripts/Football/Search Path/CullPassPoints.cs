@@ -51,7 +51,8 @@ public class CullPassPoints : MonoBehaviour
     public List<int> posibleLonelyPointsSize = new List<int>();
     public List<bool> AuxNextPositionPlayerBusiesList = new List<bool>();
     public EntityManager entityManager;
-    List<PublicPlayerData> players = new List<PublicPlayerData>();
+    [HideInInspector]
+    public List<PublicPlayerData> players = new List<PublicPlayerData>();
     public float v0y = 5;
     public float y = 2;
     public int batchesPerChunk = 1;
@@ -195,13 +196,7 @@ public class CullPassPoints : MonoBehaviour
     }
     public PublicPlayerData GetPublicPlayerData(int index)
     {
-        if(index < teamAttack_start + teamAttack_size && index >= teamAttack_start)
-        {
-            return Teams.getTeamByName(teamName_Attacker).publicPlayerDatas[index - teamAttack_start];
-        }
-        else if(index < teamDefense_start + teamDefense_size && index >= teamDefense_start){
-            return Teams.getTeamByName(teamName_Defense).publicPlayerDatas[index - teamDefense_start];
-        }
+        if(index< players.Count)return players[index];
         return null;
     }
     void createEntities()
@@ -380,6 +375,7 @@ public class CullPassPoints : MonoBehaviour
             int Snode = k;
             for (int i = teamAttack_start, j = 0; i < teamAttack_start + teamAttack_size; i++, j++)
             {
+
                 if (attackTeam.publicPlayerDatas[j].Equals(firstPublicPlayerData)) continue;
                 Vector3 position = attackTeam.publicPlayerDatas[j].position;
                 Vector3 forward = attackTeam.publicPlayerDatas[j].bodyTransform.forward;
@@ -396,6 +392,24 @@ public class CullPassPoints : MonoBehaviour
                 //Vector3 normalizedVelocity = teamPlayers.publicPlayerDatas[i].velocity;
                 //normalizedVelocity.Normalize();
                 float speed = defenseTeam.publicPlayerDatas[j].speed;
+                searchPlayData.SetPlayerPosition(Snode, i, position, speed, forward);
+            }
+        }
+    }
+    public void UpdateInstantPlayerPositions2(Team defenseTeam, Team attackTeam, List<int> Snodes)
+    {
+        for (int k = 0; k < searchPlayData.searchPlayNodes.Count; k++)
+        {
+            int Snode = k;
+            for (int i = 0; i < players.Count; i++)
+            {
+                PublicPlayerData publicPlayerData = players[i];
+                if (publicPlayerData.Equals(firstPublicPlayerData)) continue;
+                Vector3 position = publicPlayerData.position;
+                Vector3 forward = publicPlayerData.bodyTransform.forward;
+                //Vector3 normalizedVelocity = teamPlayers.publicPlayerDatas[i].velocity;
+                //normalizedVelocity.Normalize();
+                float speed = publicPlayerData.speed;
                 searchPlayData.SetPlayerPosition(Snode, i, position, speed, forward);
             }
         }

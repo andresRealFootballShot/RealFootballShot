@@ -2178,7 +2178,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae8f8759170830a47ba1a6b4cc6737bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initMaxSpeed: 4.5
+  initMaxSpeed: 5
   minRandomReflexes: 0.1
   maxRandomReflexes: 0.2
   speedRotation: 5
@@ -2442,6 +2442,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   info: ultimate
+  PublicPlayerData: {fileID: 0}
   forwardRunSpeed: 7
   forwardSprintSpeed: 3.5
   backRunSpeed: 4
@@ -2692,11 +2693,14 @@ MonoBehaviour:
   minRotationSpeedWhileRun: 300
   maxSpeedWhileRun_AngularLerp: 4
   minSpeedForRotateBody: 0
+  minSpeedForRotateBody2: 0
   minSpeedForChangeDirection: 1
   directionRotationSpeed: 360
   maxSpeedForReachBall: 0
   maxAngleForRun: 45
+  maxAngleForRun2: 0
   stopOffset: 0
+  phase: 0
 --- !u!114 &6244234487330640569
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2726,6 +2730,7 @@ MonoBehaviour:
   maxAngleDriving: 5
   bodyAdjustAngle: 0
   bodyAdjustSpeed: 0
+  enabled: 0
 --- !u!1 &5279867306647696566
 GameObject:
   m_ObjectHideFlags: 0

@@ -119,7 +119,9 @@ namespace CullPositionPoint
                 return true;
             }
             else{
-                passData = parabolicPassData;
+                if(!straightReachBall)
+                    passData = parabolicPassData;
+                else passData = straightPassData;
                 return !straightReachBall;
             }
         }

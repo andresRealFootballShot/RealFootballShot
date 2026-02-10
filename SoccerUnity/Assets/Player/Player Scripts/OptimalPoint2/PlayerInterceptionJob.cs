@@ -27,7 +27,7 @@ public struct PlayerInterceptionJob : IJobParallelFor
     [ReadOnly] public NativeArray<float3> playerPositions;
     [ReadOnly] public NativeArray<float3> playerVelocities;
     [ReadOnly] public NativeArray<float3> playerDirections;
-
+    [ReadOnly] public NativeArray<bool> isGoalkeepers;
     [WriteOnly] public NativeArray<int> reachableIndex;
     [WriteOnly] public NativeArray<float> timePlayerToReachIndex;
     [WriteOnly] public NativeArray<float3> endPlayerDirections;
@@ -51,74 +51,86 @@ public struct PlayerInterceptionJob : IJobParallelFor
         float minSpeedForRotate = minSpeedForRotates[index];
         float minSpeedForRotate2 = minSpeedForRotates2[index];
         float scope = scopes[index];
+        bool isGoalkeeper = isGoalkeepers[index];
 
         for (int i = 0; i < ballPositions.Length; i++)
         {
             float3 ballPos = ballPositions[i];
             float ballTime = ballTimes[i];
+            float totalTime = 0;
+            
             float verticalDistance = ballPos.y - playerPos.y;
-            float currentSpeed = math.length(new float2(playerVel.x, playerVel.z));
+            
             if (verticalDistance > jumpHeight)
                 continue;
-
-            // =========================
-            // FASE 0 – FRENO + DESPLAZAMIENTO
-            // =========================
-            float3 toTargetInitial = ballPos - playerPos;
-            float2 toTargetXZ = new float2(toTargetInitial.x, toTargetInitial.z);
-
-            float angle = AngleBetweenXZ(playerDir, toTargetXZ);
-            bool mustBrakeBeforeRotate = angle > maxAngleForRun;
-
-            float tBrake = 0f;
-            float dBrake = 0f;
-            float3 posAfterBrake = playerPos;
-            //if (mustBrakeBeforeRotate && currentSpeed > minSpeedForRotate)
-            if (mustBrakeBeforeRotate)
+            if (isGoalkeeper)
             {
-                if(EstimateBrakeMove(playerPos, playerDir, ballPos, currentSpeed, maxAngleForRun2, minSpeedForRotate, decel, out posAfterBrake, out tBrake))
-                {
-                    currentSpeed = Mathf.Clamp(minSpeedForRotate, 0, currentSpeed);
-                }
-                else
-                {
-
-                    float deltaV = Mathf.Clamp(currentSpeed - minSpeedForRotate2, 0, Mathf.Infinity);
-                    tBrake = (deltaV / decel);
-                    dBrake = (deltaV * deltaV) / (2f * decel);
-
-                    posAfterBrake = playerPos + playerDir * dBrake;
-                    currentSpeed = Mathf.Clamp(minSpeedForRotate2, 0, currentSpeed);
-                }
+                toTargetAfterBrake = ballPos - playerPos;
+                totalTime = linearGetTimeToReachPosition(playerPos, ballPos, maxSpeed, scope);
             }
+            else
+            {
+                float currentSpeed = math.length(new float2(playerVel.x, playerVel.z));
+                // =========================
+                // FASE 0 – FRENO + DESPLAZAMIENTO
+                // =========================
+                float3 toTargetInitial = ballPos - playerPos;
+                float2 toTargetXZ = new float2(toTargetInitial.x, toTargetInitial.z);
 
-            // =========================
-            // FASE 1 – ROTACIÓN
-            // =========================
-            toTargetAfterBrake = ballPos - posAfterBrake;
+                float angle = AngleBetweenXZ(playerDir, toTargetXZ);
+                bool mustBrakeBeforeRotate = angle > maxAngleForRun;
+
+                float tBrake = 0f;
+                float dBrake = 0f;
+                float3 posAfterBrake = playerPos;
+                //if (mustBrakeBeforeRotate && currentSpeed > minSpeedForRotate)
+                if (mustBrakeBeforeRotate)
+                {
+                    if (EstimateBrakeMove(playerPos, playerDir, ballPos, currentSpeed, maxAngleForRun2, minSpeedForRotate, decel, out posAfterBrake, out tBrake))
+                    {
+                        currentSpeed = Mathf.Clamp(minSpeedForRotate, 0, currentSpeed);
+                    }
+                    else
+                    {
+
+                        float deltaV = Mathf.Clamp(currentSpeed - minSpeedForRotate2, 0, Mathf.Infinity);
+                        tBrake = (deltaV / decel);
+                        dBrake = (deltaV * deltaV) / (2f * decel);
+
+                        posAfterBrake = playerPos + playerDir * dBrake;
+                        currentSpeed = Mathf.Clamp(minSpeedForRotate2, 0, currentSpeed);
+                    }
+                }
+
+                // =========================
+                // FASE 1 – ROTACIÓN
+                // =========================
+                toTargetAfterBrake = ballPos - posAfterBrake;
+
+                float2 toTargetXZAfterBrake = new float2(toTargetAfterBrake.x, toTargetAfterBrake.z);
+
+                float angleAfterBrake = AngleBetweenXZ(playerDir, toTargetXZAfterBrake);
+                float tRotate = Mathf.Clamp(angleAfterBrake - maxAngleForRun, 0, Mathf.Infinity) / rotationSpeed;
+
+                // =========================
+                // FASE 2 – DESPLAZAMIENTO REAL
+                // =========================
+                float distanceToTarget = math.max(
+                    math.length(toTargetXZAfterBrake) - scope, 0);
+
+                float tMove = EstimateTimeToReach(
+                    distanceToTarget,
+                    currentSpeed,
+                    accel,
+                    decel,
+                    maxSpeed,
+                    reachBallSpeed
+                );
+
+                //float totalTime = tBrake + tRotate + tMove;
+                totalTime = tBrake + tMove;
+            }
             
-            float2 toTargetXZAfterBrake = new float2(toTargetAfterBrake.x, toTargetAfterBrake.z);
-
-            float angleAfterBrake = AngleBetweenXZ(playerDir, toTargetXZAfterBrake);
-            float tRotate = Mathf.Clamp(angleAfterBrake - maxAngleForRun,0,Mathf.Infinity) / rotationSpeed;
-
-            // =========================
-            // FASE 2 – DESPLAZAMIENTO REAL
-            // =========================
-            float distanceToTarget = math.max(
-                math.length(toTargetXZAfterBrake) - scope,0);
-
-            float tMove = EstimateTimeToReach(
-                distanceToTarget,
-                currentSpeed,
-                accel,
-                decel,
-                maxSpeed,
-                reachBallSpeed
-            );
-
-            //float totalTime = tBrake + tRotate + tMove;
-            float totalTime = tBrake + tMove;
             //Debug.Log("bT=" + tBrake + " mT=" + tMove + " rT=" + tRotate+ " distanceToTarget="+ distanceToTarget + " angle=" + angleAfterBrake);
             if (totalTime <= ballTime)
             {
@@ -132,6 +144,12 @@ public struct PlayerInterceptionJob : IJobParallelFor
         endPlayerDirections[index] = toTargetAfterBrake;
         reachableIndex[index] = bestIndex;
         timePlayerToReachIndex[index] = bestTime;
+    }
+    public static float linearGetTimeToReachPosition(Vector3 playerPosition, Vector3 targetPosition, float maxSpeed, float scope)
+    {
+        float distance = Mathf.Clamp(Vector3.Distance(MyFunctions.setYToVector3(playerPosition, targetPosition.y), targetPosition) - scope, 0, Mathf.Infinity);
+        float t = distance / maxSpeed;
+        return t;
     }
     public static bool EstimateBrakeMove(float3 playerPos,float3 playerDir,float3 ballPos,float currentSpeed,float maxAngleForRun,float minSpeedForRotate, float decel,out float3 posAfterBrake,out float time)
     {

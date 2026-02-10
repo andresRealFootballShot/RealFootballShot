@@ -40,6 +40,7 @@ public class BallInterceptionSystem : MonoBehaviour
     private NativeArray<float3> playerPositions;
     private NativeArray<float3> playerVelocities;
     private NativeArray<float3> playerDirections;
+    private NativeArray<bool> isGoalkeepers;
     public float timeDebug;
     bool enablePlayersGoTarget;
     private void Start()
@@ -77,7 +78,6 @@ public class BallInterceptionSystem : MonoBehaviour
         for (int i = 0; i < Teams.allPlayers.Count; i++)
         {
             PublicPlayerData publicPlayerData = Teams.allPlayers[i];
-
             accelerations[i] = publicPlayerData.playerComponents.movementValues.forwardAcceleration;
             deccelerations[i] = publicPlayerData.playerComponents.movementValues.forwardDeceleration;
             maxSpeeds[i] = publicPlayerData.maxSpeed;
@@ -98,6 +98,7 @@ public class BallInterceptionSystem : MonoBehaviour
             playerVelocities[i] = publicPlayerData.playerComponents.Velocity;
             playerDirections[i] = publicPlayerData.playerComponents.bodyY0Forward;
             scopes[i] = publicPlayerData.playerComponents.scope;
+            isGoalkeepers[i] = publicPlayerData.IsGoalkeeper;
         }
 
         // Ejecutar el Job
@@ -122,10 +123,29 @@ public class BallInterceptionSystem : MonoBehaviour
             playerPositions = playerPositions,
             playerVelocities = playerVelocities,
             playerDirections = playerDirections,
+            isGoalkeepers = isGoalkeepers,
         };
 
         var handle = job.Schedule(Teams.allPlayers.Count, 1);
         handle.Complete();
+        UpdateChaserData();
+    }
+    void UpdateChaserData()
+    {
+        for (int i = 0; i < Teams.allPlayers.Count; i++)
+        {
+            PublicPlayerData publicPlayerData = Teams.allPlayers[i];
+            publicPlayerData.getFirstChaserData(out ChaserData chaserData);
+            int ballPosIndex = reachableIndices[i];
+            chaserData.ReachTheTarget = ballPosIndex != -1;
+            if (ballPosIndex != -1)
+            {
+                chaserData.OptimalPoint = ballPositions[ballPosIndex];
+                chaserData.ClosestPoint = ballPositions[ballPosIndex];
+                chaserData.OptimalTime = timeToReach[i];
+                chaserData.OptimalTargetTime = ballTimes[ballPosIndex];
+            }
+        }
     }
     void testKick()
     {
@@ -288,6 +308,7 @@ public class BallInterceptionSystem : MonoBehaviour
             playerVelocities = new NativeArray<float3>(playerCount, Allocator.Persistent);
             playerDirections = new NativeArray<float3>(playerCount, Allocator.Persistent);
             endPlayerDirections = new NativeArray<float3>(playerCount, Allocator.Persistent);
+            isGoalkeepers = new NativeArray<bool>(playerCount, Allocator.Persistent);
         }
     }
 
@@ -310,6 +331,7 @@ public class BallInterceptionSystem : MonoBehaviour
         if (playerVelocities.IsCreated) playerVelocities.Dispose();
         if (playerDirections.IsCreated) playerDirections.Dispose();
         if (endPlayerDirections.IsCreated) endPlayerDirections.Dispose();
+        if (isGoalkeepers.IsCreated) isGoalkeepers.Dispose();
     }
     void OnDestroy()
     {
