@@ -20,6 +20,7 @@ namespace CullPositionPoint
         public float ballReachTime;
         public int defenseReachIndex;
         public float defenseReachTime;
+        public float distanceDefenseReachBall;
         public Vector2 defenseReachPosition;
         public Vector3 passVelocity;
         public void Clear()
@@ -29,6 +30,7 @@ namespace CullPositionPoint
             defenseReachTime = -1;
             defenseReachPosition = Vector2.positiveInfinity;
             passVelocity = Vector3.zero;
+            distanceDefenseReachBall = Mathf.Infinity;
         }
         public Vector3 GetDefenseReach3DPosition(float y = 0)
         {
@@ -137,6 +139,9 @@ namespace CullPositionPoint
         public int sizeLonelyPoints;
         public Vector2 post1Position, post2Position;
         public float distanceWeightLerp;
+        public Vector2 midfield, defenseGoalPosition;
+        public float defenseTargetOffside;
+        public int passerIndex;
     }
     public struct PlayerPositionElement : IBufferElementData
     {
@@ -225,6 +230,7 @@ public class SearchPlayData
     {
         public Triangulator triangulator;
         public NativeArray<float2> playerPositions = new NativeArray<float2>();
+        public NativeArray<float2> playerTargetPositions = new NativeArray<float2>();
         public List<int> cullEntities = new List<int>();
         public List<int> cullEntityLonelyPointCount = new List<int>();
         public List<int> nextTriangulatorEntities = new List<int>();
@@ -438,6 +444,16 @@ public class SearchPlayData
        float2 pos = searchPlayNodes[node].playerPositions[index+4];
         return new Vector2(pos.x, pos.y);
     }
+    public Vector2 GetPlayerTargetPosition(int node, int index)
+    {
+        float2 pos = searchPlayNodes[node].playerTargetPositions[index];
+        return new Vector2(pos.x, pos.y);
+    }
+    public Vector3 GetPlayerTargetPosition(int node, int index,float y=0)
+    {
+        float2 pos = searchPlayNodes[node].playerTargetPositions[index];
+        return new Vector3(pos.x, y, pos.y);
+    }
     public float GetPlayerSpeed(int node, int index)=> searchPlayNodes[node].speed[index];
     public Vector3 GetPlayerDirection(int node, int index) => searchPlayNodes[node].direction[index];
     public int GetPlayerCount(int node) => searchPlayNodes[node].playerCount;
@@ -447,10 +463,13 @@ public class SearchPlayData
         foreach (var searchPlayNode in searchPlayNodes)
         {
             searchPlayNode.playerPositions.Dispose();
+            searchPlayNode.playerTargetPositions.Dispose();
             searchPlayNode.triangulator.Dispose();
         }
     }
     public void SetPlayerPositions(int node, NativeArray<float2> playerPositions) => searchPlayNodes[node].playerPositions = playerPositions;
+    public void SetPlayerTargetPositions(int node, NativeArray<float2> playerTargetPositions) => searchPlayNodes[node].playerTargetPositions = playerTargetPositions;
+    public void SetPlayerTargetPosition(int node,int playerIndex, Vector2 position) => searchPlayNodes[node].playerTargetPositions[playerIndex] = position;
     public void SetTriangulator(int node, Triangulator triangulator) => searchPlayNodes[node].triangulator = triangulator;
    
     public void SetCullEntity(int node,int cullEntity)

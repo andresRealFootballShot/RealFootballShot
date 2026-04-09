@@ -1,7 +1,9 @@
 using CullPositionPoint;
+using DOTS_ChaserDataCalculation;
 using FieldTriangleV2;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Entities;
 using Unity.Entities.UniversalDelegates;
 using UnityEditor;
@@ -17,7 +19,7 @@ public class CullPassPointsDebug : MonoBehaviour
     public bool debugPointResults, _debugNode;
     public bool _debugAllLonelyPointsOfNode;
     public bool debugPassLonelyPoint;
-    public bool _debugLonelyPointIndex, debugReachableLonelyPoints, debugAttackPass;
+    public bool _debugLonelyPointIndex, debugReachableLonelyPoints, debugAllAttackPass, debugIndexAttackPass;
     public int debugNode = 0;
     public int debugLonelyPointIndex = 0;
     public bool debugPlayerIndex;
@@ -32,9 +34,11 @@ public class CullPassPointsDebug : MonoBehaviour
     public float startPlayerSpeed, maxSpeedForReachBall;
     public bool debugStraightPass;
     public bool pause;
-    public bool updateDebug=true;
+    public bool updateDebug=true,stopUpdatePassStarted;
     public float timeScale=1;
     string teamName_Defense { get => CullPassPoints.teamName_Defense; }
+    Team defenseTeam { get => CullPassPoints.defenseTeam; }
+    Team attackTeam { get => CullPassPoints.attackTeam; }
     string teamName_Attacker { get => CullPassPoints.teamName_Attacker; }
     int teamAttack_start { get => CullPassPoints.teamAttack_start; }
     List<Entity> entities { get => CullPassPoints.entities; }
@@ -46,10 +50,14 @@ public class CullPassPointsDebug : MonoBehaviour
     public SearchPlayData searchPlayData { get => CullPassPoints.searchPlayData; }
     LonelyPointElement2 debugLonelyPointElement, debugPreviousLonelyPointElement;
     Vector3 attackPos, defensePos;
-    string teamAttack, teamDefense;
+
+    int firstReachPlayerIndex;
+    string teamAttackNamePass, teamDefenseNamePass;
     bool passStarted;
+    PublicPlayerData attackPublicPlayerData { get => CullPassPoints.GetPublicPlayerData(debugLonelyPointElement.attackReachIndex); }
     void Start()
     {
+
     }
 
 #if UNITY_EDITOR
@@ -59,7 +67,7 @@ public class CullPassPointsDebug : MonoBehaviour
         {
             startPass();
         }
-        if (updateDebug&& !passStarted)
+        if (updateDebug && (!passStarted))
         {
             GetDebugData();
         }
@@ -97,8 +105,8 @@ public class CullPassPointsDebug : MonoBehaviour
         SetInstantVelocity();
         CullPassPoints.startCullPassPointsSystem = true;
         MatchEvents.CullPassPointsEnd.AddListener(PlayDebug);
-        debugPassLonelyPoint = true;
-        _debugAllLonelyPointsOfNode = false;
+        //debugPassLonelyPoint = true;
+        _debugAllLonelyPointsOfNode = !stopUpdatePassStarted;
         
     }
     void getPos()
@@ -108,6 +116,7 @@ public class CullPassPointsDebug : MonoBehaviour
         attackPos = new Vector3(attackPos2D.x, 0.5f, attackPos2D.y);
         Vector2 defensePos2D = searchPlayData.GetPlayerPosition(debugNode, passData.defenseReachIndex);
         defensePos = new Vector3(defensePos2D.x, 0.5f, defensePos2D.y);
+        firstReachPlayerIndex = CullPassPoints.players.IndexOf(CullPassPoints.firstPublicPlayerData);
     }
     public void PlayDebug()
     {
@@ -127,8 +136,8 @@ public class CullPassPointsDebug : MonoBehaviour
         debugLonelyPointElement = GetDebugLonelyPoint(debugLonelyPointIndex);
         debugPreviousLonelyPointElement = CullPassPoints.searchPlayData.GetBallLonelyPoint(debugNode);
         getPos();
-        teamAttack = CullPassPoints.teamName_Attacker;
-        teamDefense = CullPassPoints.teamName_Defense;
+        teamAttackNamePass = CullPassPoints.teamName_Attacker;
+        teamDefenseNamePass = CullPassPoints.teamName_Defense;
     }
     void Kick()
     {
@@ -151,9 +160,124 @@ public class CullPassPointsDebug : MonoBehaviour
         publicPlayerData.playerComponents.movementCtrl.SetTargetPosition(CullPassPoints.ballReachPosition);
 
         PublicPlayerData attackPublicPlayerData = CullPassPoints.GetPublicPlayerData(debugLonelyPointElement.attackReachIndex);
+        if (attackPublicPlayerData.playerComponents.movementCtrl != null){
+            SetOffsideLineTarget();
+
+
+        }
+        if (!debugLonelyPointElement.GetPassData(debugStraightPass, out PassData passData)) return;
+        Team team = Teams.getTeamByName(teamDefenseNamePass);
+        foreach(PublicPlayerData defensePublicPlayerData in team.publicPlayerDatas)
+        {
+            int index = CullPassPoints.players.IndexOf(defensePublicPlayerData);
+            if (defensePublicPlayerData.playerComponents.movementCtrl == null) continue;
+            Vector3 defensePos = searchPlayData.GetPlayerTargetPosition(debugNode, index,0);
+            defensePublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(defensePos);
+        }
+    }
+    void SetOffsideLineTarget()
+    {
+        Team team = CullPassPoints.defenseTeam;
+        Vector3 goalPosition = team.goalPosition;
+        PublicPlayerData attackPublicPlayerData = CullPassPoints.GetPublicPlayerData(debugLonelyPointElement.attackReachIndex);
+        Vector3 playerPosition = attackPublicPlayerData.position;
+        playerPosition.y= 0;
+        Vector3 offsideLine = GetOffsideLine();
+        Vector3 forward = goalPosition - offsideLine;
+        Vector3 dir = playerPosition - offsideLine;
+        forward.y = 0;
+        if (Vector2.Dot(forward, dir) <= 0)
+        {
+            Vector3 targetPosition =  debugWeightLonelyPooints[debugLonelyPointIndex].position;
+
+            Vector3 offsidePoint = GetPointOnOffsideLine(playerPosition, targetPosition, offsideLine);
+            attackPublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(defensePos);
+            attackPublicPlayerData.playerComponents.movementCtrl.debug = true;
+            attackPublicPlayerData.playerComponents.movementCtrl.debugMoveTimes = true;
+            attackPublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(offsidePoint);
+            float time = GetTimeToReachPointDOTS.accelerationGetTimeToReachPosition2(playerPosition, attackPublicPlayerData.playerComponents.Speed, attackPublicPlayerData.playerComponents.bodyY0Forward, attackPublicPlayerData.playerComponents.VelocityY0Direction, debugLonelyPointElement.Get3DPosition(), attackPublicPlayerData.playerComponents.movementValues.maxAngleForRun, attackPublicPlayerData.playerComponents.movementValues.maxAngleForRun2, attackPublicPlayerData.playerComponents.movementValues.minSpeedForRotateBody, attackPublicPlayerData.playerComponents.movementValues.minSpeedForRotateBody2, attackPublicPlayerData.playerComponents.movementValues.forwardAcceleration, attackPublicPlayerData.playerComponents.movementValues.forwardDeceleration, attackPublicPlayerData.playerComponents.movementValues.maxSpeedForReachBall, attackPublicPlayerData.playerComponents.scope, attackPublicPlayerData.playerComponents.movementValues.maxForwardSpeed);
+            Invoke(nameof(SetTargetPositionBeforeOffsideLine), time);
+        }
+        else
+        {
+
+            attackPublicPlayerData.playerComponents.movementCtrl.debug = true;
+            attackPublicPlayerData.playerComponents.movementCtrl.debugMoveTimes = true;
+            attackPublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(debugLonelyPointElement.Get3DPosition());
+        }
+    }
+    void SetTargetPositionBeforeOffsideLine()
+    {
+        print("reach offsideLine");
         attackPublicPlayerData.playerComponents.movementCtrl.debug = true;
         attackPublicPlayerData.playerComponents.movementCtrl.debugMoveTimes = true;
         attackPublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(debugLonelyPointElement.Get3DPosition());
+    }
+    Vector3 GetPointOnOffsideLine(Vector3 playerPosition, Vector3 targetPosition, Vector3 offside)
+    {
+        // Línea horizontal (x ignorada, usas eje Z realmente)
+        float offsideZ = offside.z;
+
+        Vector3 dir = (targetPosition - playerPosition);
+
+        if (Mathf.Abs(dir.z) < 0.001f)
+            return targetPosition;
+
+        float t = (offsideZ - playerPosition.z) / dir.z;
+
+        t = Mathf.Clamp01(t);
+
+        return playerPosition + dir * t;
+    }
+    Vector3 GetOffsideLine()
+    {
+        Vector3 ballPosition = MatchComponents.ballPosition;
+        Vector3 goalPosition = defenseTeam.goalPosition;
+        ballPosition.x = goalPosition.x;
+        Vector3 midfieldPos = MatchComponents.footballField.center;
+        midfieldPos.x = goalPosition.x;
+        midfieldPos.y = 0;
+        Vector3 forward = (goalPosition - midfieldPos).normalized;
+
+        float max1 = float.MinValue; // defensa más cercano a portería
+        float max2 = float.MinValue; // segundo más cercano
+
+        // Buscar los dos defensas más retrasados
+        foreach(PublicPlayerData publicPlayerData in defenseTeam.publicPlayerDatas)
+        {
+            Vector3 playerPos = new Vector3(goalPosition.x,0, publicPlayerData.position.z);
+            float projection = Vector3.Dot(forward, playerPos - midfieldPos);
+
+            if (projection > max1)
+            {
+                max2 = max1;
+                max1 = projection;
+            }
+            else if (projection > max2)
+            {
+                max2 = projection;
+            }
+        }
+
+        // Si hay menos de 2 defensas
+        if (max2 == float.MinValue)
+            return midfieldPos;
+
+        // Proyección del balón
+        float ballProjection = Vector2.Dot(forward, ballPosition - midfieldPos);
+        if (ballProjection <= 0f && max2 <= 0f)
+        {
+            return midfieldPos;
+        }
+        // La línea es el más cercano a portería entre:
+        // - el balón
+        // - el penúltimo defensa (max2)
+        float finalProjection = Mathf.Max(ballProjection, max2);
+
+        return midfieldPos + forward * finalProjection;
+    }
+    void SetDefenseTarget()
+    {
         if (!debugLonelyPointElement.GetPassData(debugStraightPass, out PassData passData)) return;
         PublicPlayerData defensePublicPlayerData = CullPassPoints.GetPublicPlayerData(passData.defenseReachIndex);
         if (defensePublicPlayerData.playerComponents.movementCtrl == null) return;
@@ -164,13 +288,14 @@ public class CullPassPointsDebug : MonoBehaviour
     void SearchNodePass()
     {
 
-        
+        EditorApplication.isPaused = pause;
         MatchComponents.ballTransform.position = CullPassPoints.ballReachPosition;
         debugLonelyPointElement.GetPassData(debugStraightPass, out PassData passData);
         
         MatchComponents.ballRigidbody.velocity = passData.passVelocity;
-        
-        
+        SetDefenseTarget();
+
+
     }
     private void OnDrawGizmos()
  {
@@ -228,7 +353,7 @@ public class CullPassPointsDebug : MonoBehaviour
                 {
                     DrawLonelyPoint(debugWeightLonelyPooints[i], searchPlayData.GetBallLonelyPoint(debugNode), debugNode, i, "", Color.white);
                     _debugArrow(searchPlayData.GetBallLonelyPoint(debugNode), debugWeightLonelyPooints[i]);
-                    //DrawReachPlayers(debugWeightLonelyPooints[i]);
+                    DrawReachPlayers(debugWeightLonelyPooints[i]);
                 }
              }
          }
@@ -255,11 +380,22 @@ public class CullPassPointsDebug : MonoBehaviour
         }
         if (debugAttackTeam)
         {
-                printAttackTeam(CullPassPoints.searchPlayData.GetBallLonelyPoint(debugNode));
+           printAttackTeam(CullPassPoints.searchPlayData.GetBallLonelyPoint(debugNode));
         }
-         //debugBallInfo();
+        //CheckOffsideLastPlayer();
+        //debugBallInfo();
+        //CheckDuplicatedLonelyPoints();
      }
  }
+ void CheckOffsideLastPlayer()
+{
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 12;
+        style.normal.textColor = Color.black;
+        string info = "Offside Last Player";
+        Vector3 lastPlayerPos = CullPassPoints.FootballPositionCtrl.GetLastPlayerPosition(MatchComponents.ballPosition, CullPassPoints.teamName_Defense);
+        Handles.Label(lastPlayerPos + Vector3.up * 1.5f, info, style);
+    }
 void DrawReachPlayers(LonelyPointElement2 lonelyPointElement)
 {
     bool passDataAvailable = lonelyPointElement.GetPassData(debugStraightPass,out PassData passData);
@@ -270,7 +406,7 @@ void DrawReachPlayers(LonelyPointElement2 lonelyPointElement)
 
     GUIStyle style = new GUIStyle();
     style.fontSize = 12;
-    style.normal.textColor = Teams.getTeamByName(teamAttack).Color;
+    style.normal.textColor = Teams.getTeamByName(teamAttackNamePass).Color;
     string info = "Attack Reach Time = " + lonelyPointElement.attackReachTime.ToString("f2");
     Handles.Label(attackPos + Vector3.up*1.5f, info, style);
 
@@ -282,18 +418,27 @@ void DrawReachPlayers(LonelyPointElement2 lonelyPointElement)
 
         style = new GUIStyle();
         style.fontSize = 12;
-        style.normal.textColor = Teams.getTeamByName(teamDefense).Color;
+        style.normal.textColor = Teams.getTeamByName(teamDefenseNamePass).Color;
         info = "Defense Reach Time = " + passData.defenseReachTime.ToString("f2");
         Handles.Label(defensePos + Vector3.up * 1.5f, info, style);
     }
+        if (firstReachPlayerIndex != -1)
+        {
+            style = new GUIStyle();
+            style.fontSize = 12;
+            style.normal.textColor = Color.green;
+            string info2 = "First Player Reach";
+            Vector3 pos = CullPassPoints.players[firstReachPlayerIndex].position;
+            Handles.Label(pos + Vector3.up * 1.7f, info2, style);
+        }
 }
 void printAttackTeam(LonelyPointElement2 lonelyPointElement)
 {
     GUIStyle style = new GUIStyle();
     style.fontSize = 12;
-    style.normal.textColor = Teams.getTeamByName(teamAttack).Color;
+    style.normal.textColor = Teams.getTeamByName(teamAttackNamePass).Color;
     Vector3 pos = new Vector3(lonelyPointElement.position.x, 1.5f, lonelyPointElement.position.y);
-    string info = "Attack Team = " + teamAttack;
+    string info = "Attack Team = " + teamAttackNamePass;
     Handles.Label(pos, info, style);
 }
  void _debugArrow(LonelyPointElement2 previousLonelyPoint, LonelyPointElement2 lonelyPointElement)
@@ -323,8 +468,8 @@ void _debugArrow(Vector3 pos1, Vector3 pos2)
                      MatchComponents.ballRigidbody.velocity = TestResultComponent.straightReachBall ? TestResultComponent.GetV0DOTSResult1.v0 : TestResultComponent.GetV0DOTSResult2.v0;
                      //MatchComponents.ballRigidbody.velocity = TestResultComponent.GetV0DOTSResult1.v0;
                      GetV0DOTSResult GetV0DOTSResult = TestResultComponent.straightReachBall ? TestResultComponent.GetV0DOTSResult1 : TestResultComponent.GetV0DOTSResult2;
-                        CullPassPoints.setAttackTargetPosition(TestResultComponent, GetV0DOTSResult);
-                        CullPassPoints.setDefenseTargetPosition(TestResultComponent, GetV0DOTSResult);
+                     CullPassPoints.setAttackTargetPosition(TestResultComponent, GetV0DOTSResult);
+                     CullPassPoints.setDefenseTargetPosition(TestResultComponent, GetV0DOTSResult);
                      //StartCoroutine(TestCoroutine(TestResultComponent, GetV0DOTSResult));
                      //StartCoroutine(TestCoroutineDefenseLonleyPosition(TestResultComponent));
                      return;
@@ -376,16 +521,53 @@ LonelyPointElement2 GetDebugLonelyPoint(int index)
  {
      for (int i = 0; i < CullPassPoints.players.Count; i++)
      {
-
-         Vector3 position = CullPassPoints.players[i].position;
-         GUIStyle style = new GUIStyle();
+         Vector3 position2 = CullPassPoints.players[i].position;
+         Vector3 position = CullPassPoints.searchPlayData.GetPlayerTargetPosition(debugNode, i, 0);
+         Vector2 position2D = CullPassPoints.searchPlayData.GetPlayerPosition(debugNode, i);
+         Vector3 position3 = new Vector3(position2D.x,0, position2D.y);
+            GUIStyle style = new GUIStyle();
          style.fontSize = 14;
-         style.normal.textColor = Teams.getTeamByName(teamAttack).Color;
+         
+         style.normal.textColor = Teams.getTeamByName(teamAttackNamePass).Color;
          Handles.Label(position + Vector3.up * 1.25f, "player index=" + i, style);
-
+        if (defenseTeam.publicPlayerDatas.Contains(CullPassPoints.players[i]))
+        {
+            Handles.DrawLine(position2, position3);
+        }
      }
 
  }
+    Vector3 GetPointOnOffsideLine(Vector3 playerPosition, Vector3 targetPosition, Vector2 offside)
+    {
+        // Línea horizontal (x ignorada, usas eje Z realmente)
+        float offsideZ = offside.y;
+
+        Vector3 dir = (targetPosition - playerPosition);
+
+        if (Mathf.Abs(dir.z) < 0.001f)
+            return targetPosition;
+
+        float t = (offsideZ - playerPosition.z) / dir.z;
+
+        t = Mathf.Clamp01(t);
+
+        return playerPosition + dir * t;
+    }
+    void CheckDuplicatedLonelyPoints()
+{
+        print("Duplicated LonelyPoints");
+        for (int i = 0; i < debugWeightLonelyPooints.Count; i++)
+        {
+            for (int j = 0; j < debugWeightLonelyPooints.Count; j++)
+            {
+                if(i==j) continue;
+                if (Vector2.Distance(debugWeightLonelyPooints[i].position, debugWeightLonelyPooints[j].position) < 0.1f)
+                {
+                    print("Duplicated LonelyPoints:" + debugWeightLonelyPooints[i].index + " and " + debugWeightLonelyPooints[j].index);
+                }
+            }
+        }
+}
  void DrawLonelyPoint(LonelyPointElement2 lonelyPointElement, LonelyPointElement2 previousLonelyPoint, int node, int index, string info, Color infoColor)
  {
      //if (!lonelyPointElement.parabolicReachBall) return;
@@ -419,27 +601,29 @@ LonelyPointElement2 GetDebugLonelyPoint(int index)
      Handles.Label(pos + Vector3.up * 1.7f, info, style);
      style.fontSize = 14;
      style.normal.textColor = color;
-     //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
-     //string text = "straightReachBall=" + lonelyPointElement.straightReachBall + " parabolicReachBall=" + lonelyPointElement.parabolicReachBall + " i="+lonelyPointElement.index;
-     string text = "i=" + lonelyPointElement.index;
+        //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
+        //string text = "straightReachBall=" + lonelyPointElement.straightReachBall + " parabolicReachBall=" + lonelyPointElement.parabolicReachBall + " i="+lonelyPointElement.index;
+        float value = lonelyPointElement.weight * 100;
+        string text = "i=" + lonelyPointElement.index + " weight="+ value;
      //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
 
 
      Handles.Label(pos + Vector3.up * 0.5f, text, style);
      Color c = Color.Lerp(Color.green, Color.red, lonelyPointElement.weight);
      style.normal.textColor = c;
-     float value = lonelyPointElement.weight * 100;
-     text = "weight=" + value.ToString("f2") + " order=" + lonelyPointElement.order + " node=" + node + " index=" + lonelyPointElement.index + " Pos=" + lonelyPointElement.position.ToString("f2");
+     
+     lonelyPointElement.GetPassData(debugStraightPass, out PassData passData);
+       text = "weight=" + value.ToString("f2")  + " order=" + lonelyPointElement.order + " node=" + node + " index=" + lonelyPointElement.index + " Pos=" + lonelyPointElement.position.ToString("f2");
      if (debugText)
          Handles.Label(pos + Vector3.up * 1.25f, text, style);
-     lonelyPointElement.GetPassData(debugStraightPass,out PassData passData);
-     if (debugAttackPass)
+     
+     if (debugAllAttackPass||(debugIndexAttackPass&&debugLonelyPointIndex==lonelyPointElement.index))
      {
         Team attackTeam = Teams.getTeamByName(teamName_Attacker);
         Vector2 playerPos2 = searchPlayData.GetPlayerPosition(0, lonelyPointElement.attackReachIndex);
         Vector3 playerPos = new Vector3(playerPos2.x, 0, playerPos2.y);
         Debug.DrawLine(playerPos + Vector3.up * 0.25f, pos + Vector3.up * 0.25f, Color.black);
-        string pass = "straight=" + lonelyPointElement.straightReachBall + " parabolic=" + lonelyPointElement.parabolicReachBall+ " pass force="+ passData.passVelocity.magnitude;
+        string pass = "straight=" + lonelyPointElement.straightReachBall + " parabolic=" + lonelyPointElement.parabolicReachBall+ " pass force="+ passData.passVelocity.magnitude + " StraightDistanceDefenseReachBall=" + lonelyPointElement.straightPassData.distanceDefenseReachBall.ToString("f2") + " ParabolicDistanceDefenseReachBall=" + lonelyPointElement.parabolicPassData.distanceDefenseReachBall.ToString("f2") ;
         
         Vector3 pos3 = new Vector3(lonelyPointElement.position.x, 1, lonelyPointElement.position.y);
         Vector3 pos4 = new Vector3(previousLonelyPoint.position.x, 1, previousLonelyPoint.position.y);

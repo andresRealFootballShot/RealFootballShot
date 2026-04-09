@@ -1,0 +1,12 @@
+
+En unity 3d estoy haciendo un juego de futbol. quiero que hagas una función a la que le pase una posición del campo y devuelvas un peso. Ese peso equivale a la importancia de esa posición. Por ejemplo, cuanto mas cerca de la portería rival mas importante es. Ten en cuenta la distancia a la portería, el angulo a la portería(cuanto mas en el centrado esté la posición, mejor. si esta mas escorado a una banda, peor). Distancia del balón a la posición(a partir de cierta distancia penaliza, es decir si esta muy lejos penaliza)
+Los parámetros de la función son :
+lonelyPoint.position (posición a evaluar)
+CullPassPointsParams.post1Position, CullPassPointsParams.post2Position (posición de los postes de la portería rival)
+ballPosition
+MinDistanceRival_Ball distancia del rival al balón cuando llega el rival a la posición(si es positivo este valor multiplica el peso por -1. si es negativa no hagas nada)
+maxFieldDistance ( distancia del campo entero)
+
+Puedes crear nuevos parámetros si quieres. 
+Quiero que el peso que devuelvas sea realista y sea acorde a como un jugador de futbol en la realidad evalúa las posiciones del campo.
+las posiciones son Vector2

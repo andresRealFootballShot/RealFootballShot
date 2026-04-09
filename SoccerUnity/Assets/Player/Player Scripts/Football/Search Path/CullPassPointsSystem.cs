@@ -74,7 +74,7 @@ public class CullPassPointsSystem : SystemBase
         if (reset)
         {
             SearchPlayData.Clear();
-            
+                CullPassPoints.CreatePlayerTargetPositions();
                 /*
                 SearchPlayData.posibleNodes.Clear();
                 Snodes.Clear();
@@ -102,10 +102,12 @@ public class CullPassPointsSystem : SystemBase
             CullPassPoints.CalculateFirstReachPlayerToBall(Snodes);
             CullPassPoints.SetBallPosition(Snodes, 1, CullPassPoints.ballReachPosition, CullPassPoints.firstPlayerReachTime);
             nodeCalculationPerFrameTotal = 1;
-            
-
             CullPassPoints.UpdateInstantPlayerPositions2(defenseTeam, attackTeam, Snodes);
+            //////////////Calculo de futuras posiciones de los defensas
+            SetNextPlayerPositions(CullPassPoints.ballReachPosition);
+            
             CullPassPoints.UpdatePlayerPositions(Snodes, 1, 0);
+            CullPassPoints.UpdateOffsideLine(CullPassPoints.ballReachPosition, defenseTeam.TeamName, Snodes);
             
 
             SearchPlayData.SetIsSearched(Snodes[0], true);
@@ -200,7 +202,14 @@ public class CullPassPointsSystem : SystemBase
         }
         
     }
-    
+    void SetNextPlayerPositions(Vector3 ballPosition)
+    {
+        SearchPlayData.posibleNodes.Clear();
+        SearchPlayData.AddPosibleNode(0);
+        CullPassPoints.CalculateNextPositions(0, ballPosition, FieldPositionsData.HorizontalPositionType.Right, defenseTeam);
+        CullPassPoints.UpdateNextPlayerPoints(1, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
+        RemovePosibleNodes(1);
+    }
     void CopyNodes(List<int> nodes, List<int> copies,int size)
     {
         //nodes.Clear();

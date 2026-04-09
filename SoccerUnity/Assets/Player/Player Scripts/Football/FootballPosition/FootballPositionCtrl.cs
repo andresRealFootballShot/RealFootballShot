@@ -256,6 +256,31 @@ public class FootballPositionCtrl : MonoBehaviour
     {
         return playerPositionType.Equals(PlayerPositionType.CenterBack) || playerPositionType.Equals(PlayerPositionType.LateralBack);
     }
+    public Vector3 GetLastPlayerPosition(Vector3 ballPosition,string teamName)
+    {
+        Team team = Teams.getTeamByName(teamName);
+        PressureFieldPositionDatas PressureFieldPositionDatas;
+        if (!getCurrentPressureFieldPositions(out PressureFieldPositionDatas)) return Vector3.positiveInfinity;
+        Vector3 normailizedBallPosition = getNormalizedPosition(horizontalPositionType, ballPosition, team.SideOfField);
+        float offsideLineValueY = GetOffsideLineGetValue(PressureFieldPositionDatas, normailizedBallPosition, out float offsideWeight);
+        FieldPositionsData FieldPositionData = PressureFieldPositionDatas.FieldPositionDatas.Find(x => x.playerPositionType.Equals(PlayerPositionType.LateralBack));
+        getWeightyValue4(normailizedBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out Vector2 weightyValue);
+        
+
+        Vector2 symmetricalBallPosition = normailizedBallPosition;
+        symmetricalBallPosition.x = 1 - symmetricalBallPosition.x;
+        getWeightyValue4(symmetricalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out Vector2 weightValue2);
+        
+        if(weightyValue.y < weightValue2.y)
+        {
+            return getGlobalPosition(horizontalPositionType, weightyValue, team.SideOfField);
+        }
+        else
+        {
+            FieldPositionsData.HorizontalPositionType otherHorizontalPositionType = getOtherHorizontalPositionType(horizontalPositionType);
+            return getGlobalPosition(otherHorizontalPositionType, weightValue2, team.SideOfField);
+        }
+    }
     public void getWeightyValue4(Vector2 normalizedPosition, List<FieldPositionsData.Point2> points,float offsideLinePosY, PlayerPositionType playerPositionType,float weightOffsideLine, out Vector2 value)
     {
         float totalH = 0;
@@ -355,8 +380,7 @@ public class FootballPositionCtrl : MonoBehaviour
         }
         horizontalBallDistance = Mathf.Clamp01(horizontalBallDistance);
 
-        normalizedBallPosition = new Vector2(horizontalBallDistance, verticalBallDistance);
-        return normalizedBallPosition;
+        return new Vector2(horizontalBallDistance, verticalBallDistance);
     }
     public Vector2 getNormalizedPosition(FieldPositionsData.HorizontalPositionType horizontalPositionType, Vector3 position)
     {
@@ -373,8 +397,7 @@ public class FootballPositionCtrl : MonoBehaviour
         }
         horizontalBallDistance = Mathf.Clamp01(horizontalBallDistance);
 
-        normalizedBallPosition = new Vector2(horizontalBallDistance, verticalBallDistance);
-        return normalizedBallPosition;
+        return new Vector2(horizontalBallDistance, verticalBallDistance);
     }
     public Vector3 getGlobalPosition(FieldPositionsData.HorizontalPositionType horizontalPositionType, Vector2 normalizedPosition, SideOfField sideOfField)
     {

@@ -35,6 +35,7 @@ public class Team : MonoBehaviour
     public int playersNoGoalkeeperCount { get; set; }
     public TeamHUD teamHUD;
     public SideOfField SideOfField { get; set; }
+    public Vector3 goalPosition { get => MyFunctions.setY0ToVector3( SideOfField.goalComponents.transform.position); }
     public void Load()
     {
         nameTeamVar.Value = initName;

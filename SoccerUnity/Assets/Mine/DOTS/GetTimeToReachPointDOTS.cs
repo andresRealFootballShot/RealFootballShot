@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst;
 using UnityEngine;
@@ -6,6 +6,9 @@ using Unity.Mathematics;
 using CullPositionPoint;
 using UnityEditor.Experimental.GraphView;
 using System.IO;
+using UnityEngine.UIElements;
+using static MovimentValues;
+using NextMove_Algorithm;
 
 namespace DOTS_ChaserDataCalculation
 {
@@ -176,6 +179,107 @@ namespace DOTS_ChaserDataCalculation
             }
             return result;
         }
+    public static float accelerationGetTimeToReachPosition2(
+    Vector3 playerPosition,
+    float currentSpeed,
+    Vector3 bodyForward,
+    Vector3 normalizedForwardVelocity,
+    Vector3 targetPosition,
+
+    // Parámetros antes en playerData
+    float maxAngleForRun,
+    float maxAngleForRun2,
+    float minSpeedForRotate,
+    float minSpeedForRotate2,
+    float acceleration,
+    float decceleration,
+    float maxSpeedForReachBall,
+    float scope,
+
+    // Parámetro antes en playerParams
+    float maxSpeed
+)
+        {
+            if (MyFunctions.Vector3IsNan(targetPosition) ||
+                targetPosition.Equals(Vector3.positiveInfinity) ||
+                targetPosition.Equals(Vector3.negativeInfinity))
+            {
+                return Mathf.Infinity;
+            }
+
+            Vector3 playerPos = playerPosition;
+            Vector3 playerDir = bodyForward;
+            playerDir.y = 0f;
+            playerDir.Normalize();
+
+            float speed = currentSpeed;
+
+            Vector3 toTargetInitial = targetPosition - playerPos;
+            toTargetInitial.y = 0f;
+
+            float angle = Vector3.Angle(playerDir, toTargetInitial.normalized);
+
+            float tBrake = 0f;
+            Vector3 posAfterBrake = playerPos;
+
+            // =========================
+            // FASE 0 – FRENO
+            // =========================
+            if (angle > maxAngleForRun)
+            {
+                float3 posTmp;
+                float tTmp;
+
+                if (PlayerInterceptionJob.EstimateBrakeMove(
+                    playerPos,
+                    playerDir,
+                    targetPosition,
+                    speed,
+                    maxAngleForRun2,
+                    minSpeedForRotate,
+                    decceleration,
+                    out posTmp,
+                    out tTmp))
+                {
+                    posAfterBrake = posTmp;
+                    tBrake = tTmp;
+                    speed = Mathf.Clamp(minSpeedForRotate, 0, speed);
+                }
+                else
+                {
+                    float deltaV = Mathf.Clamp(speed - minSpeedForRotate2, 0, Mathf.Infinity);
+                    tBrake = deltaV / decceleration;
+
+                    float dBrake =
+                        (speed * speed -
+                         minSpeedForRotate2 * minSpeedForRotate2) /
+                        (2f * decceleration);
+
+                    posAfterBrake += playerDir * dBrake;
+                    speed = Mathf.Clamp(minSpeedForRotate2, 0, speed);
+                }
+            }
+
+            // =========================
+            // FASE 2 – DESPLAZAMIENTO
+            // =========================
+            Vector3 toTargetAfterBrake = targetPosition - posAfterBrake;
+            toTargetAfterBrake.y = 0f;
+
+            float distanceToTarget =
+                Mathf.Max(toTargetAfterBrake.magnitude - scope, 0f);
+
+            float tMove = PlayerInterceptionJob.EstimateTimeToReach(
+                distanceToTarget,
+                speed,
+                acceleration,
+                decceleration,
+                maxSpeed,
+                maxSpeedForReachBall
+            );
+
+            return tBrake + tMove;
+        }
         public static float accelerationGetTimeToReachPosition2(
             Vector3 playerPosition,
             float currentSpeed,
@@ -208,7 +312,7 @@ namespace DOTS_ChaserDataCalculation
             Vector3 posAfterBrake = playerPos;
 
             // =========================
-            // FASE 0 � FRENO (id�ntica)
+            // FASE 0 – FRENO (idéntica)
             // =========================
             if (angle > playerData.maxAngleForRun)
             {
@@ -246,7 +350,7 @@ namespace DOTS_ChaserDataCalculation
             }
 
             // =========================
-            // FASE 2 � DESPLAZAMIENTO
+            // FASE 2 – DESPLAZAMIENTO
             // =========================
             Vector3 toTargetAfterBrake = targetPosition - posAfterBrake;
             toTargetAfterBrake.y = 0f;
@@ -264,6 +368,250 @@ namespace DOTS_ChaserDataCalculation
             );
 
             return tBrake + tMove;
+        }
+        public struct MovementResult
+        {
+            public Vector3 position;
+            public float speed;
+            public Vector3 direction;
+        }
+public static void accelerationGetPositionAtTime(
+    Vector3 playerPosition,
+    float currentSpeed,
+    Vector3 bodyForward,
+    Vector3 targetPosition,
+    float time,
+
+    float scope,
+    float maxAngleForRun,
+    float maxAngleForRun2,
+    float minSpeedForRotate,
+    float minSpeedForRotate2,
+    float maxSpeedForReachBall,
+    float acceleration,
+    float decceleration,
+    float maxSpeed,
+    float targetSpeed,
+
+    out Vector3 position,
+    out float finalSpeed,
+    out Vector3 finalDirection)
+        {
+            position = playerPosition;
+            finalSpeed = currentSpeed;
+
+            Vector3 playerDir = bodyForward;
+            playerDir.y = 0f;
+            playerDir.Normalize();
+
+            Vector3 toTarget = targetPosition - playerPosition;
+            toTarget.y = 0f;
+
+            if (toTarget.sqrMagnitude < 0.0001f)
+            {
+                finalDirection = playerDir;
+                return;
+            }
+
+            Vector3 targetDir = toTarget.normalized;
+
+            float angle = Vector3.Angle(playerDir, targetDir);
+
+            float tRemaining = time;
+
+            // =========================
+            // FASE 0 – FRENO
+            // =========================
+            if (angle > maxAngleForRun && finalSpeed > 0f)
+            {
+                float3 posTmp;
+                float tBrake;
+
+                bool mustBrake = PlayerInterceptionJob.EstimateBrakeMove(
+                    playerPosition,
+                    playerDir,
+                    targetPosition,
+                    finalSpeed,
+                    maxAngleForRun2,
+                    minSpeedForRotate,
+                    decceleration,
+                    out posTmp,
+                    out tBrake);
+
+                float targetBrakeSpeed = mustBrake ? minSpeedForRotate : minSpeedForRotate2;
+
+                float deltaV = Mathf.Max(finalSpeed - targetBrakeSpeed, 0f);
+                float realBrakeTime = deltaV / decceleration;
+
+                if (tRemaining <= realBrakeTime)
+                {
+                    // 🔴 Nos quedamos dentro del frenado
+                    float v1 = finalSpeed;
+                    float v2 = v1 - decceleration * tRemaining;
+
+                    float d = (v1 + v2) * 0.5f * tRemaining;
+
+                    position += playerDir * d;
+                    finalSpeed = v2;
+                    finalDirection = playerDir;
+                    return;
+                }
+                else
+                {
+                    // 🔵 Completamos frenado
+                    float dBrake = (finalSpeed * finalSpeed - targetBrakeSpeed * targetBrakeSpeed) / (2f * decceleration);
+
+                    position += playerDir * dBrake;
+
+                    finalSpeed = targetBrakeSpeed;
+                    tRemaining -= realBrakeTime;
+                }
+            }
+
+            // =========================
+            // FASE 1 – MOVIMIENTO HACIA TARGET
+            // =========================
+            Vector3 moveDir = (targetPosition - position);
+            moveDir.y = 0f;
+
+            float distance = Mathf.Max(moveDir.magnitude - scope, 0f);
+
+            if (distance < 0.0001f)
+            {
+                finalDirection = playerDir;
+                return;
+            }
+
+            moveDir.Normalize();
+            finalDirection = moveDir;
+
+            float speed = finalSpeed;
+
+            // Distancia para frenar hasta targetSpeed
+            float decelDistance = (speed * speed - targetSpeed * targetSpeed) / (2f * decceleration);
+            decelDistance = Mathf.Max(decelDistance, 0f);
+
+            float dAccelToMax = Mathf.Abs(AccelerationPath.getX2(speed, maxSpeed, acceleration));
+            float dDecelFromMax = Mathf.Abs(AccelerationPath.getX2(maxSpeed, targetSpeed, decceleration));
+
+            float dCruise = Mathf.Max(distance - dAccelToMax - dDecelFromMax, 0f);
+
+            // ===== CASO 1: NO ALCANZA MAX SPEED =====
+            float dStartDecel = Mathf.Max(
+                AccelerationPath.getDistanceWhereStartDecelerate(
+                    speed, targetSpeed, acceleration, -decceleration, distance), 0f);
+
+            float tAccel;
+            AccelerationPath.getT(dStartDecel, speed, acceleration, out tAccel);
+
+            if (tRemaining <= tAccel)
+            {
+                // 🔴 Dentro de aceleración
+                float v2 = speed + acceleration * tRemaining;
+                float d = (speed + v2) * 0.5f * tRemaining;
+
+                position += moveDir * d;
+                finalSpeed = v2;
+                return;
+            }
+
+            // 🔵 completamos aceleración parcial
+            float vAfterAccel = speed + acceleration * tAccel;
+            position += moveDir * dStartDecel;
+
+            tRemaining -= tAccel;
+
+            // ===== DECELERACIÓN DIRECTA (SIN CRUCERO) =====
+            float tDecel = AccelerationPath.getT(targetSpeed, vAfterAccel, decceleration);
+
+            if (dAccelToMax >= dStartDecel)
+            {
+                if (tRemaining <= tDecel)
+                {
+                    float v2 = vAfterAccel - decceleration * tRemaining;
+                    float d = (vAfterAccel + v2) * 0.5f * tRemaining;
+
+                    position += moveDir * d;
+                    finalSpeed = v2;
+                    return;
+                }
+                else
+                {
+                    float dDecel = (vAfterAccel * vAfterAccel - targetSpeed * targetSpeed) / (2f * decceleration);
+
+                    position += moveDir * dDecel;
+                    finalSpeed = targetSpeed;
+                    return;
+                }
+            }
+
+            // ===== CASO 2: ALCANZA MAX SPEED =====
+
+            // ACELERACIÓN HASTA MAX
+            float tToMax = AccelerationPath.getT(maxSpeed, speed, acceleration);
+
+            if (tRemaining <= tToMax)
+            {
+                float v2 = speed + acceleration * tRemaining;
+                float d = (speed + v2) * 0.5f * tRemaining;
+
+                position += moveDir * d;
+                finalSpeed = v2;
+                return;
+            }
+
+            position += moveDir * dAccelToMax;
+            tRemaining -= tToMax;
+
+            // CRUCERO
+            float tCruise = dCruise / maxSpeed;
+
+            if (tRemaining <= tCruise)
+            {
+                position += moveDir * (maxSpeed * tRemaining);
+                finalSpeed = maxSpeed;
+                return;
+            }
+
+            position += moveDir * dCruise;
+            tRemaining -= tCruise;
+
+            // DECELERACIÓN FINAL
+            float tFinalDecel = AccelerationPath.getT(targetSpeed, maxSpeed, decceleration);
+
+            if (tRemaining <= tFinalDecel)
+            {
+                float v2 = maxSpeed - decceleration * tRemaining;
+                float d = (maxSpeed + v2) * 0.5f * tRemaining;
+
+                position += moveDir * d;
+                finalSpeed = v2;
+                return;
+            }
+
+            float dFinal = (maxSpeed * maxSpeed - targetSpeed * targetSpeed) / (2f * decceleration);
+
+            position += moveDir * dFinal;
+            finalSpeed = targetSpeed;
+        }
+        static float SolveTimeForDistance(float v0, float a, float d)
+        {
+            // d = v0*t + 0.5*a*t^2
+            float A = 0.5f * a;
+            float B = v0;
+            float C = -d;
+
+            float discriminant = B * B - 4f * A * C;
+
+            if (discriminant < 0f)
+                return 0f;
+
+            float sqrt = Mathf.Sqrt(discriminant);
+
+            float t1 = (-B + sqrt) / (2f * A);
+            float t2 = (-B - sqrt) / (2f * A);
+
+            return Mathf.Max(t1, t2);
         }
         public static float accelerationGetVelocity(ref PlayerDataComponent playerDataComponent, float t, Vector3 targetPosition)
         {
