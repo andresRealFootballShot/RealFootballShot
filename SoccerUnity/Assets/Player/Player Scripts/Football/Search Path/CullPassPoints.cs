@@ -61,6 +61,7 @@ public class CullPassPoints : MonoBehaviour
     public CalculateNextPositionShedule calculateNextPositionShedule;
     public TriangulatorJob triangulatorJob;
     public List<int> sortLonelyPointsSize;
+    public List<LonelyPointElement2> firstReachLonelyPoints = new List<LonelyPointElement2>();
     public string lineupName="Default", pressureName = "Default";
     public PublicPlayerData publicPlayerData;
     public float testTime = 1;
@@ -81,6 +82,10 @@ public class CullPassPoints : MonoBehaviour
     public Vector3 ballReachPosition { get; set; }
     public PublicPlayerData firstPublicPlayerData { get; set; }
     public float firstPlayerReachTime { get; set; }
+    private void Awake()
+    {
+        MatchComponents.CullPassPoints = this;
+    }
     void Start()
     {
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -209,7 +214,7 @@ public class CullPassPoints : MonoBehaviour
     }
     public PublicPlayerData GetPublicPlayerData(int index)
     {
-        if(index< players.Count)return players[index];
+        if(index< players.Count&&index>=0)return players[index];
         return null;
     }
     void createEntities()
@@ -486,7 +491,7 @@ public class CullPassPoints : MonoBehaviour
                     playerPositionElement.currentSpeed = speed;
                     PublicPlayerData publicPlayerData = GetPublicPlayerData(j);
                     playerPositionElement.maxSpeedForReachBall = publicPlayerData.movimentValues.maxSpeedForReachBall;
-                    playerPositionElement.scope = publicPlayerData.playerComponents.scope;
+                    playerPositionElement.scope = publicPlayerData.playerComponents.ballScope;
                     playerPositionElement.maxAngleForRun = publicPlayerData.playerComponents.movementValues.maxAngleForRun;
                     playerPositionElement.minSpeedForRotate = publicPlayerData.playerComponents.movementValues.minSpeedForRotateBody;
                     playerPositionElement.minSpeedForRotate2 = publicPlayerData.playerComponents.movementValues.minSpeedForRotateBody2;
@@ -754,7 +759,7 @@ public class CullPassPoints : MonoBehaviour
                 {
                     order = 0;
                     bool exit=false;
-                    if (lonelyPointElements[i].weight < 0 && !block) continue;
+                    if (lonelyPointElements[i].weight < 0 && !block&&false) continue;
                     if (searchPlayData.posibleNodes.Count >= cullPassPointsParams.maxPosibleLonelyPointsSize) return;
                     float minWeight = lonelyPointElements[i].weight;
                     for (int z = 0; z < cullEntityCount; z++)
@@ -770,7 +775,7 @@ public class CullPassPoints : MonoBehaviour
                                 exit = true;
                                 break;
                             }
-                            if ((z == l && i == j) || lonelyPointElements2[j].weight < 0 && !block) continue;
+                            if ((z == l && i == j) || lonelyPointElements2[j].weight < 0 && !block&&false) continue;
                             if (minWeight < lonelyPointElements2[j].weight)
                             {
                                 //order = lonelyPointElements2[j].order;
@@ -805,6 +810,17 @@ public class CullPassPoints : MonoBehaviour
                         searchPlayData.AddPosibleNode(FNode);
                         searchPlayData.SetPreviousNode(FNode, Snode);
                         searchPlayData.AddNextNode(Snode, FNode);
+                        if (Snode == 0)
+                        {
+                            if (order > firstReachLonelyPoints.Count)
+                            {
+                                firstReachLonelyPoints.Add(lonelyPointElement);
+                            }
+                            else
+                            {
+                                firstReachLonelyPoints.Insert(order, lonelyPointElement);
+                            }
+                        }
                         order++;
                         newNodesCount++;
                         //posibleLonelyPointsSize[calculationIndex] = order;

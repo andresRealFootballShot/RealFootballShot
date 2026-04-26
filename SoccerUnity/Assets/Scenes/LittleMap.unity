@@ -8765,7 +8765,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.44
+      value: -7
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.y
@@ -8773,7 +8773,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 18.47
+      value: 17.79
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalRotation.w
@@ -13004,6 +13004,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1771444376}
     m_Modifications:
+    - target: {fileID: 3747010004157290952, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: debug
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004157290952, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: debugMove
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3747010004157290953, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -15336,11 +15344,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3747010004157290952, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: debug
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004157290952, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: debugMove
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004157290952, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: debugMoveTimes
@@ -16587,7 +16595,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -6.3899994
+      value: -6.06
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.y
@@ -16595,7 +16603,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -23.490005
+      value: -29.35
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalRotation.w
@@ -17219,7 +17227,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 704861089}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 48.79542, y: 0, z: 151.5}
+  m_LocalPosition: {x: 48.79542, y: 0, z: 151.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1430556384}
@@ -18048,7 +18056,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.17
+      value: -4.98
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.y
@@ -18056,7 +18064,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -15.04
+      value: -17.27
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalRotation.w
@@ -20195,10 +20203,6 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4898939940102067593, guid: 52c7c213e7609504b823046d1531b765, type: 3}
-      propertyPath: useAccelerationInChaserDataCalculation
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5254813481460711530, guid: 52c7c213e7609504b823046d1531b765, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -20651,7 +20655,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &818615340
 Transform:
   m_ObjectHideFlags: 0
@@ -24040,7 +24044,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_RootOrder
-      value: 9
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.x
@@ -25875,7 +25879,7 @@ MonoBehaviour:
     teamSize: 11
     maxSizeTriangleBuffer: 100
     maxSizeLonelyPointsBuffer: 200
-    minLonelyPointDistance: 5
+    minLonelyPointDistance: 4
     divideEdgeMaxPoints: 1
     minNormalizedArea: 0.4
     fieldOffset: 2
@@ -33886,6 +33890,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1771444376}
     m_Modifications:
+    - target: {fileID: 3747010004157290952, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: debug
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004157290952, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: debugMove
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3747010004157290952, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+      propertyPath: debugMoveTimes
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3747010004157290953, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -34359,7 +34375,7 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents:
-    - {fileID: 8166353082085943081, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
+    - {fileID: 0}
     - {fileID: 7193358462165263421, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
 --- !u!4 &1442790978 stripped
@@ -41477,10 +41493,6 @@ PrefabInstance:
       propertyPath: driverPublicPlayerData
       value: 
       objectReference: {fileID: 158353085}
-    - target: {fileID: 8166353082085943081, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
-      propertyPath: targetPosition
-      value: 
-      objectReference: {fileID: 1087038334}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
 --- !u!1 &1764036700
@@ -42125,7 +42137,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1796266504}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 25, y: 0, z: 152.99}
+  m_LocalPosition: {x: 34, y: 0, z: 156.05}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1875775244}
@@ -44270,7 +44282,7 @@ MonoBehaviour:
   force: 0
   startPlayerSpeed: 0
   maxSpeedForReachBall: 0
-  debugStraightPass: 1
+  debugStraightPass: 0
   pause: 1
   updateDebug: 1
   stopUpdatePassStarted: 0
@@ -44290,6 +44302,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CullPassPoints: {fileID: 1875775246}
+  debug: 1
+  timeScale: 0.5
 --- !u!1 &1876518188
 GameObject:
   m_ObjectHideFlags: 0
@@ -45920,10 +45934,6 @@ PrefabInstance:
       propertyPath: m_LocalPosition.x
       value: 4.197
       objectReference: {fileID: 0}
-    - target: {fileID: 1245342403834558881, guid: 3d3da407de0ff834b914c70c08e36d36, type: 3}
-      propertyPath: teamName
-      value: Blue
-      objectReference: {fileID: 0}
     - target: {fileID: 2026927982365148285, guid: 3d3da407de0ff834b914c70c08e36d36, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.62
@@ -47494,7 +47504,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 6.459999
+      value: 3.16
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.y
@@ -47502,7 +47512,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -23.869995
+      value: -29.85
       objectReference: {fileID: 0}
     - target: {fileID: 3747010004228969939, guid: aabef4bfcb31735498256ab3ad5e3547, type: 3}
       propertyPath: m_LocalRotation.w
@@ -49002,7 +49012,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1322839334424030253, guid: 4600716e881ddd442b459f182df3d352, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 42.48
+      value: 45.83
       objectReference: {fileID: 0}
     - target: {fileID: 1322839334424030253, guid: 4600716e881ddd442b459f182df3d352, type: 3}
       propertyPath: m_LocalPosition.y
@@ -49010,7 +49020,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1322839334424030253, guid: 4600716e881ddd442b459f182df3d352, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 173.05
+      value: 176.59
       objectReference: {fileID: 0}
     - target: {fileID: 1322839334424030253, guid: 4600716e881ddd442b459f182df3d352, type: 3}
       propertyPath: m_LocalRotation.w
@@ -89147,6 +89157,7 @@ MonoBehaviour:
   initName: Red
   players: []
   publicPlayerDatas: []
+  outfieldPublicPlayerDatas: []
   choosedLineup: {fileID: 6909758110085026565}
   spawnsTransform: []
   posStartBall: {fileID: 0}
@@ -89321,6 +89332,7 @@ MonoBehaviour:
   initName: Blue
   players: []
   publicPlayerDatas: []
+  outfieldPublicPlayerDatas: []
   choosedLineup: {fileID: 6909758110309341061}
   spawnsTransform: []
   posStartBall: {fileID: 0}

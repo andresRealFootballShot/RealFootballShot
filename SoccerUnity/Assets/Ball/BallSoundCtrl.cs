@@ -30,9 +30,16 @@ public class BallSoundCtrl : MonoBehaviour
     public float GetVolumeKick(float currentForce)
     {
         //float result = Mathf.Clamp((currentValue * (volumeMax - volumeMin)) / (volumeMax - volumeMin), volumeMin, volumeMax);
+        if (KickValues.volumenAdjust != null)
+        {
 
-        float result = KickValues.volumenAdjust.Evaluate((currentForce / KickValues.maxForceVolume)* maxVolume);
-        return result;
+            float result = KickValues.volumenAdjust.Evaluate((currentForce / KickValues.maxForceVolume) * maxVolume);
+            return result;
+        }
+        else
+        {
+            return 0;
+        }
     }
     private void OnCollisionEnter(Collision collision)
     {

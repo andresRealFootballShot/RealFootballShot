@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4400358762812040009}
-  - component: {fileID: 6668484656658001226}
   m_Layer: 0
   m_Name: DefensivePosition
   m_TagString: Untagged
@@ -32,19 +31,6 @@ Transform:
   m_Father: {fileID: 3747010005515620610}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6668484656658001226
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2083164959408788506}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 256e6a4e654a1304394ff90160642706, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  debug: 0
 --- !u!1 &3747010004004035086
 GameObject:
   m_ObjectHideFlags: 0
@@ -357,7 +343,6 @@ GameObject:
   - component: {fileID: 3747010004157290951}
   - component: {fileID: 3747010004157290952}
   - component: {fileID: 3747010004157290953}
-  - component: {fileID: 3747010004157290954}
   - component: {fileID: 3747010004157290955}
   m_Layer: 0
   m_Name: Movement
@@ -683,23 +668,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 058627743a367d9418815e90f6d0eb41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3747010004157290954
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3747010004157290957}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df990294ea8782e44829affa966f6d56, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  minDistanceSpeedInterpolationOffset: 0.001
-  maxDistanceSpeedInterpolationOffset: 0.001
-  minFollowSpeed: 0
-  minOffsetSpeed: 1
-  maxOffsetSpeed: 3
 --- !u!114 &3747010004157290955
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2920,7 +2888,8 @@ GameObject:
   - component: {fileID: 3747010005515620609}
   - component: {fileID: 3747010005515620667}
   - component: {fileID: 3747010005515620666}
-  - component: {fileID: 8166353082085943081}
+  - component: {fileID: 4757934629735853395}
+  - component: {fileID: 7809148508847226821}
   m_Layer: 0
   m_Name: SoccerComponents
   m_TagString: Untagged
@@ -2958,6 +2927,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxKickForce: 33
   scopeOffset: 0.25
+  passScopeOffset: 0.1
 --- !u!114 &3747010005515620669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3055,19 +3025,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 140b9a2e8b40c514ab0e33a80f5b8c99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8166353082085943081
+--- !u!114 &4757934629735853395
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3747010005515620611}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ab9580da48c7b44db1845cafdbea9ba, type: 3}
+  m_Script: {fileID: 11500000, guid: 0a160b6cf87acd2429375e65b4bb3fd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetPosition: {fileID: 0}
+--- !u!114 &7809148508847226821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3747010005515620611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1af301f93a83d1a49bf7faca3c31377b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3747010005541261554
 GameObject:
   m_ObjectHideFlags: 0
@@ -3150,6 +3131,7 @@ MonoBehaviour:
   useAccelerationInChaserDataCalculation: 1
   addToOptimalPoint: 1
   playerComponents: {fileID: 3747010005541261549}
+  IsBot: 1
   rigidbody: {fileID: 3747010004615711253}
   animator: {fileID: 3747010006063244259}
 --- !u!114 &3747010005541261550
@@ -3238,7 +3220,9 @@ MonoBehaviour:
   ballDriving: {fileID: 3747010005515620670}
   playerSkills: {fileID: 0}
   playerParameters: {fileID: 11400000, guid: 34ccf7b9b5539f048997ee20523139cc, type: 2}
+  botMoveFunctions: {fileID: 7809148508847226821}
   friction: 0
+  botKick: {fileID: 4757934629735853395}
   myTeam: {fileID: 0}
   rivalTeam: {fileID: 0}
 --- !u!114 &3747010005541261547

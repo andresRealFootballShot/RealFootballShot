@@ -21,6 +21,7 @@ public class PlayerComponent : MonoBehaviour
             playerData.HorizontalSpeed = Vector3.Dot(bodyTransform.right, value);
         } 
     }
+    public bool IsBot{ get => publicPlayerData.IsBot; }
     public Vector3 VelocityDirection { get => playerData.NormalizedVelocity;}
     public Vector3 VelocityY0Direction { get => new Vector3(VelocityDirection.x,0, VelocityDirection.z);}
     public Vector3 Y0Velocity { get => MyFunctions.setY0ToVector3(playerData.Velocity); }
@@ -57,9 +58,12 @@ public class PlayerComponent : MonoBehaviour
     protected Quaternion bodyRotation { get => playerComponents.bodyTransform.rotation; set => playerComponents.bodyTransform.rotation = value; }
     protected Rigidbody bodyRigidbody { get => playerComponents.rigidbody; }
     protected Rigidbody ballRigidbody { get => MatchComponents.ballRigidbody; }
+    protected BotKick BotKick { get => playerComponents.BotKick; }
     protected Vector3 bodyRigidbodyPosition { get => playerComponents.rigidbody.position; }
     protected float ballBodyAngle { get => Vector3.Angle(bodyY0Forward, bodyBallY0Direction); }
-    public float scope { get => playerComponents.soccerPlayerData.scopeOffset +bodyRadio + MatchComponents.ballRadio; }
+    public float scope { get => playerData.Scope; set => playerData.Scope = value; }
+    public float ballScope { get => playerComponents.soccerPlayerData.scopeOffset + bodyRadio + MatchComponents.ballRadio; }
+    public float passScope { get => playerComponents.soccerPlayerData.passScopeOffset + bodyRadio + MatchComponents.ballRadio; }
     
     public float stopOffset { get => movementValues.stopOffset; set => movementValues.stopOffset = value; }
     public new string name { get => playerComponents.root.name; }

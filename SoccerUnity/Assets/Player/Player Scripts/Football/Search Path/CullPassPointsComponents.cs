@@ -444,6 +444,11 @@ public class SearchPlayData
        float2 pos = searchPlayNodes[node].playerPositions[index+4];
         return new Vector2(pos.x, pos.y);
     }
+    public Vector3 GetPlayerPosition(int node, int index,float y=0)
+    {
+        float2 pos = searchPlayNodes[node].playerPositions[index + 4];
+        return new Vector3(pos.x,y, pos.y);
+    }
     public Vector2 GetPlayerTargetPosition(int node, int index)
     {
         float2 pos = searchPlayNodes[node].playerTargetPositions[index];

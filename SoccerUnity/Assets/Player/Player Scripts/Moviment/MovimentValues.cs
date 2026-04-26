@@ -30,6 +30,7 @@ public class MovimentValues : MonoBehaviour
     public Vector3 DesiredY0Direction { get => new Vector3(DesiredDirection.x,0, DesiredDirection.z).normalized;}
     public Vector3 DesiredVelocity { get => DesiredDirection * ForwardDesiredSpeed; }
     public bool LookTarget { get; set; }
+    public bool StopMove { get; set; }
     public Vector3 DesiredLookDirection { get=> LookTarget ? DesiredY0Direction : DesiredLookDirectionVar.Value;  set => DesiredLookDirectionVar.Value = value; }
     public Vector3 LookDirection { get => LookDirectionVar.Value; set => LookDirectionVar.Value = value; }
     public Vector3 NormalizedForwardDesiredVelocity { get => DesiredVelocity/ maxForwardSpeed; }

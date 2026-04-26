@@ -10,6 +10,7 @@ public class Team : MonoBehaviour
     public Variable<string> nameTeamVar=new Variable<string>();
     public List<string> players = new List<string>();
     public List<PublicPlayerData> publicPlayerDatas = new List<PublicPlayerData>();
+    public List<PublicPlayerData> outfieldPublicPlayerDatas = new List<PublicPlayerData>();
     public List<PlayerDataComponent> playerDataComponents = new List<PlayerDataComponent>();
     public List<ChaserData> firstChaserDatas = new List<ChaserData>();
     public Dictionary<TypeFieldPosition.Type, string> fieldPositionOfPlayers = new Dictionary<TypeFieldPosition.Type, string>();
@@ -254,6 +255,11 @@ public class Team : MonoBehaviour
         publicPlayerDatas.Add(publicPlayerData);
         PublicPlayerData.getPlayerData(publicPlayerData,playerDataComponents.Count, out PlayerDataComponent playerDataComponent);
         playerDataComponents.Add(playerDataComponent);
+        if (!publicPlayerData.IsGoalkeeper)
+        {
+            
+            outfieldPublicPlayerDatas.Add(publicPlayerData);
+        }
     }
     public void addFirstChaserData(ChaserData chaserData)
     {
@@ -321,6 +327,18 @@ public class Team : MonoBehaviour
     public bool getTypeFieldPositionOfPlayer(string playerID,out TypeFieldPosition.Type typeFieldPositionOfPlayer)
     {
        return MyFunctions.GetKeyByValue(fieldPositionOfPlayers, playerID, out typeFieldPositionOfPlayer);
+    }
+
+    public bool checkTypeFieldPositionOfPlayer(string playerID, TypeFieldPosition.Type typeFieldPositionOfPlayer)
+    {
+        if(MyFunctions.GetKeyByValue(fieldPositionOfPlayers, playerID, out TypeFieldPosition.Type typeFieldPositionOfPlayer2))
+        {
+            return typeFieldPositionOfPlayer.Equals(typeFieldPositionOfPlayer2);
+        }
+        else
+        {
+            return false;
+        }
     }
     public void addGoal(int actor)
     {

@@ -97,13 +97,15 @@ public class MovementCtrl : MovementPlayerComponent
             return;
         
         float angle = Vector3.Angle(VelocityY0Direction, DesiredY0Direction);
+        float angle3 = Vector3.Angle(LookY0Direction, DesiredLookDirection);
         float angle2 = Vector3.Angle(bodyY0Forward, DesiredY0Direction)-maxAngleForRun;
         float requiredSpeed = angle > maxAngleForRun2 ? minSpeedForRotate2: minSpeedForRotate;
-        if (angle > maxAngleForRun && EndForwardSpeed > requiredSpeed)
+        string n = publicPlayerData.playerID;
+        if (angle > maxAngleForRun && EndForwardSpeed > requiredSpeed || StopMove && angle3>1&& EndForwardSpeed > requiredSpeed)
         {
             phase = MovePhase.Brake;
         }
-        else if (angle2 > 0.1f)
+        else if (angle2 > 0.1f || StopMove&& angle3 > 1)
         {
             phase = MovePhase.Rotate;
         }
@@ -114,7 +116,6 @@ public class MovementCtrl : MovementPlayerComponent
     }
     void UpdateSpeed(float dt)
     {
-        
         switch (phase)
         {
             case MovePhase.Brake:
@@ -159,6 +160,7 @@ public class MovementCtrl : MovementPlayerComponent
                 }
         }
     }
+
     void UpdateRotation(float dt)
     {
         if (DesiredLookDirection == Vector3.zero)
@@ -190,9 +192,11 @@ public class MovementCtrl : MovementPlayerComponent
 
         lookDirection = newDir;
 
-       
+        
         bodyTransform.rotation = Quaternion.LookRotation(lookDirection, Vector3.up);
+        LookDirection = lookDirection;
     }
+
     void calculateBotVelocity(float deltaTime)
     {
         Vector3 dir= phase == MovePhase.Brake ? VelocityDirection : DesiredY0Direction;
@@ -397,7 +401,9 @@ public class MovementCtrl : MovementPlayerComponent
     public void SetTargetPosition(Vector3 targetPosition)
     {
         playerComponents.ForwardDesiredSpeed = publicPlayerData.movimentValues.maxForwardSpeed;
-        playerComponents.LookTarget = true;
+        
+        StopMove = false;
+        LookTarget = true;
         playerComponents.MinForwardSpeed = 0;
         playerComponents.TargetPosition = targetPosition;
         playerComponents.stopOffset = 0;
@@ -462,7 +468,7 @@ public class MovementCtrl : MovementPlayerComponent
         }
 
     }
-    void startMoveTimes()
+    public void startMoveTimes()
     {
         startMove = true;
         breakTime = 0;
@@ -488,5 +494,14 @@ public class MovementCtrl : MovementPlayerComponent
             }
             Handles.Label(bodyPosition + Vector3.up * 1.5f, info, style);
         }
+    }
+    public void SetStopped_LookTarget(Vector3 targetPosition)
+    {
+        StopMove = true;
+        LookTarget = false;
+        Vector3 dir = targetPosition - bodyPosition;
+        dir.y = 0;
+        dir.Normalize();
+        DesiredLookDirection = dir;
     }
 }

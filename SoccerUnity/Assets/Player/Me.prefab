@@ -124,6 +124,7 @@ MonoBehaviour:
   useAccelerationInChaserDataCalculation: 1
   addToOptimalPoint: 1
   playerComponents: {fileID: 4607743629604859195}
+  IsBot: 0
   rigidbody: {fileID: 3897645093233017453}
   animator: {fileID: 1054235014282044755}
 --- !u!114 &7558675750953002123
@@ -198,6 +199,7 @@ MonoBehaviour:
   playerSkills: {fileID: 11400000, guid: 6512255020a373d46a7e83d0c690b936, type: 2}
   playerParameters: {fileID: 11400000, guid: 34ccf7b9b5539f048997ee20523139cc, type: 2}
   friction: 0
+  botKick: {fileID: 0}
   myTeam: {fileID: 0}
   rivalTeam: {fileID: 0}
 --- !u!114 &5276792245282462272

@@ -20,9 +20,11 @@ public class MovementPlayerComponent : PlayerComponent
     protected float Clamp01NormalizedForwardDesiredSpeed { get => movementValues.Clamp01NormalizedForwardDesiredVelocity.magnitude; }
 
     public float EndForwardSpeed { get => movementValues.adjustedForwardVelocitySpeed; set => movementValues.adjustedForwardVelocitySpeed = value; }
+    public bool StopMove { get => movementValues.StopMove; set => movementValues.StopMove = value; }
     public MovePhase phase { get => movementValues.phase; set => movementValues.phase = value; }
     
     protected Vector3 LookDirection { get => movementValues.LookDirection; set => movementValues.LookDirection = value; }
+    protected Vector3 LookY0Direction { get => MyFunctions.setY0ToVector3( movementValues.LookDirection);}
     
     protected float distanceStopMoveBallPlayer { get => stopOffset + movementValues.distanceStopMoveBallPlayerOffset; }
     //protected float distanceStopMoveBallPlayer { get => 3.289582f; }

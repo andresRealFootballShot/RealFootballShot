@@ -6,7 +6,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-[BurstCompile]
+//[BurstCompile]
 public struct PlayerInterceptionJob : IJobParallelFor
 {
     [ReadOnly] public NativeArray<float3> ballPositions;
@@ -186,6 +186,7 @@ public struct PlayerInterceptionJob : IJobParallelFor
         }
 
         float time = 0f;
+        
         float d = Mathf.Max(AccelerationPath.getDistanceWhereStartDecelerate(currentSpeed, targetSpeed, accel, -decel, distance),0);
         
         float acelX = Mathf.Abs(AccelerationPath.getX2(currentSpeed, maxSpeed, accel));
@@ -195,7 +196,12 @@ public struct PlayerInterceptionJob : IJobParallelFor
             float t3;
             AccelerationPath.getT(d, currentSpeed, accel, out t3);
             float v1 = currentSpeed + accel * t3;
-            float t4 = AccelerationPath.getT(targetSpeed, v1, decel);
+            float t4 = 0;
+            if (d < distance)
+            {
+
+                t4 = AccelerationPath.getT(targetSpeed, v1, decel);
+            }
             time = t3 + t4;
 
             //Debug.Log("Not Reach MaxSpeed DistanceStartDecelerate=" + d+" time_startDecelerate="+t3 + " speed_startDecelerate=" + v1);

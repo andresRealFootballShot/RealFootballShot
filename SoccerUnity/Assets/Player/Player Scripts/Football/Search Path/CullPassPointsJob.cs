@@ -14,7 +14,8 @@ using static CullPassPoints;
 using static FieldTriangleSpace.FieldOfTrianglesCreator;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
-[BurstCompile]
+using Unity.Mathematics;
+//[BurstCompile]
 public struct CullPassPointsJob : IJobEntityBatch
 {
     public BufferTypeHandle<LonelyPointElement2> lonelyPointsHandle;
@@ -67,6 +68,7 @@ public struct CullPassPointsJob : IJobEntityBatch
                 float reachTime2 = GetTimeToReachPosition(ref PlayerPositions, ref PlayerGenericParams, attackIndexStart, attackIndexEnd, lonelyPosition, ref attackIndex,offsidePos, CullPassPointsParams.defenseGoalPosition,t0,CullPassPointsParams.passerIndex);
                 
                 float reachTime = attackIndex==CullPassPointsParams.passerIndex ? reachTime2 : Mathf.Max(reachTime2-t0,0);
+                reachTime += 0.1f;
                 lonelyPoint.attackReachIndex = attackIndex;
                 lonelyPoint.attackReachTime = reachTime2;
                 PathDataDOTS.Pos0 = BallParams.BallPosition;
@@ -431,7 +433,7 @@ public struct CullPassPointsJob : IJobEntityBatch
     }
     float getPlayerReachDistance_StraightPass(bool isStraightPass, Vector3 playerPosition, Vector3 closestPoint,Vector3 ballPosition,float maxSpeed, ref PathDataDOTS PathDataDOTS, ref Vector3 ballPositionAtReachTime, ref PlayerGenericParams PlayerGenericParams,ref PlayerPositionElement playerPositionElement, out float playerReachTimeResult, float t0,bool isGoalkeeper)
     {
-        playerReachTimeResult = GetTimeToReachPosition(ref playerPositionElement,playerPositionElement.position, closestPoint,maxSpeed, ref PlayerGenericParams, isGoalkeeper);
+        playerReachTimeResult = GetTimeToReachPosition(ref playerPositionElement,playerPositionElement.position, closestPoint,maxSpeed,playerPositionElement.maxSpeedForReachBall,playerPositionElement.currentSpeed, ref PlayerGenericParams, isGoalkeeper,playerPositionElement.scope);
         
         float playerReachTimeResult2 = isGoalkeeper ? playerReachTimeResult : playerReachTimeResult - t0;
         if (isStraightPass)
@@ -471,7 +473,7 @@ public struct CullPassPointsJob : IJobEntityBatch
                 bool isGolkeeper = i == indexStart;
                 float maxSpeed = isGolkeeper ? PlayerGenericParams.goalkeeperMaxSpeed : PlayerGenericParams.maxSpeed;
 
-                float reachTime = GetTimeToReachPosition(ref playerPositionElement, playerPositionElement.position, targetPosition, maxSpeed, ref PlayerGenericParams, isGolkeeper);
+                float reachTime = GetTimeToReachPosition(ref playerPositionElement, playerPositionElement.position, targetPosition, maxSpeed, playerPositionElement.maxSpeedForReachBall, playerPositionElement.currentSpeed, ref PlayerGenericParams, isGolkeeper, playerPositionElement.scope);
                 if (reachTime < reachTimeEnd)
                 {
                     reachTimeEnd = reachTime;
@@ -485,8 +487,10 @@ public struct CullPassPointsJob : IJobEntityBatch
     {
         float reachTimeEnd = Mathf.Infinity;
         Vector2 forward = defenseGoalPos - offside;
+        Vector2 forward2 = new Vector2(targetPosition.x,targetPosition.y) - offside;
         forward.x = 0;
-
+        forward2.x = 0;
+        Vector3 offside3D = new Vector3(offside.x,0, offside.y);
         for (int i = indexStart; i < indexEnd; i++)
         {
             PlayerPositionElement playerPositionElement = PlayerPositions[i];
@@ -494,41 +498,73 @@ public struct CullPassPointsJob : IJobEntityBatch
 
             Vector2 dir = playerPositionElement.position - offside;
             dir.x = 0;
-
-            if (Vector2.Dot(forward, dir) <= 0)
+            float totalTime;
+            bool isGolkeeper = i == indexStart;
+            float maxSpeed = isGolkeeper ? PlayerGenericParams.goalkeeperMaxSpeed : PlayerGenericParams.maxSpeed;
+            if (Vector2.Dot(forward, forward2) <= 0 && Vector2.Dot(forward, dir) <= 0)
             {
-                bool isGolkeeper = i == indexStart;
-                float maxSpeed = isGolkeeper ? PlayerGenericParams.goalkeeperMaxSpeed : PlayerGenericParams.maxSpeed;
-
-                // 🔥 Punto donde cruzaría la línea
-                Vector3 offsidePoint = GetPointOnOffsideLine(playerPosition, targetPosition, offside);
-
-                // Tiempo hasta ese punto
-                float timeToOffside = GetTimeToReachPosition(ref playerPositionElement, playerPositionElement.position, offsidePoint, maxSpeed, ref PlayerGenericParams, isGolkeeper);
-
-                float totalTime;
-
-                if (timeToOffside < reachBallTime && i!= passerPlayer)
+                totalTime = GetTimeToReachPosition(ref playerPositionElement, playerPositionElement.position, targetPosition, maxSpeed, playerPositionElement.maxSpeedForReachBall, playerPositionElement.currentSpeed, ref PlayerGenericParams, isGolkeeper, playerPositionElement.scope);
+            }else if (Vector2.Dot(forward, dir) <= 0)
+            {
+                if (SegmentLineIntersectionXZ(playerPosition, targetPosition, offside3D, offside3D + Vector3.right, out Vector3 offsidePoint))
                 {
-                    // ❌ Llegaría antes → tiene que esperar
-                    float waitTime = reachBallTime - timeToOffside;
+                    if (i != passerPlayer)
+                    {
+                        float targetSpeed = maxSpeed;
+                        float decrement = 2f;
+                        bool enterInOffside = false;
+                        float timeToOffside = 0;
+                        while (targetSpeed > 0)
+                        {
+                            // Tiempo hasta ese punto
+                            timeToOffside = GetTimeToReachPosition(ref playerPositionElement, playerPositionElement.position, offsidePoint, maxSpeed, targetSpeed, playerPositionElement.currentSpeed, ref PlayerGenericParams, isGolkeeper,0.1f);
+                            if (timeToOffside < reachBallTime)
+                            {
+                                targetSpeed = Mathf.Max(targetSpeed - decrement, 0);
+                                enterInOffside = true;
+                            }
+                            else
+                            {
+                                break;
+                            }
 
-                    // Tiempo desde la línea hasta el objetivo
-                    float timeFromLine = GetTimeToReachPosition(ref playerPositionElement,new Vector2(offsidePoint.x, offsidePoint.z), targetPosition, maxSpeed, ref PlayerGenericParams, isGolkeeper);
+                        }
+                        if (enterInOffside)
+                        {
+                            // ❌ Llegaría antes → tiene que esperar
+                            float waitTime = reachBallTime - timeToOffside;
 
-                    totalTime = timeToOffside + waitTime + timeFromLine;
+                            // Tiempo desde la línea hasta el objetivo
+                            float timeFromLine = GetTimeToReachPosition(ref playerPositionElement, new Vector2(offsidePoint.x, offsidePoint.z), targetPosition, maxSpeed, playerPositionElement.maxSpeedForReachBall,targetSpeed, ref PlayerGenericParams, isGolkeeper, playerPositionElement.scope);
+
+                            totalTime = timeToOffside + waitTime + timeFromLine;
+                        }
+                        else
+                        {
+                            // ✔️ No rompe fuera de juego
+                            totalTime = GetTimeToReachPosition(ref playerPositionElement, playerPositionElement.position, targetPosition, maxSpeed, playerPositionElement.maxSpeedForReachBall, playerPositionElement.currentSpeed, ref PlayerGenericParams, isGolkeeper, playerPositionElement.scope);
+                        }
+                    }
+                    else
+                    {
+                        totalTime = GetTimeToReachPosition(ref playerPositionElement, playerPositionElement.position, targetPosition, maxSpeed, playerPositionElement.maxSpeedForReachBall, playerPositionElement.currentSpeed, ref PlayerGenericParams, isGolkeeper, playerPositionElement.scope);
+                    }
+                   
                 }
                 else
                 {
                     // ✔️ No rompe fuera de juego
-                    totalTime = GetTimeToReachPosition(ref playerPositionElement, playerPositionElement.position, targetPosition, maxSpeed, ref PlayerGenericParams, isGolkeeper);
+                    totalTime = GetTimeToReachPosition(ref playerPositionElement, playerPositionElement.position, targetPosition, maxSpeed, playerPositionElement.maxSpeedForReachBall, playerPositionElement.currentSpeed, ref PlayerGenericParams, isGolkeeper, playerPositionElement.scope);
                 }
-
-                if (totalTime < reachTimeEnd)
-                {
-                    reachTimeEnd = totalTime;
-                    attackIndex = i;
-                }
+            }
+            else
+            {
+                continue;
+            }
+            if (totalTime < reachTimeEnd)
+            {
+                reachTimeEnd = totalTime;
+                attackIndex = i;
             }
         }
 
@@ -570,7 +606,7 @@ public struct CullPassPointsJob : IJobEntityBatch
         PlayerGenericParams.heightBallControl = 1.4f;
         return PlayerGenericParams;
     }
-    float GetTimeToReachPosition(ref PlayerPositionElement playerPositionElement,Vector2 playerPosition, Vector3 closestPoint,float maxSpeed,ref  PlayerGenericParams PlayerGenericParams,bool isGoalkeeper)
+    float GetTimeToReachPosition(ref PlayerPositionElement playerPositionElement,Vector2 playerPosition, Vector3 closestPoint,float maxSpeed,float targetSpeed,float currentSpeed,ref  PlayerGenericParams PlayerGenericParams,bool isGoalkeeper,float scope)
     {
         //return GetTimeToReachPointDOTS.linearGetTimeToReachPosition(playerPositionElement.position, closestPoint, maxSpeed, PlayerGenericParams.scope);
         Vector3 position = new Vector3(playerPosition.x,0, playerPosition.y);
@@ -582,8 +618,46 @@ public struct CullPassPointsJob : IJobEntityBatch
         }
         else
         {
-            return GetTimeToReachPointDOTS.accelerationGetTimeToReachPosition2(position, playerPositionElement.currentSpeed, bodyForward, normalizedPosition, ref PlayerGenericParams, closestPoint, playerPositionElement);
+            return GetTimeToReachPointDOTS.accelerationGetTimeToReachPosition2(position, currentSpeed, bodyForward, normalizedPosition, ref PlayerGenericParams, closestPoint, playerPositionElement, targetSpeed,scope);
         }
 
     }
+    public static bool SegmentLineIntersectionXZ(
+    Vector3 segA, Vector3 segB,     // segmento (finito)
+    Vector3 lineA, Vector3 lineB,   // línea infinita
+    out Vector3 intersection)
+    {
+        intersection = Vector3.zero;
+
+        // Convertimos a 2D (XZ)
+        Vector2 p1 = new Vector2(segA.x, segA.z);
+        Vector2 p2 = new Vector2(segB.x, segB.z);
+        Vector2 p3 = new Vector2(lineA.x, lineA.z);
+        Vector2 p4 = new Vector2(lineB.x, lineB.z);
+
+        Vector2 r = p2 - p1;
+        Vector2 s = p4 - p3;
+
+        float cross = r.x * s.y - r.y * s.x;
+
+        // Paralelas
+        if (math.abs(cross) < 1e-6f)
+            return false;
+
+        Vector2 diff = p3 - p1;
+
+        float t = (diff.x * s.y - diff.y * s.x) / cross;
+        // float u = (diff.x * r.y - diff.y * r.x) / cross;
+        // u no hace falta porque la línea es infinita
+
+        // ✅ Aquí está la clave: solo comprobamos el segmento
+        if (t < 0f || t > 1f)
+            return false;
+
+        Vector2 hit2D = p1 + t * r;
+
+        intersection = new Vector3(hit2D.x, 0f, hit2D.y);
+        return true;
+    }
+   
 }

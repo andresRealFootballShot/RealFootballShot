@@ -97,7 +97,7 @@ public class BallInterceptionSystem : MonoBehaviour
             playerPositions[i] = publicPlayerData.position;
             playerVelocities[i] = publicPlayerData.playerComponents.Velocity;
             playerDirections[i] = publicPlayerData.playerComponents.bodyY0Forward;
-            scopes[i] = publicPlayerData.playerComponents.scope;
+            scopes[i] = publicPlayerData.playerComponents.ballScope;
             isGoalkeepers[i] = publicPlayerData.IsGoalkeeper;
         }
 
@@ -255,7 +255,8 @@ public class BallInterceptionSystem : MonoBehaviour
             {
                 float playerReachTime = timeToReach[i];
                 float ballTime = ballTimes[index] == Mathf.Infinity ? playerReachTime : ballTimes[index];
-                if (ballTime < ballReachTimeResult || (ballTime == ballReachTimeResult && playerReachTime < firstPlayerReachTime))
+                bool kickAvailable = Teams.allPlayers[i].playerComponents.botKick != null ?  Teams.allPlayers[i].playerComponents.botKick.kickAvailable : true;
+                if (ballTime < ballReachTimeResult && kickAvailable || (ballTime == ballReachTimeResult && playerReachTime < firstPlayerReachTime && kickAvailable))
                 {
                     indexResult = index;
                     ballReachTimeResult = ballTime;

@@ -1,6 +1,7 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 public class AccelerationPath
 {
@@ -55,8 +56,11 @@ public class AccelerationPath
 
     public static float getDistanceWhereStartDecelerate(float v0, float v2, float a1, float a2, float d3)
     {
+        if (d3 <= 0f)
+            return 0f;
+        
         float d1 = ((v0 * v0) - (v2 * v2) + (2 * a2 * d3)) / (2 * (a2 - a1));
-        return d1;
+        return Mathf.Min(d1, d3);
     }
     public static float getDistanceWhereStartDecelerate2(float v0, float v2, float a)
     {
@@ -81,7 +85,7 @@ public class AccelerationPath
     }
     public static bool getT(float d, float v0, float ac, out float result)
     {
-        //No funciona con desaceleración
+        //No funciona con desaceleraciÃ³n
         float a = ac / 2;
         float b = v0;
         float c = -d;
@@ -101,7 +105,7 @@ public class AccelerationPath
     }
     public static bool getT(Vector3 x, Vector3 x0, Vector3 v0, float ac, out float result)
     {
-        //No funciona con desaceleración
+        //No funciona con desaceleraciÃ³n
         float a = ac / 2;
         float b = v0.magnitude;
         float c = -Vector3.Distance(x0, x);

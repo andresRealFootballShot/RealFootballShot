@@ -1,4 +1,4 @@
-using CullPositionPoint;
+ï»¿using CullPositionPoint;
 using DOTS_ChaserDataCalculation;
 using FieldTriangleV2;
 using System.Collections;
@@ -50,11 +50,11 @@ public class CullPassPointsDebug : MonoBehaviour
     public SearchPlayData searchPlayData { get => CullPassPoints.searchPlayData; }
     LonelyPointElement2 debugLonelyPointElement, debugPreviousLonelyPointElement;
     Vector3 attackPos, defensePos;
-
+    float firstReachBallTime;
     int firstReachPlayerIndex;
     string teamAttackNamePass, teamDefenseNamePass;
     bool passStarted;
-    PublicPlayerData attackPublicPlayerData { get => CullPassPoints.GetPublicPlayerData(debugLonelyPointElement.attackReachIndex); }
+    PublicPlayerData attackPublicPlayerDataPass, defensePublicPlayerDataPass;
     void Start()
     {
 
@@ -138,6 +138,9 @@ public class CullPassPointsDebug : MonoBehaviour
         getPos();
         teamAttackNamePass = CullPassPoints.teamName_Attacker;
         teamDefenseNamePass = CullPassPoints.teamName_Defense;
+        attackPublicPlayerDataPass= CullPassPoints.GetPublicPlayerData(debugLonelyPointElement.attackReachIndex);
+        defensePublicPlayerDataPass = CullPassPoints.GetPublicPlayerData(debugLonelyPointElement.GetPassData().defenseReachIndex);
+        firstReachBallTime = CullPassPoints.firstPlayerReachTime;
     }
     void Kick()
     {
@@ -167,85 +170,105 @@ public class CullPassPointsDebug : MonoBehaviour
         }
         if (!debugLonelyPointElement.GetPassData(debugStraightPass, out PassData passData)) return;
         Team team = Teams.getTeamByName(teamDefenseNamePass);
-        foreach(PublicPlayerData defensePublicPlayerData in team.publicPlayerDatas)
+        foreach(PublicPlayerData defensePublicPlayerData in team.outfieldPublicPlayerDatas)
         {
             int index = CullPassPoints.players.IndexOf(defensePublicPlayerData);
-            if (defensePublicPlayerData.playerComponents.movementCtrl == null) continue;
-            Vector3 defensePos = searchPlayData.GetPlayerTargetPosition(debugNode, index,0);
-            defensePublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(defensePos);
+            Vector3 targetPosition = searchPlayData.GetPlayerTargetPosition(debugNode, index,0);
+            defensePublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(targetPosition);
         }
     }
     void SetOffsideLineTarget()
     {
         Team team = CullPassPoints.defenseTeam;
         Vector3 goalPosition = team.goalPosition;
-        PublicPlayerData attackPublicPlayerData = CullPassPoints.GetPublicPlayerData(debugLonelyPointElement.attackReachIndex);
+        PublicPlayerData attackPublicPlayerData = attackPublicPlayerDataPass;
         Vector3 playerPosition = attackPublicPlayerData.position;
         playerPosition.y= 0;
         Vector3 offsideLine = GetOffsideLine();
         Vector3 forward = goalPosition - offsideLine;
         Vector3 dir = playerPosition - offsideLine;
         forward.y = 0;
-        if (Vector2.Dot(forward, dir) <= 0)
-        {
-            Vector3 targetPosition =  debugWeightLonelyPooints[debugLonelyPointIndex].position;
+        Debug.DrawLine(offsideLine,offsideLine+Vector3.up*4,Color.yellow);
+        Vector3 targetPosition = debugWeightLonelyPooints.Find(x=>x.index==debugLonelyPointIndex).Get3DPosition(0);
 
-            Vector3 offsidePoint = GetPointOnOffsideLine(playerPosition, targetPosition, offsideLine);
-            attackPublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(defensePos);
-            attackPublicPlayerData.playerComponents.movementCtrl.debug = true;
-            attackPublicPlayerData.playerComponents.movementCtrl.debugMoveTimes = true;
+        if (Vector2.Dot(forward, dir) <= 0 && SegmentLineIntersectionXZ(playerPosition, targetPosition,offsideLine, offsideLine+Vector3.right, out Vector3 offsidePoint))
+        {
+            Debug.DrawLine(offsidePoint, offsidePoint + Vector3.up*3, Color.black);
+            attackPublicPlayerData.playerComponents.movementCtrl.scope = 0.1f;
             attackPublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(offsidePoint);
-            float time = GetTimeToReachPointDOTS.accelerationGetTimeToReachPosition2(playerPosition, attackPublicPlayerData.playerComponents.Speed, attackPublicPlayerData.playerComponents.bodyY0Forward, attackPublicPlayerData.playerComponents.VelocityY0Direction, debugLonelyPointElement.Get3DPosition(), attackPublicPlayerData.playerComponents.movementValues.maxAngleForRun, attackPublicPlayerData.playerComponents.movementValues.maxAngleForRun2, attackPublicPlayerData.playerComponents.movementValues.minSpeedForRotateBody, attackPublicPlayerData.playerComponents.movementValues.minSpeedForRotateBody2, attackPublicPlayerData.playerComponents.movementValues.forwardAcceleration, attackPublicPlayerData.playerComponents.movementValues.forwardDeceleration, attackPublicPlayerData.playerComponents.movementValues.maxSpeedForReachBall, attackPublicPlayerData.playerComponents.scope, attackPublicPlayerData.playerComponents.movementValues.maxForwardSpeed);
-            Invoke(nameof(SetTargetPositionBeforeOffsideLine), time);
+            
+            Invoke(nameof(SetTargetPositionBeforeOffsideLine), firstReachBallTime);
         }
         else
         {
-
-            attackPublicPlayerData.playerComponents.movementCtrl.debug = true;
-            attackPublicPlayerData.playerComponents.movementCtrl.debugMoveTimes = true;
             attackPublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(debugLonelyPointElement.Get3DPosition());
         }
     }
     void SetTargetPositionBeforeOffsideLine()
     {
         print("reach offsideLine");
-        attackPublicPlayerData.playerComponents.movementCtrl.debug = true;
-        attackPublicPlayerData.playerComponents.movementCtrl.debugMoveTimes = true;
-        attackPublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(debugLonelyPointElement.Get3DPosition());
+        attackPublicPlayerDataPass.playerComponents.movementCtrl.SetTargetPosition(debugLonelyPointElement.Get3DPosition());
+        attackPublicPlayerDataPass.playerComponents.movementCtrl.scope = attackPublicPlayerDataPass.playerComponents.movementCtrl.ballScope;
+        defensePublicPlayerDataPass.playerComponents.movementCtrl.SetTargetPosition(debugLonelyPointElement.Get3DPosition());
     }
-    Vector3 GetPointOnOffsideLine(Vector3 playerPosition, Vector3 targetPosition, Vector3 offside)
+    public static bool SegmentLineIntersectionXZ(
+    Vector3 segA, Vector3 segB,     // segmento (finito)
+    Vector3 lineA, Vector3 lineB,   // lÃ­nea infinita
+    out Vector3 intersection)
     {
-        // Línea horizontal (x ignorada, usas eje Z realmente)
-        float offsideZ = offside.z;
+        intersection = Vector3.zero;
 
-        Vector3 dir = (targetPosition - playerPosition);
+        // Convertimos a 2D (XZ)
+        Vector2 p1 = new Vector2(segA.x, segA.z);
+        Vector2 p2 = new Vector2(segB.x, segB.z);
+        Vector2 p3 = new Vector2(lineA.x, lineA.z);
+        Vector2 p4 = new Vector2(lineB.x, lineB.z);
 
-        if (Mathf.Abs(dir.z) < 0.001f)
-            return targetPosition;
+        Vector2 r = p2 - p1;
+        Vector2 s = p4 - p3;
 
-        float t = (offsideZ - playerPosition.z) / dir.z;
+        float cross = r.x * s.y - r.y * s.x;
 
-        t = Mathf.Clamp01(t);
+        // Paralelas
+        if (Mathf.Approximately(cross, 0f))
+            return false;
 
-        return playerPosition + dir * t;
+        Vector2 diff = p3 - p1;
+
+        float t = (diff.x * s.y - diff.y * s.x) / cross;
+        // float u = (diff.x * r.y - diff.y * r.x) / cross;
+        // u no hace falta porque la lÃ­nea es infinita
+
+        // âœ… AquÃ­ estÃ¡ la clave: solo comprobamos el segmento
+        if (t < 0f || t > 1f)
+            return false;
+
+        Vector2 hit2D = p1 + t * r;
+
+        intersection = new Vector3(hit2D.x, 0f, hit2D.y);
+        return true;
     }
     Vector3 GetOffsideLine()
     {
-        Vector3 ballPosition = MatchComponents.ballPosition;
+        Vector3 ballPosition = CullPassPoints.ballReachPosition;
         Vector3 goalPosition = defenseTeam.goalPosition;
         ballPosition.x = goalPosition.x;
+        ballPosition.y = 0;
         Vector3 midfieldPos = MatchComponents.footballField.center;
         midfieldPos.x = goalPosition.x;
         midfieldPos.y = 0;
         Vector3 forward = (goalPosition - midfieldPos).normalized;
 
-        float max1 = float.MinValue; // defensa más cercano a portería
-        float max2 = float.MinValue; // segundo más cercano
+        float max1 = float.MinValue; // defensa mÃ¡s cercano a porterÃ­a
+        float max2 = float.MinValue; // segundo mÃ¡s cercano
 
-        // Buscar los dos defensas más retrasados
+        // Buscar los dos defensas mÃ¡s retrasados
         foreach(PublicPlayerData publicPlayerData in defenseTeam.publicPlayerDatas)
         {
-            Vector3 playerPos = new Vector3(goalPosition.x,0, publicPlayerData.position.z);
+            int index = CullPassPoints.players.IndexOf(publicPlayerData);
+            Vector3 targetPosition = searchPlayData.GetPlayerPosition(debugNode, index,0);
+
+            Vector3 playerPos = new Vector3(goalPosition.x,0, targetPosition.z);
             float projection = Vector3.Dot(forward, playerPos - midfieldPos);
 
             if (projection > max1)
@@ -263,15 +286,15 @@ public class CullPassPointsDebug : MonoBehaviour
         if (max2 == float.MinValue)
             return midfieldPos;
 
-        // Proyección del balón
-        float ballProjection = Vector2.Dot(forward, ballPosition - midfieldPos);
+        // ProyecciÃ³n del balÃ³n
+        float ballProjection = Vector3.Dot(forward, ballPosition - midfieldPos);
         if (ballProjection <= 0f && max2 <= 0f)
         {
             return midfieldPos;
         }
-        // La línea es el más cercano a portería entre:
-        // - el balón
-        // - el penúltimo defensa (max2)
+        // La lÃ­nea es el mÃ¡s cercano a porterÃ­a entre:
+        // - el balÃ³n
+        // - el penÃºltimo defensa (max2)
         float finalProjection = Mathf.Max(ballProjection, max2);
 
         return midfieldPos + forward * finalProjection;
@@ -281,8 +304,6 @@ public class CullPassPointsDebug : MonoBehaviour
         if (!debugLonelyPointElement.GetPassData(debugStraightPass, out PassData passData)) return;
         PublicPlayerData defensePublicPlayerData = CullPassPoints.GetPublicPlayerData(passData.defenseReachIndex);
         if (defensePublicPlayerData.playerComponents.movementCtrl == null) return;
-        defensePublicPlayerData.playerComponents.movementCtrl.debug = true;
-        defensePublicPlayerData.playerComponents.movementCtrl.debugMoveTimes = true;
         defensePublicPlayerData.playerComponents.movementCtrl.SetTargetPosition(passData.GetDefenseReach3DPosition());
     }
     void SearchNodePass()
@@ -529,7 +550,7 @@ LonelyPointElement2 GetDebugLonelyPoint(int index)
          style.fontSize = 14;
          
          style.normal.textColor = Teams.getTeamByName(teamAttackNamePass).Color;
-         Handles.Label(position + Vector3.up * 1.25f, "player index=" + i, style);
+         Handles.Label(position3 + Vector3.up * 1.25f, "player index=" + i, style);
         if (defenseTeam.publicPlayerDatas.Contains(CullPassPoints.players[i]))
         {
             Handles.DrawLine(position2, position3);
@@ -539,7 +560,7 @@ LonelyPointElement2 GetDebugLonelyPoint(int index)
  }
     Vector3 GetPointOnOffsideLine(Vector3 playerPosition, Vector3 targetPosition, Vector2 offside)
     {
-        // Línea horizontal (x ignorada, usas eje Z realmente)
+        // LÃ­nea horizontal (x ignorada, usas eje Z realmente)
         float offsideZ = offside.y;
 
         Vector3 dir = (targetPosition - playerPosition);

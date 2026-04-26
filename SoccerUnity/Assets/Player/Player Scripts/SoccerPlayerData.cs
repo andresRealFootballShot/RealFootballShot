@@ -7,5 +7,7 @@ public class SoccerPlayerData : SoccerPlayerComponent
     public new float maxKickForce = 33;
     public new Vector3 ballTargetPosition { get; set; }
     public new bool ballIsOrientedControlled { get; set; }
-    public  float scopeOffset=0.25f;
+    public float scopeOffset = 0.25f;
+    
+    public float passScopeOffset=0.1f;
 }

@@ -1,3 +1,4 @@
+using CullPositionPoint;
 using DOTS_ChaserDataCalculation;
 using Photon.Realtime;
 using System.Collections;
@@ -39,6 +40,7 @@ public class PublicPlayerData : MonoBehaviour
     public PlayerData playerData { get => playerComponents.playerData; }
     public PlayerComponents playerComponents;
     public virtual bool IsGoalkeeper { get => false; }
+    public bool IsBot = true;
     public float getTimeToReachPosition(Vector3 position,float scope)
     {
         return playerComponents.GetTimeToReachPosition.getTimeToReachPointDelegate(position,scope);
@@ -46,8 +48,9 @@ public class PublicPlayerData : MonoBehaviour
     private void Start()
     {
         addedChaserDataEvent.Value = new MyEvent(nameof(addedChaserDataEvent) + GetInstanceID());
-        
+        playerComponents.scope = playerComponents.ballScope;
     }
+     
     public static void getPlayerData(PublicPlayerData publicPlayerData, int index, out PlayerDataComponent playerDataComponent)
     {
 
@@ -106,5 +109,20 @@ public class PublicPlayerData : MonoBehaviour
             chaserData = null;
             return false;
         }
+    }
+    public bool Kick(PassData passData)
+    {
+
+        return playerComponents.botKick.Kick(passData);
+    }
+    public void SetTargetPosition(Vector3 targetPosition)
+    {
+        playerComponents.ForwardDesiredSpeed = movimentValues.maxForwardSpeed;
+        playerComponents.LookTarget = true;
+        playerComponents.MinForwardSpeed = 0;
+        playerComponents.TargetPosition = targetPosition;
+        playerComponents.stopOffset = 0;
+        playerComponents.movementCtrl.startMoveTimes();
+
     }
 }

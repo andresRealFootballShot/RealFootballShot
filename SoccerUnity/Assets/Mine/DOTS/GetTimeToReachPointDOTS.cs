@@ -287,7 +287,7 @@ namespace DOTS_ChaserDataCalculation
             Vector3 normalizedForwardVelocity,
             ref PlayerGenericParams playerParams,
             Vector3 targetPosition,
-            PlayerPositionElement playerData)
+            PlayerPositionElement playerData,float targetSpeed,float scope)
         {
             if (MyFunctions.Vector3IsNan(targetPosition) ||
                 targetPosition.Equals(Vector3.positiveInfinity) ||
@@ -356,7 +356,7 @@ namespace DOTS_ChaserDataCalculation
             toTargetAfterBrake.y = 0f;
 
             float distanceToTarget =
-                Mathf.Max(toTargetAfterBrake.magnitude - playerData.scope, 0f);
+                Mathf.Max(toTargetAfterBrake.magnitude - scope, 0f);
 
             float tMove = PlayerInterceptionJob.EstimateTimeToReach(
                 distanceToTarget,
@@ -364,7 +364,7 @@ namespace DOTS_ChaserDataCalculation
                 playerData.acceleration,
                 playerData.decceleration,
                 playerParams.maxSpeed,
-                playerData.maxSpeedForReachBall
+                targetSpeed
             );
 
             return tBrake + tMove;

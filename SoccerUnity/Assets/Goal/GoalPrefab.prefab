@@ -2373,8 +2373,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerComponents: {fileID: 3299650401645545554}
   addAwake: 1
-  teamName: 
-  fieldPositionType: 7
+  teamName: Blue
+  fieldPositionType: 13
 --- !u!114 &3299650401645545554
 MonoBehaviour:
   m_ObjectHideFlags: 0

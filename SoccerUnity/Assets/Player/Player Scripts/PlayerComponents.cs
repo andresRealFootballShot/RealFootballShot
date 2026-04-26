@@ -27,9 +27,11 @@ public class PlayerComponents : PlayerComponent
     public BallDriving ballDriving;
     public new PlayerSkills playerSkills;
     public new PlayerParameters playerParameters;
+    public BotMoveFunctions botMoveFunctions;
     [HideInInspector]
     public float friction;
     public GetTimeToReachPoint GetTimeToReachPosition;
+    public BotKick botKick;
     public Team myTeam, rivalTeam;
     public float maxSpeedRotation { get =>movementValues.rotationSpeed; }
     void Start()

@@ -73,7 +73,8 @@ public class CullPassPointsSystem : SystemBase
             //SearchPlayData.ClearCullEntities();
         if (reset)
         {
-            SearchPlayData.Clear();
+                Clear();
+            
                 CullPassPoints.CreatePlayerTargetPositions();
                 /*
                 SearchPlayData.posibleNodes.Clear();
@@ -97,7 +98,7 @@ public class CullPassPointsSystem : SystemBase
                 CullPassPoints.PlacePoints(0);
             }
 
-            Snodes.Clear();
+            
             SearchPlayData.getSortedNodes(ref Snodes, 1);
             CullPassPoints.CalculateFirstReachPlayerToBall(Snodes);
             CullPassPoints.SetBallPosition(Snodes, 1, CullPassPoints.ballReachPosition, CullPassPoints.firstPlayerReachTime);
@@ -189,7 +190,8 @@ public class CullPassPointsSystem : SystemBase
             if(nodeCalculationPerFrameTotal >= CullPassPoints.maxNodes2)
             {
                 reset = true;
-                CullPassPoints.teamBrains.Play();
+                CullPassPoints.teamBrains.Enable();
+                CullPassPoints.teamBrains.GetCullPassPointData();
                 MatchEvents.CullPassPointsEnd.Invoke();
                 break;
             }
@@ -201,6 +203,12 @@ public class CullPassPointsSystem : SystemBase
             Debug.LogError("Error: " + e.Message + "\n" + e.StackTrace);
         }
         
+    }
+    void Clear()
+    {
+        CullPassPoints.firstReachLonelyPoints.Clear();
+        SearchPlayData.Clear();
+        Snodes.Clear();
     }
     void SetNextPlayerPositions(Vector3 ballPosition)
     {
