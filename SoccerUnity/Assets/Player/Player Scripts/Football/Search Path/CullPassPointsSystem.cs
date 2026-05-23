@@ -87,8 +87,9 @@ public class CullPassPointsSystem : SystemBase
                 CullPassPoints.UpdateNextPlayerPoints(1, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
                 CullPassPoints.CompleteTriangulatorJob(1);
                 RemovePosibleNodes(1);*/
-            //if(CullPassPoints.debugTestLonelyPoints)
-            if(CullPassPoints.debugTestLonelyPoints)
+                //if(CullPassPoints.debugTestLonelyPoints)
+               
+            if (CullPassPoints.debugTestLonelyPoints)
             {
                CullPassPoints.PlaceTestLonelyPoint();
 
@@ -98,10 +99,10 @@ public class CullPassPointsSystem : SystemBase
                 CullPassPoints.PlacePoints(0);
             }
 
-            
             SearchPlayData.getSortedNodes(ref Snodes, 1);
             CullPassPoints.CalculateFirstReachPlayerToBall(Snodes);
             CullPassPoints.SetBallPosition(Snodes, 1, CullPassPoints.ballReachPosition, CullPassPoints.firstPlayerReachTime);
+
             nodeCalculationPerFrameTotal = 1;
             CullPassPoints.UpdateInstantPlayerPositions2(defenseTeam, attackTeam, Snodes);
             //////////////Calculo de futuras posiciones de los defensas
@@ -252,8 +253,6 @@ public class CullPassPointsSystem : SystemBase
     {
         if (defenseTeam.publicPlayerDatas.Count == 0) return;
         
-        
-
         //int posibleLonelyPointSize = CullPassPoints.GetPosibleLonelyPoints(nodeSize1);
         CullPassPoints.calculateNextPositionShedule.SheduleJobs(nodeCalculationPerFrame, SearchPlayData, defenseTeam.teamMaxFieldPlayers/2, CullPassPoints.lineupName, CullPassPoints.pressureName);
         CullPassPoints.UpdateNextPlayerPoints(nodeCalculationPerFrame, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);

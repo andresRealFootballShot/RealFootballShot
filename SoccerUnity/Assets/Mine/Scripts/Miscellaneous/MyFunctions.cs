@@ -271,6 +271,13 @@ public static class MyFunctions
         float project_length = Mathf.Clamp(Vector3.Dot(point - line_start, line_direction), 0f, line_length);
         return Vector3.Distance(point, line_start + line_direction * project_length);
     }
+    public static float DistancePointAndInfiniteLine(Vector3 point, Vector3 line_start, Vector3 dir)
+    {
+        Vector3 line_direction = dir;
+        line_direction.Normalize();
+        float project_length = Mathf.Max(Vector3.Dot(point - line_start, line_direction), 0f);
+        return Vector3.Distance(point, line_start + line_direction * project_length);
+    }
     public static Vector3 GetClosestPointOnLineWithStartPointAndInfiniteLenght(Vector3 point, Vector3 line_start, Vector3 dir)
     {
         dir.Normalize();

@@ -30,8 +30,8 @@ public class FootballPositionCtrlEditor : Editor
         serializedObject.Update();
         t.playerPositionType = (PlayerPositionType)EditorGUILayout.EnumPopup("PlayerPosition", t.playerPositionType);
         t.lineupName = EditorGUILayout.TextField("Lineup Name", t.lineupName);
-        t.pressureName = EditorGUILayout.TextField("Lineup Name", t.pressureName);
-        t.playerSize = EditorGUILayout.IntField("Lineup Name", t.playerSize);
+        t.pressureName = EditorGUILayout.TextField("Pressure Name", t.pressureName);
+        t.playerSize = EditorGUILayout.IntField("Player Size", t.playerSize);
         LineupFieldPositionDatas lineupFieldPositionDatas;
 
         if(!t.getCurrentLineup(out lineupFieldPositionDatas)) return;
@@ -137,6 +137,16 @@ public class FootballPositionCtrlEditor : Editor
             LineupFieldPositionDatasList LineupFieldPositionDatasList = JsonUtility.FromJson<LineupFieldPositionDatasList>(text);
             t.LineupFieldPositionList= LineupFieldPositionDatasList;
         }
+        if (GUILayout.Button("Clear"))
+        {
+            foreach (FieldPositionsData FieldPositionsData in pressureFieldPositionDatas.FieldPositionDatas)
+            {
+                FieldPositionsData.points.Clear();
+            }
+            pressureFieldPositionDatas.offsideLines.Clear();
+            pressureFieldPositionDatas.offsideStops.Clear();
+            SceneView.RepaintAll();
+        }
         GUILayout.EndHorizontal();
         EditorGUILayout.Space(10.0f);
         EditorGUILayout.LabelField("Offside Line", EditorStyles.boldLabel);
@@ -158,7 +168,7 @@ public class FootballPositionCtrlEditor : Editor
                 SceneView.RepaintAll();
             }
         }
-        
+       
         GUILayout.EndHorizontal();
         if (selectedOffsideLine != null)
         {
@@ -285,6 +295,7 @@ public class FootballPositionCtrlEditor : Editor
             }
             else
             {
+                if (FieldPositionData.points.Count <= selectedPointIndex) continue;
                 FieldPositionsData.Point2 point = FieldPositionData.points[selectedPointIndex];
                 Color color = Color.blue;
                 if (!point.enabled) color.a = a;
@@ -541,14 +552,18 @@ public class FootballPositionCtrlEditor : Editor
                 Handles.color = Color.blue;
                 foreach (var FieldPositionData in PressureFieldPositionDatas.FieldPositionDatas)
                 {
-                    FieldPositionsData.Point2 point = FieldPositionData.points[selectedPointIndex];
-                    if (!point.snap && point.enabled)
-                        Handles.SphereHandleCap(0,
-                           t.getGlobalPosition(t.horizontalPositionType, point.value),
-                           Quaternion.identity,
-                           buttonSize * 0.9f,
-                           EventType.Repaint
-                       );
+                    if(selectedPointIndex>=0&& selectedPointIndex< FieldPositionData.points.Count)
+                    {
+
+                        FieldPositionsData.Point2 point = FieldPositionData.points[selectedPointIndex];
+                        if (!point.snap && point.enabled)
+                            Handles.SphereHandleCap(0,
+                               t.getGlobalPosition(t.horizontalPositionType, point.value),
+                               Quaternion.identity,
+                               buttonSize * 0.9f,
+                               EventType.Repaint
+                           );
+                    }
                 }
                 EditorGUI.BeginChangeCheck();
                 float scaleSize = 10;

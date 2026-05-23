@@ -486,7 +486,7 @@ public class MovementCtrl : MovementPlayerComponent
             string info="";
             if (debugMove)
             {
-                info = "v=" + Speed.ToString("f1") + " θ=" + angleBodyForwardDesiredVelocity.ToString("f0") + " phase=" + phase + " dT=" + (BodyTargetXZDistance - scope).ToString("f2") + " dB=" + BodyBallXZDistance.ToString("f2")+" ";
+                info = "v=" + Speed.ToString("f1") + " θ=" + angleBodyForwardDesiredVelocity.ToString("f0") + " phase=" + phase + " dT=" + (BodyTargetXZDistance - scope).ToString("f2") + " dB=" + BodyBallXZDistance.ToString("f2")+" LookTarget="+LookTarget+" StopMove="+StopMove;
             }
             if (debugMoveTimes)
             {

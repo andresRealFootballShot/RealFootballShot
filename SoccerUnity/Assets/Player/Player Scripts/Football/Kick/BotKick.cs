@@ -8,6 +8,7 @@ public class BotKick : PlayerComponent
 {
     public float kickPeriod = 0.25f;
     public bool kickAvailable=true;
+    public float startKickTime=-1;
     void Start()
     {
         
@@ -22,11 +23,12 @@ public class BotKick : PlayerComponent
     {
         if (ReachBall())
         {
-            EditorApplication.isPaused = true;
+             //EditorApplication.isPaused = true;
             KickEventArgs kickEventArgs = new KickEventArgs(passData.passVelocity, MatchComponents.ballRigidbody.velocity, MatchComponents.ballRigidbody.angularVelocity, MatchComponents.ballRigidbody.position, publicPlayerData.playerID);
             MatchComponents.ballRigidbody.velocity = passData.passVelocity;
             Invoke(nameof(enableKick), kickPeriod);
             kickAvailable = false;
+            startKickTime = Time.time;
             MatchEvents.kick.Invoke(kickEventArgs);
             return true;
         }
@@ -40,8 +42,9 @@ public class BotKick : PlayerComponent
     void enableKick()
     {
         kickAvailable = true;
+        startKickTime = -1;
     }
-    bool ReachBall()
+    public bool ReachBall()
     {
         //return ballBodyAngle < 80 && BodyBallXZDistance < scope && ballPosition.y <= bodyHeight + ballRadio && kickAvailable;
         return BodyBallXZDistance < scope && ballPosition.y <= bodyHeight + ballRadio && kickAvailable;
