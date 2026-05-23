@@ -334,9 +334,13 @@ public class CullPassPoints : MonoBehaviour
         CullPassPointsComponent.node = nodeIndex;
         for (int i = 0; i < testLonelyPoints.Count; i++)
         {
-
-            LonelyPointElement2 lonelyPointElement2 = new LonelyPointElement2(testLonelyPoints[i].position,i);
-
+            Vector3 ballPosition = MatchComponents.ballPosition;
+            Vector3 ballReachPosition2 = new Vector3(ballPosition.x, 0, ballPosition.z);
+            float distance = Vector3.Distance(testLonelyPoints[i].position, ballReachPosition2);
+            if (distance < 2) continue;
+            LonelyPointElement2 lonelyPointElement2 = new LonelyPointElement2(testLonelyPoints[i].position, i);
+            
+            
             lonelyPointElements2[lonelyPointCount] = lonelyPointElement2;
             lonelyPointCount++;
             if (lonelyPointCount >= cullPassPointsParams.entityPointSize)
@@ -631,7 +635,10 @@ public class CullPassPoints : MonoBehaviour
         CullPassPointsComponent.node = nodeIndex;
         for (int i = 0; i < bufferSizeComponent.lonelyPointsResultSize; i++)
         {
-
+            Vector3 ballPosition = MatchComponents.ballPosition;
+            Vector3 ballReachPosition2 = new Vector3(ballPosition.x, 0, ballPosition.z);
+            float distance = Vector3.Distance(lonelyPointElements[i].position, ballReachPosition2);
+            if (distance < 2) continue;
             LonelyPointElement2 lonelyPointElement2 = new LonelyPointElement2(lonelyPointElements[i]);
             bool isDuplicated = false ;
             for (int j = i; j >= 0; j--)

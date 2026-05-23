@@ -53,7 +53,7 @@ namespace CullPositionPoint
             this.index = index;
             straightReachBall = false;
             parabolicReachBall = false;
-            weight = Mathf.Infinity;
+            weight = -Mathf.Infinity;
             order = -1;
             straightPassData = new PassData();
             parabolicPassData = new PassData();
@@ -66,7 +66,7 @@ namespace CullPositionPoint
             this.index = index;
             straightReachBall = false;
             parabolicReachBall = false;
-            weight = Mathf.Infinity;
+            weight = -Mathf.Infinity;
             order = -1;
             straightPassData = new PassData();
             parabolicPassData = new PassData();
@@ -79,7 +79,7 @@ namespace CullPositionPoint
             this.index = lonelyPointElement.index;
             straightReachBall = false;
             parabolicReachBall = false;
-            weight = Mathf.Infinity;
+            weight = -Mathf.Infinity;
             order = -1;
             straightPassData = new PassData();
             parabolicPassData = new PassData();
@@ -92,7 +92,7 @@ namespace CullPositionPoint
             this.index = index;
             straightReachBall = false;
             parabolicReachBall = false;
-            weight = Mathf.Infinity;
+            weight = -Mathf.Infinity;
             order = -1;
             straightPassData = new PassData();
             parabolicPassData = new PassData();
@@ -104,7 +104,7 @@ namespace CullPositionPoint
             position = Vector2.positiveInfinity;
             straightReachBall = false;
             parabolicReachBall = false;
-            weight = Mathf.Infinity;
+            weight = -Mathf.Infinity;
             order = -1;
             straightPassData.Clear();
             parabolicPassData.Clear();

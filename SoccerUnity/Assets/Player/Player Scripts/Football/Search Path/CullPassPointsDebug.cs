@@ -209,6 +209,7 @@ public class CullPassPointsDebug : MonoBehaviour
         print("reach offsideLine");
         attackPublicPlayerDataPass.playerComponents.movementCtrl.SetTargetPosition(debugLonelyPointElement.Get3DPosition());
         attackPublicPlayerDataPass.playerComponents.movementCtrl.scope = attackPublicPlayerDataPass.playerComponents.movementCtrl.ballScope;
+        if(defensePublicPlayerDataPass.playerComponents.movementCtrl!=null)
         defensePublicPlayerDataPass.playerComponents.movementCtrl.SetTargetPosition(debugLonelyPointElement.Get3DPosition());
     }
     public static bool SegmentLineIntersectionXZ(
@@ -416,7 +417,7 @@ public class CullPassPointsDebug : MonoBehaviour
         string info = "Offside Last Player";
         Vector3 lastPlayerPos = CullPassPoints.FootballPositionCtrl.GetLastPlayerPosition(MatchComponents.ballPosition, CullPassPoints.teamName_Defense);
         Handles.Label(lastPlayerPos + Vector3.up * 1.5f, info, style);
-    }
+}
 void DrawReachPlayers(LonelyPointElement2 lonelyPointElement)
 {
     bool passDataAvailable = lonelyPointElement.GetPassData(debugStraightPass,out PassData passData);

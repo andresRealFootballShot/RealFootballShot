@@ -2075,6 +2075,7 @@ GameObject:
   - component: {fileID: 7110047354578381703}
   - component: {fileID: 6244234487330640569}
   - component: {fileID: 6704183389520453890}
+  - component: {fileID: 7617802844254515038}
   m_Layer: 0
   m_Name: Hand
   m_TagString: GoalKeeper
@@ -2345,6 +2346,7 @@ MonoBehaviour:
   useAccelerationInChaserDataCalculation: 0
   addToOptimalPoint: 1
   playerComponents: {fileID: 3299650401645545554}
+  IsBot: 1
   components: {fileID: 3299650401645545554}
   values: {fileID: 5279867306633939444}
 --- !u!114 &4290924186599095116
@@ -2404,7 +2406,9 @@ MonoBehaviour:
   ballDriving: {fileID: 6704183389520453890}
   playerSkills: {fileID: 11400000, guid: 6512255020a373d46a7e83d0c690b936, type: 2}
   playerParameters: {fileID: 11400000, guid: 34ccf7b9b5539f048997ee20523139cc, type: 2}
+  botMoveFunctions: {fileID: 7617802844254515038}
   friction: 0
+  botKick: {fileID: 0}
   myTeam: {fileID: 0}
   rivalTeam: {fileID: 0}
   goalkeeperEvents: {fileID: 4290924186599095116}
@@ -2715,6 +2719,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxKickForce: 33
   scopeOffset: 0.25
+  passScopeOffset: 0.1
 --- !u!114 &6704183389520453890
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2731,6 +2736,18 @@ MonoBehaviour:
   bodyAdjustAngle: 0
   bodyAdjustSpeed: 0
   enabled: 0
+--- !u!114 &7617802844254515038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5279867306633939452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1af301f93a83d1a49bf7faca3c31377b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5279867306647696566
 GameObject:
   m_ObjectHideFlags: 0
@@ -4012,16 +4029,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
---- !u!1 &5009324978325171846 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
-  m_PrefabInstance: {fileID: 5279867305367245783}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &5678865589328704572 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
-  m_PrefabInstance: {fileID: 5279867305367245783}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3638828752471565474 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8879528566716807029, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
@@ -4035,6 +4042,16 @@ Transform:
 --- !u!137 &3431607352883336201 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 7411341568049137630, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
+  m_PrefabInstance: {fileID: 5279867305367245783}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5009324978325171846 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
+  m_PrefabInstance: {fileID: 5279867305367245783}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5678865589328704572 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
   m_PrefabInstance: {fileID: 5279867305367245783}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &3017726479446831362

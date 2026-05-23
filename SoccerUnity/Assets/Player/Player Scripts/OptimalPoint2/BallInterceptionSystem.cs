@@ -37,6 +37,8 @@ public class BallInterceptionSystem : MonoBehaviour
     public NativeArray<float> scopes;
     public NativeArray<float> maxAngleForRuns2;
     public NativeArray<float> minSpeedForRotates2;
+    public NativeArray<float> kickPeriods;
+    public NativeArray<float> kickRecoverTimes;
     private NativeArray<float3> playerPositions;
     private NativeArray<float3> playerVelocities;
     private NativeArray<float3> playerDirections;
@@ -88,7 +90,7 @@ public class BallInterceptionSystem : MonoBehaviour
 
                 maximumJumpHeight = publicPlayerData.maximumJumpHeights.Keys[0];
             }
-            jumpHeights[i] = maximumJumpHeight;
+            jumpHeights[i] = 1.8f;
             reachBallSpeeds[i] = publicPlayerData.movimentValues.maxSpeedForReachBall;
             maxAngleForRuns[i] = publicPlayerData.playerComponents.movementValues.maxAngleForRun;
             maxAngleForRuns2[i] = publicPlayerData.playerComponents.movementValues.maxAngleForRun2;
@@ -99,6 +101,9 @@ public class BallInterceptionSystem : MonoBehaviour
             playerDirections[i] = publicPlayerData.playerComponents.bodyY0Forward;
             scopes[i] = publicPlayerData.playerComponents.ballScope;
             isGoalkeepers[i] = publicPlayerData.IsGoalkeeper;
+            kickPeriods[i] = publicPlayerData.playerComponents.botKick != null ? publicPlayerData.playerComponents.botKick.kickPeriod :-1;
+            
+            kickRecoverTimes[i] = publicPlayerData.playerComponents.botKick!=null&& publicPlayerData.playerComponents.botKick.startKickTime!=-1 ? Time.time - publicPlayerData.playerComponents.botKick.startKickTime : -1;
         }
 
         // Ejecutar el Job
@@ -124,6 +129,8 @@ public class BallInterceptionSystem : MonoBehaviour
             playerVelocities = playerVelocities,
             playerDirections = playerDirections,
             isGoalkeepers = isGoalkeepers,
+            kickPeriods = kickPeriods,
+            kickRecoverTimes=kickRecoverTimes
         };
 
         var handle = job.Schedule(Teams.allPlayers.Count, 1);
@@ -256,7 +263,7 @@ public class BallInterceptionSystem : MonoBehaviour
                 float playerReachTime = timeToReach[i];
                 float ballTime = ballTimes[index] == Mathf.Infinity ? playerReachTime : ballTimes[index];
                 bool kickAvailable = Teams.allPlayers[i].playerComponents.botKick != null ?  Teams.allPlayers[i].playerComponents.botKick.kickAvailable : true;
-                if (ballTime < ballReachTimeResult && kickAvailable || (ballTime == ballReachTimeResult && playerReachTime < firstPlayerReachTime && kickAvailable))
+                if (ballTime < ballReachTimeResult)
                 {
                     indexResult = index;
                     ballReachTimeResult = ballTime;
@@ -310,6 +317,8 @@ public class BallInterceptionSystem : MonoBehaviour
             playerDirections = new NativeArray<float3>(playerCount, Allocator.Persistent);
             endPlayerDirections = new NativeArray<float3>(playerCount, Allocator.Persistent);
             isGoalkeepers = new NativeArray<bool>(playerCount, Allocator.Persistent);
+            kickPeriods = new NativeArray<float>(playerCount, Allocator.Persistent);
+            kickRecoverTimes = new NativeArray<float>(playerCount, Allocator.Persistent);
         }
     }
 
@@ -333,6 +342,8 @@ public class BallInterceptionSystem : MonoBehaviour
         if (playerDirections.IsCreated) playerDirections.Dispose();
         if (endPlayerDirections.IsCreated) endPlayerDirections.Dispose();
         if (isGoalkeepers.IsCreated) isGoalkeepers.Dispose();
+        if (kickPeriods.IsCreated) kickPeriods.Dispose();
+        if (kickRecoverTimes.IsCreated) kickRecoverTimes.Dispose();
     }
     void OnDestroy()
     {

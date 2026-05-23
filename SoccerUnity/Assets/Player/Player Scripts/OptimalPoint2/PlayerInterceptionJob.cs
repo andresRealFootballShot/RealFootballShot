@@ -23,6 +23,8 @@ public struct PlayerInterceptionJob : IJobParallelFor
     [ReadOnly] public NativeArray<float> minSpeedForRotates;
     [ReadOnly] public NativeArray<float> minSpeedForRotates2;
     [ReadOnly] public NativeArray<float> scopes;
+    [ReadOnly] public NativeArray<float> kickPeriods;
+    [ReadOnly] public NativeArray<float> kickRecoverTimes;
 
     [ReadOnly] public NativeArray<float3> playerPositions;
     [ReadOnly] public NativeArray<float3> playerVelocities;
@@ -51,8 +53,10 @@ public struct PlayerInterceptionJob : IJobParallelFor
         float minSpeedForRotate = minSpeedForRotates[index];
         float minSpeedForRotate2 = minSpeedForRotates2[index];
         float scope = scopes[index];
+        float kickPeriod = kickPeriods[index];
+        float kickRecoverTime = kickRecoverTimes[index];
         bool isGoalkeeper = isGoalkeepers[index];
-
+        
         for (int i = 0; i < ballPositions.Length; i++)
         {
             float3 ballPos = ballPositions[i];
@@ -60,7 +64,14 @@ public struct PlayerInterceptionJob : IJobParallelFor
             float totalTime = 0;
             
             float verticalDistance = ballPos.y - playerPos.y;
-            
+            if(kickRecoverTime != -1 && kickPeriod - kickRecoverTime > ballTime&&false)
+            {
+                scope = 0;
+            }
+            else
+            {
+                scope = scopes[index];
+            }
             if (verticalDistance > jumpHeight)
                 continue;
             if (isGoalkeeper)

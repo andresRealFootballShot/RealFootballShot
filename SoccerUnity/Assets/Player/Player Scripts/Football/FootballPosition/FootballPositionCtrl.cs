@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using static UnityEngine.Networking.UnityWebRequest;
 
 public enum PlayerPositionType
 {
@@ -201,25 +202,27 @@ public class FootballPositionCtrl : MonoBehaviour
         {
             weight = pressureFieldPositionDatas.offsideLines[index1].stop ? 0 : 1;
             return pressureFieldPositionDatas.offsideLines[index1].yValue;
-        }else if(index1 == -1 && index2 != -1)
+        }
+        else if (index1 == -1 && index2 != -1)
         {
             weight = pressureFieldPositionDatas.offsideLines[index2].stop ? 0 : 1;
             return pressureFieldPositionDatas.offsideLines[index2].yValue;
         }
-        else
+        else if(index1 != -1 && index2 != -1)
         {
             float w2 = Mathf.Abs(d1) / (Mathf.Abs(d1) + Mathf.Abs(d2));
             float w1 = 1 - w2;
-            if (pressureFieldPositionDatas.offsideLines[index1].stop&& !pressureFieldPositionDatas.offsideLines[index2].stop)
+            if (pressureFieldPositionDatas.offsideLines[index1].stop && !pressureFieldPositionDatas.offsideLines[index2].stop)
             {
                 weight = w2;
                 return pressureFieldPositionDatas.offsideLines[index2].yValue;
             }
-            else if(!pressureFieldPositionDatas.offsideLines[index1].stop && pressureFieldPositionDatas.offsideLines[index2].stop)
+            else if (!pressureFieldPositionDatas.offsideLines[index1].stop && pressureFieldPositionDatas.offsideLines[index2].stop)
             {
                 weight = w1;
                 return pressureFieldPositionDatas.offsideLines[index1].yValue;
-            }else if(pressureFieldPositionDatas.offsideLines[index1].stop && pressureFieldPositionDatas.offsideLines[index2].stop)
+            }
+            else if (pressureFieldPositionDatas.offsideLines[index1].stop && pressureFieldPositionDatas.offsideLines[index2].stop)
             {
                 weight = 0;
                 float result = pressureFieldPositionDatas.offsideLines[index1].yValue * w1 + pressureFieldPositionDatas.offsideLines[index2].yValue * w2;
@@ -232,6 +235,9 @@ public class FootballPositionCtrl : MonoBehaviour
                 return result;
             }
         }
+        
+        weight = 0;
+        return -1;
     }
     
     void getWeightyValue(Vector2 normalizedPosition, List<FieldPositionsData.Point2> points, out Vector2 value)

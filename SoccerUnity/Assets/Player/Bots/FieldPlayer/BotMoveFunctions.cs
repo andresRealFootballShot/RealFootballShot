@@ -10,7 +10,10 @@ public class BotMoveFunctions : PlayerComponent
     Team defenseTeam { get => CullPassPoints.defenseTeam; }
     public SearchPlayData searchPlayData { get => CullPassPoints.searchPlayData; }
     Vector3 targetPosition;
+    Vector3 lonelyPointPosition;
     public bool avoidOffside{ get; set; }
+    bool available=true;
+    bool goLonelyPoint;
     void Start()
     {
         MatchEvents.kick.AddListener(SomeOneKickBall);
@@ -35,7 +38,9 @@ public class BotMoveFunctions : PlayerComponent
         forward.y = 0;
         Debug.DrawLine(offsideLine, offsideLine + Vector3.up * 4, Color.yellow);
         Vector3 targetPosition = lonelyPointElement.Get3DPosition(0);
-
+        available = false;
+        goLonelyPoint = true;
+        lonelyPointPosition = lonelyPointElement.Get3DPosition(0);
         if (Vector2.Dot(forward, dir) <= 0 && SegmentLineIntersectionXZ(playerPosition, targetPosition, offsideLine, offsideLine + Vector3.right, out Vector3 offsidePoint))
         {
             Debug.DrawLine(offsidePoint, offsidePoint + Vector3.up * 3, Color.black);
@@ -51,7 +56,27 @@ public class BotMoveFunctions : PlayerComponent
             publicPlayerData.playerComponents.movementCtrl.SetTargetPosition(targetPosition);
         }
     }
-
+    public bool CheckPasserAvailable()
+    {
+        if(goLonelyPoint && CheckBallGoPoint()&&!publicPlayerData.playerComponents.botKick.ReachBall())
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    public bool CheckBallGoPoint()
+    {
+        Vector3 ballPosition = MatchComponents.ballPosition;
+        Vector3 velocity = MatchComponents.ballRigidbody.velocity;
+        Vector3 position = lonelyPointPosition;
+        ballPosition.y = 0;
+        velocity.y = 0;
+        position.y = 0;
+        return MyFunctions.DistancePointAndInfiniteLine(position, ballPosition, velocity)<0.5f;
+    }
     public static bool SegmentLineIntersectionXZ(
     Vector3 segA, Vector3 segB,     // segmento (finito)
     Vector3 lineA, Vector3 lineB,   // línea infinita
