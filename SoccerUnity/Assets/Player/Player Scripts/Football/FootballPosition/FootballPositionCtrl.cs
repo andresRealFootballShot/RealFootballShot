@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using static FieldPositionsData;
 using static UnityEngine.Networking.UnityWebRequest;
 
 public enum PlayerPositionType
@@ -114,11 +115,12 @@ public class OffsideStop
 public class FootballPositionCtrl : MonoBehaviour
 {
     public bool debug;
-    public bool debugRadios,debugAllPositions,debugAllValues, debugSymmetricalPositions,debugText=true,debugOnlyPlayerPositions;
+    public bool debugRadios,debugAllPositions,debugAllValues, debugSymmetricalPositions,debugText=true,debugOnlyPlayerPositions,debugTeam2;
     //Vector3 ballPosition { get => MatchComponents.ballPosition; }
     public SideOfField mySideOfField,rivalSideOfField;
     public SetupFootballField setupFootballField;
     public LineupFieldPositionDatasList LineupFieldPositionList;
+    public Teams teams;
     public float buttonSize = 0.1f;
     public float fieldLenght { get => MatchComponents.footballField.fieldLenght; }
     public float fieldWidth{ get => MatchComponents.footballField.fieldWidth; }
@@ -135,7 +137,25 @@ public class FootballPositionCtrl : MonoBehaviour
     [HideInInspector] public PlayerPositionType playerPositionType;
     [HideInInspector] public string lineupName = "Default";
     [HideInInspector] public string pressureName = "Default";
+
+    public SideOfField sideOfField2;
+    public string lineupName2 = "Default";
+    public string pressureName2 = "Default";
     public int playerSize = 5;
+
+    public static Dictionary<TypeFieldPosition.Type,PlayerPositionType> PlayerPosition_TypeFieldPosition = new Dictionary<TypeFieldPosition.Type, PlayerPositionType>() {
+             { TypeFieldPosition.Type.RightForward,PlayerPositionType.Forward},
+             { TypeFieldPosition.Type.LeftForward,PlayerPositionType.Forward} ,
+             { TypeFieldPosition.Type.RightCentreMidfield,PlayerPositionType.CenterMidfield},
+             { TypeFieldPosition.Type.LeftCentreMidfield,PlayerPositionType.CenterMidfield},
+             { TypeFieldPosition.Type.RightOutsideMidfield,PlayerPositionType.EdgeMidfield},
+             { TypeFieldPosition.Type.LeftOutsideMidfield,PlayerPositionType.EdgeMidfield},
+             { TypeFieldPosition.Type.CentreRightBack,PlayerPositionType.CenterBack},
+             { TypeFieldPosition.Type.CentreLeftBack,PlayerPositionType.CenterBack},
+             { TypeFieldPosition.Type.RightOutsideDefense,PlayerPositionType.LateralBack},
+             { TypeFieldPosition.Type.LeftOutsideDefense,PlayerPositionType.LateralBack},
+        };
+
     /* void Start()
     {
        string text = File.ReadAllText(Application.dataPath + "/Player/Player Scripts/Football/FootballPosition/FieldPoints.json");
@@ -152,6 +172,31 @@ public class FootballPositionCtrl : MonoBehaviour
         sideOfFields.Add(mySideOfField);
         sideOfFields.Add(rivalSideOfField);
         setupFootballField.loadFieldDimensions(sideOfFields);
+    }
+    public bool GetFieldPositionDataPosition(string lineup,string pressure,PublicPlayerData publicPlayerData,Vector3 ballPosition,out Vector3 result)
+    {
+        PressureFieldPositionDatas PressureFieldPositionDatas;
+        result = Vector3.negativeInfinity;
+        if (!getPressureFieldPositions(out PressureFieldPositionDatas, lineup, pressure)) return false;
+        if(!Teams.getTeamFromPlayer(publicPlayerData.playerID,out Team team))return false;
+        if(!team.getTypeFieldPositionOfPlayer(publicPlayerData.playerID,out TypeFieldPosition.Type fieldPositionType))return false;
+        if (!PlayerPosition_TypeFieldPosition.ContainsKey(fieldPositionType)) return false;
+        PlayerPositionType playerPositionType = PlayerPosition_TypeFieldPosition[fieldPositionType];
+        bool right = fieldPositionType.ToString().Contains("Right");
+        SideOfField sideOfField = team.SideOfField;
+        FieldPositionsData fieldPositionsData = PressureFieldPositionDatas.FieldPositionDatas.Find(x=>x.playerPositionType == playerPositionType);
+        HorizontalPositionType HorizontalPositionType = right? HorizontalPositionType.Right: HorizontalPositionType.Left;
+        ballPosition.y = 0;
+        Vector3 ballPosition2 = getGlobalPosition(HorizontalPositionType, ballPosition, sideOfField);
+        Vector2 normalizedBallPosition = getNormalizedPosition(HorizontalPositionType, ballPosition,sideOfField);
+        //normalizedBallPosition.x = right ? normalizedBallPosition.x : 1 - normailizedBallPosition.x;
+        float offsideWeight;
+        float offsideLineValueY = GetOffsideLineGetValue(PressureFieldPositionDatas, normalizedBallPosition, out offsideWeight);
+        getWeightyValue4(normalizedBallPosition, fieldPositionsData.points, offsideLineValueY, fieldPositionsData.playerPositionType, offsideWeight, out Vector2 weightyValue);
+        
+        Vector3 position = getGlobalPosition(HorizontalPositionType, weightyValue, sideOfField);
+        result = position;
+        return true;
     }
     public void AddOffsideLine(PressureFieldPositionDatas pressureFieldPositionDatas,OffsideLine offsideLine)
     {
@@ -443,6 +488,7 @@ public class FootballPositionCtrl : MonoBehaviour
         //Debug.DrawLine(mySideOfField.backTransform.position, globalPosition,Color.red);
         return globalPosition;
     }
+   
     public bool GetSelectedFieldPositionParameters(out FieldPositionsData fieldPositionDatas)
     {
         //t.selectedFieldPositionParameters = null;
@@ -461,11 +507,26 @@ public class FootballPositionCtrl : MonoBehaviour
         lineupFieldPositionData = null;
         LineupFieldPositionDatas LineupFieldPositionDatas = LineupFieldPositionList.LineupFieldPositionDatas.Find(x => x.name.Equals(lineupName));
         if (LineupFieldPositionDatas == null) return false;
-        lineupFieldPositionData = LineupFieldPositionDatas.PressureFieldPositionDatasList.Find(x => x.name.Equals(lineupName));
+        lineupFieldPositionData = LineupFieldPositionDatas.PressureFieldPositionDatasList.Find(x => x.name.Equals(pressureName));
+        if (lineupFieldPositionData == null) return false;
+        return true;
+    }
+    public bool getPressureFieldPositions(out PressureFieldPositionDatas lineupFieldPositionData,string lineupName,string pressureName)
+    {
+        lineupFieldPositionData = null;
+        LineupFieldPositionDatas LineupFieldPositionDatas = LineupFieldPositionList.LineupFieldPositionDatas.Find(x => x.name.Equals(lineupName));
+        if (LineupFieldPositionDatas == null) return false;
+        lineupFieldPositionData = LineupFieldPositionDatas.PressureFieldPositionDatasList.Find(x => x.name.Equals(pressureName));
         if (lineupFieldPositionData == null) return false;
         return true;
     }
     public bool getCurrentLineup(out LineupFieldPositionDatas lineupFieldPositionData)
+    {
+        lineupFieldPositionData = null;
+        LineupFieldPositionDatas LineupFieldPositionDatas = LineupFieldPositionList.LineupFieldPositionDatas.Find(x => x.name.Equals(lineupName));
+        return LineupFieldPositionDatas != null;
+    }
+    public bool getLineup(out LineupFieldPositionDatas lineupFieldPositionData, string lineupName)
     {
         lineupFieldPositionData = null;
         LineupFieldPositionDatas LineupFieldPositionDatas = LineupFieldPositionList.LineupFieldPositionDatas.Find(x => x.name.Equals(lineupName));

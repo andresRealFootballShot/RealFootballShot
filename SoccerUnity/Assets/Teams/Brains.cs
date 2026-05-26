@@ -4,6 +4,7 @@ using FieldTriangleV2;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Unity.Entities;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -12,6 +13,7 @@ using static UnityEditor.PlayerSettings;
 public class Brains : MonoBehaviour
 {
     public CullPassPoints CullPassPoints;
+    public FootballPositionCtrl FootballPositionCtrl;
     public bool debug;
     Team attackTeam;
     Team defenseTeam;
@@ -30,6 +32,7 @@ public class Brains : MonoBehaviour
     
     bool enable,cullPassPointEnable=true;
     bool changedPass=true,thereIsCurrentData;
+    float currentWeight;
     void Start()
     {
         
@@ -133,8 +136,19 @@ public class Brains : MonoBehaviour
     }
     void Attack_IsOn()
     {
+        Attack_DefaultPosition();
+        CheckGoalKick();
         Passer();
         AttackersGoToLonelyPoint();
+    }
+    void Attack_DefaultPosition()
+    {
+        Team team = attackTeam;
+        foreach (PublicPlayerData publicPlayerData in team.outfieldPublicPlayerDatas)
+        {
+            if (!FootballPositionCtrl.GetFieldPositionDataPosition("Default", "Default Attack", publicPlayerData, MatchComponents.ballPosition, out Vector3 targetPosition)) continue;
+            publicPlayerData.SetTargetPosition(targetPosition);
+        }
     }
     void Passer()
     {
@@ -208,6 +222,51 @@ public class Brains : MonoBehaviour
         }
         //cullPassPointEnable = false;
     }
+
+    public bool CheckGoalKick()
+    {
+        Vector2 ballPosition = new Vector2(MatchComponents.ballPosition.x, MatchComponents.ballPosition.z);
+        Team rivalTeam = passerPublicPlayerData.rivalTeam;
+        GoalComponents goalComponents = rivalTeam.SideOfField.goalComponents;
+        Vector2 left = new Vector2(goalComponents.left.position.x, goalComponents.left.position.z);
+        Vector2 right = new Vector2(goalComponents.right.position.x, goalComponents.right.position.z);
+        Vector2 center = new Vector2(goalComponents.centerOptimalPosition.position.x, goalComponents.centerOptimalPosition.position.z);
+        float distance = Vector3.Distance(ballPosition, center);
+        Vector2 midfield = new Vector2(MatchComponents.footballField.center.x, MatchComponents.footballField.center.z);
+        float maxFieldDistance = Vector2.Distance(center, midfield) * 2;
+        
+        currentWeight = CullPassPointsJob.EvaluatePosition(ballPosition,left,right,ballPosition,0, maxFieldDistance);
+        float maxWeight = getMaxWeight(0);
+        if (currentWeight > maxWeight)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    public float getMaxWeight(int node)
+    {
+        int entityCount = searchPlayData.getCullEntityCount(node);
+        float maxWeight = Mathf.NegativeInfinity;
+        for (int i = 0; i < entityCount; i++)
+        {
+            int entityIndex = searchPlayData.getCullEntity(node, i);
+            Entity entity = CullPassPoints.entities[entityIndex];
+            CullPassPointsComponent CullPassPointsComponent = CullPassPoints.entityManager.GetComponentData<CullPassPointsComponent>(entity);
+            DynamicBuffer<LonelyPointElement2> lonelyPointElements2 = CullPassPoints.entityManager.GetBuffer<LonelyPointElement2>(entity);
+            for (int j = 0; j < CullPassPointsComponent.sizeLonelyPoints; j++)
+            {
+                LonelyPointElement2 lonelyPointElement2 = lonelyPointElements2[j];
+                if (lonelyPointElement2.weight > maxWeight)
+                {
+                    maxWeight = lonelyPointElement2.weight;
+                }
+            }
+        }
+        return maxWeight;
+    }
     private void OnDrawGizmos()
     {
         if (Application.isPlaying && debug)
@@ -255,6 +314,23 @@ public class Brains : MonoBehaviour
                 info = "firstPlayerReachBall";
                 Handles.Label(position + Vector3.up * 0.7f, info, style);
             }
+
+            Team team = attackTeam;
+            if (team != null)
+            {
+                foreach (PublicPlayerData publicPlayerData in team.outfieldPublicPlayerDatas)
+                {
+                    if (!FootballPositionCtrl.GetFieldPositionDataPosition("Default", "Default Attack", publicPlayerData, MatchComponents.ballPosition, out Vector3 targetPosition)) continue;
+                    if (!team.getTypeFieldPositionOfPlayer(publicPlayerData.playerID, out TypeFieldPosition.Type fieldPositionType)) continue;
+                    info = fieldPositionType.ToString();
+                    Handles.Label(targetPosition + Vector3.up * 0.5f, info, style);
+                }
+            }
+            position = MatchComponents.ballPosition;
+
+            style.normal.textColor = new Color(0.4f, 0.7f, 0.9f);
+            info = "weight="+currentWeight*100;
+            Handles.Label(position + Vector3.up * 0.5f, info, style);
         }
     }
 }

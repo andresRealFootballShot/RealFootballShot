@@ -41,6 +41,8 @@ public class PublicPlayerData : MonoBehaviour
     public PlayerComponents playerComponents;
     public virtual bool IsGoalkeeper { get => false; }
     public bool IsBot = true;
+    public Team team { get; set; }
+    public Team rivalTeam { get; set; }
     public float getTimeToReachPosition(Vector3 position,float scope)
     {
         return playerComponents.GetTimeToReachPosition.getTimeToReachPointDelegate(position,scope);

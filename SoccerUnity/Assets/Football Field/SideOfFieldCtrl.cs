@@ -15,7 +15,7 @@ public class SideOfFieldCtrl : MonoBehaviour,ILoad
             this.goal = goal;
         }
     }*/
-    static Dictionary<string, SideOfFieldID> sideOfFieldTeams = new Dictionary<string, SideOfFieldID>();
+    public static Dictionary<string, SideOfFieldID> sideOfFieldTeams = new Dictionary<string, SideOfFieldID>();
     static Dictionary<SizeFootballFieldID, Dictionary<SideOfFieldID, SideOfField>> sideOfFields = new Dictionary<SizeFootballFieldID, Dictionary<SideOfFieldID, SideOfField>>();
     public Transform parent;
 
@@ -61,6 +61,13 @@ public class SideOfFieldCtrl : MonoBehaviour,ILoad
         {
             return false;
         }
+    }
+    public static SideOfField getRivalSideOfField(SideOfField sideOfField)
+    {
+        SideOfFieldID otherSideOfFieldID = sideOfField.Value==SideOfFieldID.One?SideOfFieldID.Two:SideOfFieldID.One;
+        SideOfField rivalSideOfField;
+        SideOfFieldCtrl.getSideOfField(otherSideOfFieldID, out rivalSideOfField);
+        return rivalSideOfField;
     }
     public static void alternateSideOfFieldsOfTeams()
     {

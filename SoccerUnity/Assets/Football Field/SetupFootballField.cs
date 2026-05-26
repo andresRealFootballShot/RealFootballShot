@@ -14,6 +14,7 @@ public class SetupFootballField : MonoBehaviour,ILoad
     public int loadLevel { get => _loadLevel; set => _loadLevel = value; }
     EventTrigger trigger = new EventTrigger();
     EventTrigger sideOfFieldAreTrigger;
+    bool isLoaded = false;
     public void Load(int level)
     {
         if (loadLevel == level)
@@ -59,6 +60,8 @@ public class SetupFootballField : MonoBehaviour,ILoad
 
     void setSideOfFieldsComponents()
     {
+        if (isLoaded) return;
+        isLoaded = true;
         MatchComponents.footballField.sideOfFields = SideOfFieldCtrl.getSideOfFieldsOfSizeFootballField(TypeMatch.SizeFootballField);
         MatchComponents.footballField.cornersComponents = new List<CornerComponents>();
         foreach (var sideOfField in MatchComponents.footballField.sideOfFields)
@@ -71,6 +74,8 @@ public class SetupFootballField : MonoBehaviour,ILoad
     }
     public void loadFieldDimensions(List<SideOfField> list)
     {
+        if (isLoaded) return;
+        isLoaded = true;
         MatchComponents.footballField.fieldLenght = 0;
         foreach (var sideOfField in list)
         {

@@ -33,7 +33,7 @@ public class CalculateNextPositionShedule : MonoBehaviour
     public Dictionary<PlayerPositionType, List<TypeFieldPosition.Type>> RightPlayerPosition_TypeFieldPosition = new Dictionary<PlayerPositionType, List<TypeFieldPosition.Type>>() {
              { PlayerPositionType.Forward, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightForward,} },
              { PlayerPositionType.CenterBack, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.CentreRightBack,} },
-             { PlayerPositionType.LateralBack, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RighttOutsideDefense,} },
+             { PlayerPositionType.LateralBack, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightOutsideDefense,} },
              { PlayerPositionType.CenterMidfield, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightCentreMidfield,} },
              { PlayerPositionType.EdgeMidfield, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightOutsideMidfield,} },
         };

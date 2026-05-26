@@ -36,6 +36,7 @@ public class Team : MonoBehaviour
     public int playersNoGoalkeeperCount { get; set; }
     public TeamHUD teamHUD;
     public SideOfField SideOfField { get; set; }
+    public SideOfField RivalSideOfField { get; set; }
     public Vector3 goalPosition { get => MyFunctions.setY0ToVector3( SideOfField.goalComponents.transform.position); }
     public void Load()
     {
@@ -98,8 +99,9 @@ public class Team : MonoBehaviour
             DebugsList.testing.print("setSideOfField team=" + TeamName + " | sideOfField=" + sideOfFieldID.ToString());
             sideOfFieldChanged.Invoke(sideOfField);
             SideOfField = sideOfField;
-
+            RivalSideOfField = SideOfFieldCtrl.getRivalSideOfField(SideOfField);
         }
+
         return true;
     }
     public List<TypeFieldPosition.Type> getAvailableFieldPositions()
@@ -269,6 +271,9 @@ public class Team : MonoBehaviour
     {
         yield return new WaitUntil(() => PublicPlayerDataList.all.ContainsKey(playerID));
         PublicPlayerData publicPlayerData = PublicPlayerDataList.all[playerID];
+        publicPlayerData.team = this;
+        Team rivalTeam = Teams.getRivalTeam(this.TeamName);
+        publicPlayerData.rivalTeam = rivalTeam;
         MatchEvents.publicPlayerDataOfAddedPlayerToTeamIsAvailable.Invoke(new PlayerAddedToTeamEventArgs(playerID, TeamName, publicPlayerData));
     }
     public bool assignFieldPositionToPlayer(string playerID, string typeFieldPositionString)

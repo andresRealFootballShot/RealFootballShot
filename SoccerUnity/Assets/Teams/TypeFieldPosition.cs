@@ -13,7 +13,7 @@ public class TypeFieldPosition : MonoVariable<TypeFieldPosition.Type>
         LeftOutsideMidfield,
         RightOutsideMidfield,
         LeftOutsideDefense,
-        RighttOutsideDefense,
+        RightOutsideDefense,
         CentreLeftBack,
         CentreRightBack,
         CentreBack,

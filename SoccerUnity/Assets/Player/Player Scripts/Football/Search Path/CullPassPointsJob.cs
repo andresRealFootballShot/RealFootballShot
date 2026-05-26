@@ -116,11 +116,10 @@ public struct CullPassPointsJob : IJobEntityBatch
                     lonelyPoint.parabolicPassData.defenseReachTime = defenseParabolicReachTime;
                     lonelyPoint.parabolicPassData.distanceDefenseReachBall = parabolicMinDistancePlayer_Ball;
                     lonelyPoint.parabolicPassData.defenseReachPosition = new Vector2(parabolicDefenseReachPosition.x, parabolicDefenseReachPosition.z);
-                     weight = EvaluatePosition(lonelyPoint.position, CullPassPointsParams.post1Position, CullPassPointsParams.post2Position, ballPosition, parabolicMinDistancePlayer_Ball, maxFieldDistance);
-                }
-                else
+                    weight = EvaluatePosition(lonelyPoint.position, CullPassPointsParams.post1Position, CullPassPointsParams.post2Position, ballPosition, parabolicMinDistancePlayer_Ball, maxFieldDistance);
+                }else
                 {
-                     weight = EvaluatePosition(lonelyPoint.position, CullPassPointsParams.post1Position, CullPassPointsParams.post2Position, ballPosition, straightMinDistancePlayer_Ball, maxFieldDistance);
+                    weight = EvaluatePosition(lonelyPoint.position, CullPassPointsParams.post1Position, CullPassPointsParams.post2Position, ballPosition, straightMinDistancePlayer_Ball, maxFieldDistance);
                     //Debug.Log("aaaaa ballReachTargetPositionTime=" + getV0DOTSResult.ballReachTargetPositionTime + " defenseReachTime=" + defenseReachTimeResult);
                 }
                 //calculateWeight(ref lonelyPoint, ref CullPassPointsParams, ballPosition,straightMinDistancePlayer_Ball, parabolicMinDistancePlayer_Ball);
@@ -232,7 +231,7 @@ public struct CullPassPointsJob : IJobEntityBatch
         // --- DISTANCIA AL BALÓN ---
         float distanceToBall = Vector2.Distance(lonelyPoint, ballPosition);
         // Penalizamos posiciones muy lejos del balón, pero no demasiado cerca
-        float ballWeight = 1f - Mathf.Clamp01((distanceToBall-30) / 30);
+        float ballWeight = Mathf.Clamp01(1f - Mathf.Clamp01((distanceToBall-5) / 30));
 
         // --- PRESIÓN DEL RIVAL ---
         // Si MinDistanceRival_Ball > 0 significa que el rival puede llegar antes: penalizamos

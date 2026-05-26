@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System;
+using static FieldPositionsData;
+using UnityEngine.UIElements;
 
 [CustomEditor(typeof(FootballPositionCtrl))]
 public class FootballPositionCtrlEditor : Editor
@@ -604,9 +606,58 @@ public class FootballPositionCtrlEditor : Editor
         }
 
         if (t.debugRadios) DrawRaidos(fieldPositionParameters,t);
+        if (t.debugTeam2) DebugLineup2();
         //DrawPositions(fieldPositionParameters,t);
         //fieldPositionParameters.selectedPoint = selectedPoint;
         //t.selectedFieldPositionParameters = fieldPositionParameters;
+    }
+    void DebugLineup2()
+    {
+        var t = (target as FootballPositionCtrl);
+        PressureFieldPositionDatas PressureFieldPositionDatas;
+        if (!t.getPressureFieldPositions(out PressureFieldPositionDatas,t.lineupName2,t.pressureName2)) return;
+
+        FieldPositionsData fieldPositionParameters;
+        if (!t.GetSelectedFieldPositionParameters(out fieldPositionParameters)) return;
+        
+        Vector2 weightyValue = Vector2.zero;
+        
+        SideOfField sideOfField = t.sideOfField2;
+        if (sideOfField == null) return;
+        Vector3 globalPosition = t.getGlobalPosition(t.horizontalPositionType, t.normailizedBallPosition, sideOfField);
+        Vector2 normalizedBallPosition = t.getNormalizedPosition(t.horizontalPositionType, globalPosition);
+        float offsideWeight;
+        float offsideLineValueY = t.GetOffsideLineGetValue(PressureFieldPositionDatas, normalizedBallPosition, out offsideWeight);
+        foreach (var FieldPositionData in PressureFieldPositionDatas.FieldPositionDatas)
+        {
+            Handles.color = Color.black;
+            t.getWeightyValue4(normalizedBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out weightyValue);
+
+            Handles.SphereHandleCap(0, t.getGlobalPosition(t.horizontalPositionType, weightyValue, sideOfField) + Vector3.up * 0.25f, Quaternion.identity, 0.5f, EventType.Repaint);
+            string info = FieldPositionData.playerPositionType.ToString();
+            GUIStyle style = new GUIStyle();
+            style.fontSize = 13;
+            style.normal.textColor = Color.red;
+            if (t.debugText)
+                Handles.Label(t.getGlobalPosition(t.horizontalPositionType, weightyValue, sideOfField) + Vector3.up * 1f, info, style);
+
+            if (t.debugSymmetricalPositions)
+            {
+                Vector2 weightValue2 = Vector2.zero;
+                Vector2 symmetricalBallPosition = normalizedBallPosition;
+                symmetricalBallPosition.x = 1 - symmetricalBallPosition.x;
+                t.getWeightyValue4(symmetricalBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out weightValue2);
+                Handles.color = Color.grey;
+                FieldPositionsData.HorizontalPositionType otherHorizontalPositionType = t.getOtherHorizontalPositionType(t.horizontalPositionType);
+                Handles.SphereHandleCap(0, t.getGlobalPosition(otherHorizontalPositionType, weightValue2, sideOfField) + Vector3.up * 0.25f, Quaternion.identity, 0.5f, EventType.Repaint);
+                info = FieldPositionData.playerPositionType.ToString();
+                style.fontSize = 13;
+                style.normal.textColor = Color.red;
+                if (t.debugText)
+                    Handles.Label(t.getGlobalPosition(otherHorizontalPositionType, weightValue2, sideOfField) + Vector3.up * 1f, info, style);
+            }
+
+        }
     }
     void DrawPositions(FieldPositionsData fieldPositionParameters, FootballPositionCtrl t,float offsidePositionY,float offsideWeight)
     {

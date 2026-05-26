@@ -7,6 +7,7 @@ public class Teams : MonoBehaviour,ILoad,IClearBeforeLoadScene
     //public Team teamRed, teamBlue;
     public static Dictionary<string,Team> teamsDictionary = new Dictionary<string, Team>();
     public static List<Team> teamsList { get { return new List<Team>(teamsDictionary.Values); } }
+    public List<Team> teamsList2;
     public static int staticLoadLevel = MatchEvents.staticLoadLevel+1;
     public int loadLevel { get => staticLoadLevel; set => staticLoadLevel = value; }
     public static MyEvent teamsAreLoadedEvent = new MyEvent(nameof(Teams)+" | "+nameof(teamsAreLoadedEvent));
