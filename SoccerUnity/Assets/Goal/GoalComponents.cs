@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GoalComponents : MonoBehaviour
 {
-    public Transform centerOptimalPosition,centerMatchStoppedState, left, right, down, up, maxYTrans,forward;
+    public Transform centerOptimalPosition,centerMatchStoppedState, left, right, down, up, maxYTrans,forward,bottomLeft,bottomRight,topLeft,topRight;
 
     public PlaneWithLimits goalPlane;
     public PlaneWithLimits ballGoesInsidePlane;

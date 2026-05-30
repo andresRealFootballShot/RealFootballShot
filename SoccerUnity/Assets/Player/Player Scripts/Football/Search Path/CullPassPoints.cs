@@ -42,8 +42,7 @@ public class CullPassPoints : MonoBehaviour
     public string teamName_Defense = "Red";
     public string teamName_Attacker = "Blue";
     public List<Transform> testLonelyPoints;
-
-
+    public ShotResult bestShot;
     public Team defenseTeam{ get; set; }
     public Team attackTeam { get; set; }
 
@@ -68,6 +67,7 @@ public class CullPassPoints : MonoBehaviour
     public SearchPlayData searchPlayData;
     float fieldOffset = 2;
     CullPassPointsSystem cullPassPointsSystem;
+    ShotSystem ShotSystem;
     [HideInInspector]
     public int teamA_size, teamB_size,teamAttack_start,teamDefense_start,teamAttack_size,teamDefense_size;
     bool teamA_isAttacker;
@@ -90,6 +90,8 @@ public class CullPassPoints : MonoBehaviour
     {
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
         cullPassPointsSystem = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<CullPassPointsSystem>();
+        ShotSystem = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<ShotSystem>();
+        ShotSystem.CullPassPoints = this;
         cullPassPointsSystem.CullPassPoints = this;
         cullPassPointsSystem.SearchLonelyPointsManager = SearchLonelyPointsManager;
         int previous=1;

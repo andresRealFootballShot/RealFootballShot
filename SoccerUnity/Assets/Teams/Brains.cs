@@ -234,10 +234,14 @@ public class Brains : MonoBehaviour
         float distance = Vector3.Distance(ballPosition, center);
         Vector2 midfield = new Vector2(MatchComponents.footballField.center.x, MatchComponents.footballField.center.z);
         float maxFieldDistance = Vector2.Distance(center, midfield) * 2;
-        
+
+        Vector2 dir1 = left - ballPosition;
+        Vector2 dir2 = right - ballPosition;
+        float angle = Vector2.Angle(dir1, dir2);
+        float weight2 = (angle / 21) + (1-(distance/21));
         currentWeight = CullPassPointsJob.EvaluatePosition(ballPosition,left,right,ballPosition,0, maxFieldDistance);
         float maxWeight = getMaxWeight(0);
-        if (currentWeight > maxWeight)
+        if (currentWeight > maxWeight&& isLookingToGoal(goalComponents))
         {
             return true;
         }
@@ -245,6 +249,17 @@ public class Brains : MonoBehaviour
         {
             return false;
         }
+    }
+    bool isLookingToGoal(GoalComponents goalComponents)
+    {
+        Vector2 center = new Vector2(goalComponents.centerOptimalPosition.position.x, goalComponents.centerOptimalPosition.position.z);
+        Vector2 ballPosition = new Vector2(MatchComponents.ballPosition.x, MatchComponents.ballPosition.z);
+        Vector2 playerPos = new Vector2(passerPublicPlayerData.position.x,passerPublicPlayerData.position.z);
+        Vector2 dir1 = center- ballPosition;
+        Vector2 dir2 = ballPosition - playerPos;
+        float angle = Vector2.Angle(dir1, dir2);
+        float angle2 = Vector2.Angle(dir1, passerPublicPlayerData.playerComponents.bodyY0Forward);
+        return angle < 90 && angle2<90;
     }
     public float getMaxWeight(int node)
     {
@@ -331,6 +346,9 @@ public class Brains : MonoBehaviour
             style.normal.textColor = new Color(0.4f, 0.7f, 0.9f);
             info = "weight="+currentWeight*100;
             Handles.Label(position + Vector3.up * 0.5f, info, style);
+
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(CullPassPoints.bestShot.target, 0.2f);
         }
     }
 }
