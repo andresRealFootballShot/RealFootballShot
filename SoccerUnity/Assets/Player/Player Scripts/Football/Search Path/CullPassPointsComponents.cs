@@ -155,7 +155,8 @@ namespace CullPositionPoint
         public float maxAngleForRun, maxAngleForRun2;
         public float maxSpeedRotation;
         public float minSpeedForRotate, minSpeedForRotate2;
-        public PlayerPositionElement(Vector2 position, Vector2 bodyForward, Vector2 normalizedVelocity, float currentSpeed, float maxSpeedForReachBall,float scope=0,float acceleration = 0, float decceleration = 0,float maxAngleForRun = 0,float maxSpeedRotation = 0, float minSpeedForRotate = 0)
+        public float maxSpeed;
+        public PlayerPositionElement(Vector2 position, Vector2 bodyForward, Vector2 normalizedVelocity, float currentSpeed, float maxSpeedForReachBall,float scope=0,float acceleration = 0, float decceleration = 0,float maxAngleForRun = 0,float maxSpeedRotation = 0, float minSpeedForRotate = 0,float maxSpeed=10)
         {
             this.position = position;
             this.bodyForward = bodyForward;
@@ -170,11 +171,12 @@ namespace CullPositionPoint
             this.maxSpeedRotation = maxSpeedRotation;
             this.minSpeedForRotate = minSpeedForRotate;
             minSpeedForRotate2 = 0;
-        }
+            this.maxSpeed=maxSpeed;
+    }
     }
     public struct PlayerGenericParams
     {
-        public float maxSpeed;
+        
         public float goalkeeperMaxSpeed;
         public float maxKickForce;
         public float heightJump;

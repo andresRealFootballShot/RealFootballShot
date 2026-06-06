@@ -2,8 +2,9 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 
-[BurstCompile]
+//[BurstCompile]
 public struct ShotJob : IJobParallelFor
 {
     [ReadOnly] public NativeArray<ShotCandidate> candidates;
@@ -25,24 +26,23 @@ public struct ShotJob : IJobParallelFor
         {
             float t = (left + right) * 0.5f;
 
-            GetV0BurstResult r = default;
+            GetV0DOTSResultBurst r2 = default;
 
             ParabolicPassBurst.GetV0(
                 c.ballPos,
                 c.target,
-                ref r,
-                c.maxKickForce,
+                ref r2,
+                c.maxKickForce,1000,0.1f,
                 t,
                 c.k,
                 c.vf);
-
-            if (!r.foundedResult)
+            if (!r2.foundedResult)
             {
                 left = t;
                 continue;
             }
 
-            if (r.maxKickForceReached)
+            if (r2.maxKickForceReached)
             {
                 right = t;
                 continue;
@@ -54,20 +54,31 @@ public struct ShotJob : IJobParallelFor
                 continue;
             }
 
-            if (GoalkeeperBlocks(c, r.v0, t))
+            if (GoalkeeperBlocks(c, r2.v0, t,out float goalkeeperBallDistance))
             {
                 left = t;
                 continue;
             }
+            float distToCenter =
+    math.distance(c.target, c.goalCenter);
+            float centerScore =
+    1f - math.saturate(
+        distToCenter / c.goalHalfWidth);
 
+            float speedScore =
+                1f - math.saturate(
+                    r2.v0Magnitude / c.maxKickForce);
+            if (r2.v0Magnitude < 7 ) speedScore = 0;
+            float goalkeeperBallDistanceScore = Mathf.Clamp01(goalkeeperBallDistance / 5);
             float score =
-                math.abs(c.target.x) - r.v0Magnitude;
+                centerScore * 100f +
+                speedScore * 20f+ goalkeeperBallDistanceScore*20;
 
             if (score > best.score)
             {
                 best.valid = true;
                 best.target = c.target;
-                best.v0 = r.v0;
+                best.v0 = r2.v0;
                 best.time = t;
                 best.score = score;
             }
@@ -111,28 +122,36 @@ public struct ShotJob : IJobParallelFor
     }
 
     bool GoalkeeperBlocks(
-        ShotCandidate c,
-        float3 v0,
-        float totalTime)
+      ShotCandidate c,
+      float3 v0,
+      float totalTime,out float distance)
     {
+        distance = Mathf.Infinity;
         for (int i = 1; i <= 10; i++)
         {
-            float t = totalTime * i / 10f;
+            float t =
+                totalTime * i / 10f;
 
             float3 ball =
-                ParabolicPassBurst.Velocity(
-                    t, v0, c.k, c.vf);
+                ParabolicPassBurst.GetPositionAtTime(
+                    t,
+                    c.ballPos,
+                    v0,
+                    c.k,
+                    c.vf);
 
             if (ball.y > c.goalkeeperMaxHeight)
                 continue;
 
             float dist =
                 math.distance(
-                    new float3(c.goalkeeperPos.x, ball.y, c.goalkeeperPos.z),
+                    c.goalkeeperPos,
                     ball);
-
             if (dist / c.goalkeeperSpeed <= t)
+            {
+                distance = dist;
                 return true;
+            }
         }
 
         return false;

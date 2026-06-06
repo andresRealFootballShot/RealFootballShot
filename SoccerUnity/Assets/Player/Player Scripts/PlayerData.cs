@@ -17,5 +17,6 @@ public class PlayerData
     public float HorizontalSpeed { get; set; }
     public float RotationSpeed { get; set; }
     public float Scope { get; set; }
+    public float defaultScope { get; set; }
 
 }

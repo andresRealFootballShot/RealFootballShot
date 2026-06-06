@@ -208,7 +208,7 @@ public class CullPassPointsDebug : MonoBehaviour
     {
         print("reach offsideLine");
         attackPublicPlayerDataPass.playerComponents.movementCtrl.SetTargetPosition(debugLonelyPointElement.Get3DPosition());
-        attackPublicPlayerDataPass.playerComponents.movementCtrl.scope = attackPublicPlayerDataPass.playerComponents.movementCtrl.ballScope;
+        attackPublicPlayerDataPass.playerComponents.movementCtrl.scope = attackPublicPlayerDataPass.playerComponents.movementCtrl.defaultScope;
         if(defensePublicPlayerDataPass.playerComponents.movementCtrl!=null)
         defensePublicPlayerDataPass.playerComponents.movementCtrl.SetTargetPosition(debugLonelyPointElement.Get3DPosition());
     }
@@ -383,8 +383,8 @@ public class CullPassPointsDebug : MonoBehaviour
          {
              for (int i = 0; i < debugWeightLonelyPooints.Count; i++)
              {
-                 if (debugLonelyPointIndex == debugWeightLonelyPooints[i].index)
-                     DrawLonelyPoint(debugWeightLonelyPooints[i], searchPlayData.GetBallLonelyPoint(debugNode), debugNode, i, "Lonely Point", new Color(0.6f, 0.9f, 0.75f));
+                 if (debugLonelyPointIndex < debugWeightLonelyPooints.Count)
+                     DrawLonelyPoint(debugWeightLonelyPooints[debugLonelyPointIndex], searchPlayData.GetBallLonelyPoint(debugNode), debugNode, i, "Lonely Point", new Color(0.6f, 0.9f, 0.75f));
              }
          }
         if (debugPassLonelyPoint)
@@ -639,7 +639,7 @@ LonelyPointElement2 GetDebugLonelyPoint(int index)
      if (debugText)
          Handles.Label(pos + Vector3.up * 1.25f, text, style);
      
-     if (debugAllAttackPass||(debugIndexAttackPass&&debugLonelyPointIndex==lonelyPointElement.index))
+     if (debugAllAttackPass||(debugIndexAttackPass && (CullPassPoints.firstReachLonelyPoints[0].index==lonelyPointElement.index || lonelyPointElement.index== debugLonelyPointIndex)))
      {
         Team attackTeam = Teams.getTeamByName(teamName_Attacker);
         Vector2 playerPos2 = searchPlayData.GetPlayerPosition(0, lonelyPointElement.attackReachIndex);

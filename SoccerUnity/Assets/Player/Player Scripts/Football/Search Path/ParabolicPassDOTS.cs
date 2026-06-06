@@ -175,6 +175,53 @@ public class ParabolicPassDOTS
             result.ballReachTargetPositionTime = t2;
         }
     }
+    public static void getV02(Vector3 pos0, Vector3 posf, ref GetV0DOTSResult result, float maxKickForce, float maxControlSpeed, float maxControlSpeedLerpDistance, float t, float k, float vfMagnitude)
+    {
+        float d = Vector3.Distance(pos0, MyFunctions.setYToVector3(posf, pos0.y));
+        maxControlSpeed = Mathf.Lerp(2, maxControlSpeed, d / maxControlSpeedLerpDistance);
+        Vector3 v0 = ParabolaWithDrag_GetV0(t, pos0, posf, k, 9.8f);
+        v0.y = Mathf.Clamp(v0.y, 0, maxControlSpeed);
+        Vector3 vt = Vector3.zero;
+        ParabolicWithDragDOTS.GetVelocityAtTime(t, v0, k, vfMagnitude, ref vt);
+        result.ballReachTargetPositionTime = t;
+        Vector3 vt2 = vt;
+        vt2.y = 0;
+        result.foundedResult = true;
+        if ((vt2.magnitude >= maxControlSpeed || t == 0))
+        {
+            Vector3 dir = (posf - pos0).normalized;
+            //Vector3 v02 = getV0ByVt(maxControlSpeed, dir, k, t,vfMagnitude);
+            Vector3 v02 = StraightXZDragPathDOTS.getV0ByVt(maxControlSpeed, pos0, posf, k);
+            result.v0 = v02;
+            Vector3 v03 = new Vector3(result.v0.x, 0, result.v0.z);
+            float t2 = StraightXZDragPathDOTS.getT(pos0, posf, v03.magnitude, k);
+            result.v0.y = ParabolaWithDrag_GetVY0(t2, pos0, posf, k, 9.8f);
+            result.v0.y = Mathf.Clamp(result.v0.y, 0, maxControlSpeed + 0.5f);
+            result.v0Magnitude = result.v0.magnitude;
+            result.maximumControlSpeedReached = true;
+            result.vt = maxControlSpeed;
+            
+        }
+        else
+        {
+            result.v0 = v0;
+            result.v0Magnitude = v0.magnitude;
+        }
+        if (result.v0Magnitude > maxKickForce)
+        {
+            result.v0 = result.v0.normalized * maxKickForce;
+            result.v0Magnitude = maxKickForce;
+            result.maxKickForceReached = true;
+        }
+        result.maximumControlSpeedReached = result.vt >= maxControlSpeed;
+        if (result.maximumControlSpeedReached || result.maxKickForceReached)
+        {
+            Vector3 v0mzx = result.v0;
+            v0mzx.y = 0;
+            float t2 = StraightXZDragPathDOTS.getT(d, v0mzx.magnitude, k);
+            result.ballReachTargetPositionTime = t2;
+        }
+    }
     static Vector3 getFirstMinVy(Vector3 firstPoint, float time, ref GetPassV0Element GetPassV0Element)
     {
         Vector3 v0 = ParabolaWithDrag_GetV0(time, GetPassV0Element.Pos0, firstPoint, GetPassV0Element.k, GetPassV0Element.g);

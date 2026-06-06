@@ -157,14 +157,14 @@ namespace DOTS_ChaserDataCalculation
             float d3 = d2 - playerData.scope;
             float d = AccelerationPath.getDistanceWhereStartDecelerate(v0Magnitude, playerData.maxSpeedForReachBall, a, -da, d3);
             float t3, t4, t8, result;
-            float x3 = Mathf.Abs(AccelerationPath.getX2(v0Magnitude, PlayerGenericParams.maxSpeed, a));
+            float x3 = Mathf.Abs(AccelerationPath.getX2(v0Magnitude, playerData.maxSpeed, a));
             if (x3 < d)
             {
-                float t5 = AccelerationPath.getT(PlayerGenericParams.maxSpeed, v0Magnitude, a);
-                float x4 = Mathf.Abs(AccelerationPath.getX2(PlayerGenericParams.maxSpeed, playerData.maxSpeedForReachBall, da));
+                float t5 = AccelerationPath.getT(playerData.maxSpeed, v0Magnitude, a);
+                float x4 = Mathf.Abs(AccelerationPath.getX2(playerData.maxSpeed, playerData.maxSpeedForReachBall, da));
                 float x5 = d3 - x3 - x4;
-                float t6 = x5 / PlayerGenericParams.maxSpeed;
-                float t7 = AccelerationPath.getT(playerData.maxSpeedForReachBall, PlayerGenericParams.maxSpeed, da);
+                float t6 = x5 / playerData.maxSpeed;
+                float t7 = AccelerationPath.getT(playerData.maxSpeedForReachBall, playerData.maxSpeed, da);
                 t8 = t5 + t6 + t7;
                 result = t1 + t2 + t8;
             }
@@ -287,12 +287,16 @@ namespace DOTS_ChaserDataCalculation
             Vector3 normalizedForwardVelocity,
             ref PlayerGenericParams playerParams,
             Vector3 targetPosition,
-            PlayerPositionElement playerData,float targetSpeed,float scope)
+            PlayerPositionElement playerData,float targetSpeed,float scope,out Vector3 posAfterBrake,out float tBrake,out float brakeSpeed)
         {
+
+            brakeSpeed = currentSpeed;
             if (MyFunctions.Vector3IsNan(targetPosition) ||
                 targetPosition.Equals(Vector3.positiveInfinity) ||
                 targetPosition.Equals(Vector3.negativeInfinity))
             {
+                posAfterBrake = Vector3.positiveInfinity;
+                tBrake = Mathf.Infinity;
                 return Mathf.Infinity;
             }
 
@@ -308,9 +312,8 @@ namespace DOTS_ChaserDataCalculation
 
             float angle = Vector3.Angle(playerDir, toTargetInitial.normalized);
 
-            float tBrake = 0f;
-            Vector3 posAfterBrake = playerPos;
-
+             tBrake = 0f;
+            posAfterBrake = playerPos;
             // =========================
             // FASE 0 – FRENO (idéntica)
             // =========================
@@ -333,6 +336,7 @@ namespace DOTS_ChaserDataCalculation
                     posAfterBrake = posTmp;
                     tBrake = tTmp;
                     speed = Mathf.Clamp(playerData.minSpeedForRotate, 0, speed);
+                    brakeSpeed = speed;
                 }
                 else
                 {
@@ -346,6 +350,7 @@ namespace DOTS_ChaserDataCalculation
 
                     posAfterBrake += playerDir * dBrake;
                     speed = Mathf.Clamp(playerData.minSpeedForRotate2, 0, speed);
+                    brakeSpeed = speed;
                 }
             }
 
@@ -363,7 +368,7 @@ namespace DOTS_ChaserDataCalculation
                 speed,
                 playerData.acceleration,
                 playerData.decceleration,
-                playerParams.maxSpeed,
+                playerData.maxSpeed,
                 targetSpeed
             );
 

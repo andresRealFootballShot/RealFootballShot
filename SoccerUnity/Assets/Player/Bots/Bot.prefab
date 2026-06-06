@@ -3037,6 +3037,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a160b6cf87acd2429375e65b4bb3fd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  kickPeriod: 0.25
+  kickAvailable: 1
+  startKickTime: -1
 --- !u!114 &7809148508847226821
 MonoBehaviour:
   m_ObjectHideFlags: 0

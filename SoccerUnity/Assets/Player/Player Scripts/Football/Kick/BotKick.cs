@@ -23,10 +23,11 @@ public class BotKick : PlayerComponent
     {
         if (ReachBall())
         {
-            
-             //EditorApplication.isPaused = true;
+
+            //EditorApplication.isPaused = true;
             KickEventArgs kickEventArgs = new KickEventArgs(passData.passVelocity, MatchComponents.ballRigidbody.velocity, MatchComponents.ballRigidbody.angularVelocity, MatchComponents.ballRigidbody.position, publicPlayerData.playerID);
             MatchComponents.ballRigidbody.velocity = passData.passVelocity;
+            MatchComponents.ballRigidbody.angularVelocity = Vector3.zero;
             Invoke(nameof(enableKick), kickPeriod);
             kickAvailable = false;
             startKickTime = Time.time;
@@ -48,6 +49,6 @@ public class BotKick : PlayerComponent
     public bool ReachBall()
     {
         //return ballBodyAngle < 80 && BodyBallXZDistance < scope && ballPosition.y <= bodyHeight + ballRadio && kickAvailable;
-        return BodyBallXZDistance < scope && ballPosition.y <= bodyHeight + ballRadio && kickAvailable;
+        return BodyBallXZDistance < ballScope && ballPosition.y <= bodyHeight + ballRadio && kickAvailable;
     }
 }

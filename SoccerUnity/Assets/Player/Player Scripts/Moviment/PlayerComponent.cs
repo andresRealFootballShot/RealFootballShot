@@ -53,7 +53,7 @@ public class PlayerComponent : MonoBehaviour
     
     protected float BodyTargetXZDistance { get => Vector3.Distance(MyFunctions.setYToVector3(bodyPosition, 0), MyFunctions.setYToVector3(TargetPosition, 0)); }
     protected float BodyTargetXZScpDistance { get => BodyTargetXZDistance-scope; }
-    protected float BodyBallXZDistance { get => Vector3.Distance(MyFunctions.setYToVector3(bodyPosition, 0), MyFunctions.setYToVector3(ballPosition, 0)); }
+    public float BodyBallXZDistance { get => Vector3.Distance(MyFunctions.setYToVector3(bodyPosition, 0), MyFunctions.setYToVector3(ballPosition, 0)); }
     public float BodyBallXZScpDistance { get => BodyBallXZDistance-scope; }
     protected Quaternion bodyRotation { get => playerComponents.bodyTransform.rotation; set => playerComponents.bodyTransform.rotation = value; }
     protected Rigidbody bodyRigidbody { get => playerComponents.rigidbody; }
@@ -62,6 +62,7 @@ public class PlayerComponent : MonoBehaviour
     protected Vector3 bodyRigidbodyPosition { get => playerComponents.rigidbody.position; }
     protected float ballBodyAngle { get => Vector3.Angle(bodyY0Forward, bodyBallY0Direction); }
     public float scope { get => playerData.Scope; set => playerData.Scope = value; }
+    public float defaultScope { get => playerData.defaultScope; set => playerData.defaultScope = value; }
     public float ballScope { get => playerComponents.soccerPlayerData.scopeOffset + bodyRadio + MatchComponents.ballRadio; }
     public float passScope { get => playerComponents.soccerPlayerData.passScopeOffset + bodyRadio + MatchComponents.ballRadio; }
     

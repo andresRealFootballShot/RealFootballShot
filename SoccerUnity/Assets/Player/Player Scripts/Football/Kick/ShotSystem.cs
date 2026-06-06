@@ -76,7 +76,9 @@ public partial class ShotSystem : SystemBase
         float3 BR = goalComponents.bottomRight.position;
         float3 TL = goalComponents.topLeft.position;
         float3 TR = goalComponents.topRight.position;
-
+        float3 center = goalComponents.centerOptimalPosition.position;
+        float goalWidth = math.distance(BL, BR);
+        float goalHalfWidth = goalWidth * 0.5f;
         int xSteps = 6;
         int ySteps = 4;
 
@@ -106,6 +108,7 @@ public partial class ShotSystem : SystemBase
 
                 for (int x = 0; x <= xSteps; x++)
                 {
+                    //if(y!=2||x!=3)continue;
                     float fx = x / (float)xSteps;
                     if (id >= arr.Length) break;
                     arr[id] = new ShotCandidate
@@ -124,13 +127,15 @@ public partial class ShotSystem : SystemBase
                         goalkeeperMaxHeight =
                             goalkeeperPublicPlayerData.values.maxHeightInArea,
 
+                        goalCenter = center,
+                        goalHalfWidth= goalHalfWidth,
                         maxKickForce = 35f,
 
                         minTime = 0.15f,
                         maxTime = 1.8f,
 
-                        k = 0.2f,
-                        vf = 9.81f / 0.2f
+                        k = MatchComponents.ballRigidbody.drag,
+                        vf = 9.81f / MatchComponents.ballRigidbody.drag
                     };
                     id++;
                 }
@@ -165,7 +170,8 @@ public struct ShotCandidate
     public float3 goalkeeperPos;
     public float goalkeeperSpeed;
     public float goalkeeperMaxHeight;
-
+    public float3 goalCenter;
+    public float goalHalfWidth;
     public float maxKickForce;
 
     public float minTime;

@@ -52,7 +52,7 @@ public class BotMoveFunctions : PlayerComponent
         else
         {
             avoidOffside = false;
-            publicPlayerData.playerComponents.movementCtrl.scope = publicPlayerData.playerComponents.movementCtrl.ballScope;
+            publicPlayerData.playerComponents.movementCtrl.scope = publicPlayerData.playerComponents.movementCtrl.defaultScope;
             publicPlayerData.playerComponents.movementCtrl.SetTargetPosition(targetPosition);
         }
     }

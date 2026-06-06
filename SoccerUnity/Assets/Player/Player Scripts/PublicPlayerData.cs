@@ -50,7 +50,9 @@ public class PublicPlayerData : MonoBehaviour
     private void Start()
     {
         addedChaserDataEvent.Value = new MyEvent(nameof(addedChaserDataEvent) + GetInstanceID());
-        playerComponents.scope = playerComponents.ballScope;
+       
+        playerComponents.defaultScope = playerComponents.ballScope*0.7f;
+        playerComponents.scope = playerComponents.defaultScope;
     }
      
     public static void getPlayerData(PublicPlayerData publicPlayerData, int index, out PlayerDataComponent playerDataComponent)
@@ -116,6 +118,11 @@ public class PublicPlayerData : MonoBehaviour
     {
 
         return playerComponents.botKick.Kick(passData);
+    }
+    public bool ReachBall()
+    {
+
+        return playerComponents.botKick.ReachBall();
     }
     public void SetTargetPosition(Vector3 targetPosition)
     {
