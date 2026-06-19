@@ -4,7 +4,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-//[BurstCompile]
+[BurstCompile]
 public struct ShotJob : IJobParallelFor
 {
     [ReadOnly] public NativeArray<ShotCandidate> candidates;
@@ -15,7 +15,10 @@ public struct ShotJob : IJobParallelFor
     public void Execute(int index)
     {
         ShotCandidate c = candidates[index];
-
+        if (BotControl.CheckBallControl(c))
+        {
+            return;
+        }
         ShotResult best = default;
         best.score = -999999f;
 
@@ -35,7 +38,7 @@ public struct ShotJob : IJobParallelFor
                 c.maxKickForce,1000,0.1f,
                 t,
                 c.k,
-                c.vf);
+                c.vf,c.ballSpeed);
             if (!r2.foundedResult)
             {
                 left = t;
@@ -59,6 +62,7 @@ public struct ShotJob : IJobParallelFor
                 left = t;
                 continue;
             }
+            
             float distToCenter =
     math.distance(c.target, c.goalCenter);
             float centerScore =
@@ -147,7 +151,7 @@ public struct ShotJob : IJobParallelFor
                 math.distance(
                     c.goalkeeperPos,
                     ball);
-            if (dist / c.goalkeeperSpeed <= t)
+            if ((dist / c.goalkeeperSpeed)+c.reflex <= t)
             {
                 distance = dist;
                 return true;

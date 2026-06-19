@@ -13,6 +13,9 @@ public class PublicPlayerData : MonoBehaviour
     public Variable<Vector3> initPosition = new Variable<Vector3>();
     public Variable<Quaternion> initRotation = new Variable<Quaternion>();
     public float maxSpeed { get {return maxSpeedVar.Value; } set { maxSpeedVar.Value=value; } }
+    public bool kickAvailable { get {return playerComponents.botKick.kickAvailable; }  }
+    public BotKick BotKick { get {return playerComponents.botKick; }  }
+    public BotControl BotControl { get {return playerComponents.BotControl; }  }
     public Vector3 velocity { get { return playerData.Velocity; } set { playerData.Velocity = value; } }
     public float speed { get { return playerData.Speed; }}
     public float resistance { get { return resistanceVar.Value; } set { resistanceVar.Value = value; } }
@@ -20,11 +23,12 @@ public class PublicPlayerData : MonoBehaviour
     public Vector3 position { get { return bodyTransform.position; } set { bodyTransform.position = value; } }
     public Vector3 InitPosition { get { return initPosition.Value; } set { initPosition.Value = value; } }
     public Quaternion InitRotation { get { return initRotation.Value; } set { initRotation.Value = value; } }
+    public SoccerPlayerData SoccerPlayerData { get { return playerComponents.soccerPlayerData; }}
     //public float maximumJumpHeight { get; set; }
     public SortedList<float, Area> maximumJumpHeights { get; set; } = new SortedList<float, Area>();
     public string playerName { get { return playerNameVar.Value; } set { playerNameVar.Value = value; } }
     public string playerID { get { return playerIDMono.getStringID(); } set { playerIDMono.RemoteLoad(value); } }
-
+    
     public List<ChaserData> ChaserDataList { get; set; } = new List<ChaserData>();
     //public MyEvent addedChaserDataEvent;
     public Variable<MyEvent> addedChaserDataEvent = new Variable<MyEvent>();
@@ -117,7 +121,7 @@ public class PublicPlayerData : MonoBehaviour
     public bool Kick(PassData passData)
     {
 
-        return playerComponents.botKick.Kick(passData);
+        return playerComponents.botKick.CheckKick(passData);
     }
     public bool ReachBall()
     {

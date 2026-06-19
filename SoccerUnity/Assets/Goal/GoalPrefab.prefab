@@ -2213,11 +2213,11 @@ MonoBehaviour:
   wirst1: {fileID: 549468529120331945}
   sideOfField: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   pass: {fileID: 655011190266930550}
   test: {fileID: 0}
   enableRandomPass: 0
-  enableMotion: 0
+  enableMotion: 1
 --- !u!114 &655011190266930550
 MonoBehaviour:
   m_ObjectHideFlags: 0

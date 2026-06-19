@@ -277,6 +277,7 @@ public class CullPassPoints : MonoBehaviour
             BallParamsComponent.groundY= MatchComponents.ballComponents.radio * MatchComponents.ballComponents.transBall.localScale.x;
             BallParamsComponent.bounciness = MatchComponents.ballComponents.bounciness;
             BallParamsComponent.BallPosition = MatchComponents.ballRigidbody.position;
+            BallParamsComponent.ballVelocity= MatchComponents.ballRigidbody.velocity;
             //searchPlayData.getSortedNodes(ref cullPassPointsSystem.Snodes, 0);
             searchPlayData.SetBallPosition(0, MatchComponents.ballRigidbody.position);
             entityManager.SetComponentData<BallParamsComponent>(entity, BallParamsComponent);
@@ -298,6 +299,7 @@ public class CullPassPoints : MonoBehaviour
                 BallParamsComponent BallParamsComponent = entityManager.GetComponentData<BallParamsComponent>(entity);
                 BallParamsComponent.BallPosition = ballPosition;
                 BallParamsComponent.t0 = t0;
+                BallParamsComponent.ballVelocity = MatchComponents.ballRigidbody.velocity;
                 entityManager.SetComponentData<BallParamsComponent>(entity, BallParamsComponent);
                 
             }
@@ -317,6 +319,7 @@ public class CullPassPoints : MonoBehaviour
 
                 BallParamsComponent BallParamsComponent = entityManager.GetComponentData<BallParamsComponent>(entity);
                 BallParamsComponent.BallPosition = ballPosition;
+                BallParamsComponent.ballVelocity = MatchComponents.ballRigidbody.velocity;
                 entityManager.SetComponentData<BallParamsComponent>(entity, BallParamsComponent);
             }
             

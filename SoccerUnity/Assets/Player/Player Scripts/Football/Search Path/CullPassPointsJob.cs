@@ -15,7 +15,7 @@ using static FieldTriangleSpace.FieldOfTrianglesCreator;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using Unity.Mathematics;
-//[BurstCompile]
+[BurstCompile]
 public struct CullPassPointsJob : IJobEntityBatch
 {
     public BufferTypeHandle<LonelyPointElement2> lonelyPointsHandle;
@@ -106,7 +106,7 @@ public struct CullPassPointsJob : IJobEntityBatch
                     TestResult.straightReachBall = false;
                     lonelyPoint.straightReachBall = false;
                     float ballReachTime;
-                    bool parabolicReachBall = getParabolicPass_isPosible(ref PlayerPositions, defenseIndexStart, defenseIndexEnd, defenseReachIndex, ref PlayerGenericParams, lonelyPosition, BallParams.BallPosition, reachTime, defenseStraightReachTimeResult, BallParams.k, vf, ref VOParams, PlayerGenericParams.maxKickForce,ref PathDataDOTS,out parabolicMinDistancePlayer_Ball,out ballReachTime, ref TestResult,t0,out int defenseParabolicReachIndex,out float defenseParabolicReachTime,out Vector3 parabolicDefenseReachPosition,out Vector3 passVelocity, straightDefenseReachPosition);
+                    bool parabolicReachBall = getParabolicPass_isPosible(ref PlayerPositions, defenseIndexStart, defenseIndexEnd, defenseReachIndex, ref PlayerGenericParams, lonelyPosition, BallParams.BallPosition, reachTime, defenseStraightReachTimeResult, BallParams.k, vf, ref VOParams, PlayerGenericParams.maxKickForce,ref PathDataDOTS,out parabolicMinDistancePlayer_Ball,out ballReachTime, ref TestResult,t0,out int defenseParabolicReachIndex,out float defenseParabolicReachTime,out Vector3 parabolicDefenseReachPosition,out Vector3 passVelocity, straightDefenseReachPosition,BallParams.ballVelocity);
 
                     TestResult.parabolicReachBall = parabolicReachBall;
                     lonelyPoint.parabolicReachBall = parabolicReachBall;
@@ -251,14 +251,14 @@ public struct CullPassPointsJob : IJobEntityBatch
         // Clamp opcional para mantenerlo entre -1 y 1
         return Mathf.Clamp(finalWeight, -2f, 1f);
     }
-    bool getParabolicPass_isPosible(ref DynamicBuffer<PlayerPositionElement> PlayerPositions, int startIndex, int endIndex, int defenseIndexStraightPass, ref PlayerGenericParams PlayerGenericParams, Vector3 lonelyPosition, Vector3 ballPosition, float attackReachTime, float defenseStraightReachTime, float k, float vf, ref GetStraightV0Params VOParams, float maxKickForce,ref PathDataDOTS PathDataDOTS,out float parabolicMinDistance_BallPlayer,out float ballReachTime, ref TestResultComponent TestResult, float t0,out int defenseParabolicReachIndex,out float defenseParabolicReachTime,out Vector3 defenseReachPosition,out Vector3 passVelocity,Vector3 straightDefenseReachPosition)
+    bool getParabolicPass_isPosible(ref DynamicBuffer<PlayerPositionElement> PlayerPositions, int startIndex, int endIndex, int defenseIndexStraightPass, ref PlayerGenericParams PlayerGenericParams, Vector3 lonelyPosition, Vector3 ballPosition, float attackReachTime, float defenseStraightReachTime, float k, float vf, ref GetStraightV0Params VOParams, float maxKickForce,ref PathDataDOTS PathDataDOTS,out float parabolicMinDistance_BallPlayer,out float ballReachTime, ref TestResultComponent TestResult, float t0,out int defenseParabolicReachIndex,out float defenseParabolicReachTime,out Vector3 defenseReachPosition,out Vector3 passVelocity,Vector3 straightDefenseReachPosition,Vector3 ballVelocity)
     {
 
         GetV0DOTSResult getV0DOTSResult = new GetV0DOTSResult();
         //StraightXZDragPathDOTS.getXZV0(ref getV0DOTSResult, attackReachTime, ballPosition, lonelyPosition, PlayerGenericParams.maxKickForce, ref VOParams, k);
         Vector3 controlLonelyPosition = lonelyPosition;
         controlLonelyPosition.y = PlayerGenericParams.heightBallControl;
-        ParabolicPassDOTS.getV0(ballPosition, controlLonelyPosition, ref getV0DOTSResult, maxKickForce, VOParams.maxControlSpeed, VOParams.maxControlSpeedLerpDistance, attackReachTime, k, vf);
+        ParabolicPassDOTS.getV0(ballPosition, controlLonelyPosition, ref getV0DOTSResult, maxKickForce, VOParams.maxControlSpeed, VOParams.maxControlSpeedLerpDistance, attackReachTime, k, vf, ballVelocity);
         ballReachTime = getV0DOTSResult.ballReachTargetPositionTime;
         float timeDiference = defenseStraightReachTime - getV0DOTSResult.ballReachTargetPositionTime;
         TestResult.defenseParabolicDifferenceTime = timeDiference;

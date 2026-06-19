@@ -195,7 +195,7 @@ namespace CullPositionPoint
 public struct BallParamsComponent : IComponentData
 {
     public float k, friction, ballRadio, g, mass, groundY, dynamicFriction, bounciness, t0;
-    public Vector3 BallPosition;
+    public Vector3 BallPosition,ballVelocity;
 }
 public struct GetStraightV0Params
 {

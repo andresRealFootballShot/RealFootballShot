@@ -7,7 +7,7 @@ using UnityEngine;
 public class BotKick : PlayerComponent
 {
     public float kickPeriod = 0.25f;
-    public bool kickAvailable=true;
+    public bool kickAvailable{ get => Time.time - startKickTime < kickPeriod; }
     public float startKickTime=-1;
     void Start()
     {
@@ -19,19 +19,18 @@ public class BotKick : PlayerComponent
     {
         
     }
-    public bool Kick(PassData passData)
+    public bool CheckKick(PassData passData)
     {
         if (ReachBall())
         {
 
             //EditorApplication.isPaused = true;
-            KickEventArgs kickEventArgs = new KickEventArgs(passData.passVelocity, MatchComponents.ballRigidbody.velocity, MatchComponents.ballRigidbody.angularVelocity, MatchComponents.ballRigidbody.position, publicPlayerData.playerID);
-            MatchComponents.ballRigidbody.velocity = passData.passVelocity;
-            MatchComponents.ballRigidbody.angularVelocity = Vector3.zero;
-            Invoke(nameof(enableKick), kickPeriod);
-            kickAvailable = false;
-            startKickTime = Time.time;
-            MatchEvents.kick.Invoke(kickEventArgs);
+            
+
+            Kick(passData.passVelocity, MatchComponents.ballRigidbody.angularVelocity);
+
+
+           
             return true;
         }
         else
@@ -41,10 +40,20 @@ public class BotKick : PlayerComponent
 
         
     }
-    void enableKick()
+    public void Kick(Vector3 velocity,Vector3 angularVelocity)
     {
-        kickAvailable = true;
-        startKickTime = -1;
+        KickEventArgs kickEventArgs = new KickEventArgs(velocity, MatchComponents.ballRigidbody.velocity, MatchComponents.ballRigidbody.angularVelocity, MatchComponents.ballRigidbody.position, publicPlayerData.playerID);
+        MatchComponents.ballRigidbody.velocity = velocity;
+        MatchComponents.ballRigidbody.angularVelocity = angularVelocity;
+        startKickTime = Time.time;
+        MatchEvents.kick.Invoke(kickEventArgs);
+    }
+    public void Kick(Vector3 velocity)
+    {
+        KickEventArgs kickEventArgs = new KickEventArgs(velocity, MatchComponents.ballRigidbody.velocity, MatchComponents.ballRigidbody.angularVelocity, MatchComponents.ballRigidbody.position, publicPlayerData.playerID);
+        MatchComponents.ballRigidbody.velocity = velocity;
+        startKickTime = Time.time;
+        MatchEvents.kick.Invoke(kickEventArgs);
     }
     public bool ReachBall()
     {

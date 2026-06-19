@@ -8,6 +8,8 @@ public class MatchComponents : MonoBehaviour
     public static ISetupTeams setupTeams;
     public static BallComponents ballComponents;
     public static Rigidbody ballRigidbody { get => ballComponents.rigBall; }
+    public static Vector3 ballVelocity { get => ballComponents.rigBall.velocity; }
+    public static float ballSpeed { get => ballComponents.rigBall.velocity.magnitude; }
     public static Transform ballTransform { get => ballComponents.transBall; }
     public static Vector3 ballPosition { get => ballComponents.transBall.position; }
     public static float ballRadio { get => ballComponents.radio; }

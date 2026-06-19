@@ -16,6 +16,15 @@ public class PlayerSkills : ScriptableObject
     public float ballForceControl;
     [Range(0, 1)]
     public float ballTimeControl;
+    [Header("Control 2")]
+    [Range(0, 180)]
+    public int MaxAngleControl=70;
+    [Range(0, 100)]
+    public float MinVelocityControl = 5;
+    [Range(0, 100)]
+    public float MaxVelocityControl = 20;
+    [Range(0, 100)]
+    public float MaxVelocityDistanceControl=50;
     [Header("Driving")]
     [Range(0, 1)]
     public float drivingSkill;

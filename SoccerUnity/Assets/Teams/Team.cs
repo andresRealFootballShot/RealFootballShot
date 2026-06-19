@@ -38,6 +38,7 @@ public class Team : MonoBehaviour
     public SideOfField SideOfField { get; set; }
     public SideOfField RivalSideOfField { get; set; }
     public Vector3 goalPosition { get => MyFunctions.setY0ToVector3( SideOfField.goalComponents.transform.position); }
+    public PublicPlayerData firstReachBallPublicPlayerData;
     public void Load()
     {
         nameTeamVar.Value = initName;

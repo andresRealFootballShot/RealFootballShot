@@ -5,6 +5,7 @@ using Unity.Entities;
 using Unity.Collections;
 using Unity.Burst;
 using DOTS_ChaserDataCalculation;
+using Unity.Mathematics;
 
 [BurstCompile]
 public class ParabolicPassDOTS
@@ -129,7 +130,7 @@ public class ParabolicPassDOTS
         float distanceXZ = Vector3.Distance(XZ0, XZf);
         return dir.normalized * (distanceXZ * k + vt);
     }
-    public static void getV0(Vector3 pos0,Vector3 posf, ref GetV0DOTSResult result, float maxKickForce, float maxControlSpeed,float maxControlSpeedLerpDistance, float t,float k,float vfMagnitude)
+    public static void getV0(Vector3 pos0,Vector3 posf, ref GetV0DOTSResult result, float maxKickForce, float maxControlSpeed,float maxControlSpeedLerpDistance, float t,float k,float vfMagnitude,Vector3 ballVelocity)
     {
         float d = Vector3.Distance(pos0, MyFunctions.setYToVector3(posf, pos0.y));
         maxControlSpeed = Mathf.Lerp(2, maxControlSpeed, d / maxControlSpeedLerpDistance);
@@ -140,6 +141,8 @@ public class ParabolicPassDOTS
         result.ballReachTargetPositionTime = t;
         Vector3 vt2 = vt;
         vt2.y = 0;
+        Vector3 dir2 = posf - pos0;
+        if (pos0.y > 1) maxKickForce = CalculateHeaderVelocity(ballVelocity, dir2, 7, 0.55f, 0.85f).magnitude;
         if ((vt2.magnitude >= maxControlSpeed || t == 0))
         {
             Vector3 dir = (posf - pos0).normalized;
@@ -174,6 +177,25 @@ public class ParabolicPassDOTS
             float t2 = StraightXZDragPathDOTS.getT(d, v0mzx.magnitude, k);
             result.ballReachTargetPositionTime = t2;
         }
+    }
+    public static Vector3 CalculateHeaderVelocity(
+    Vector3 ballVelocity,
+    Vector3 headerDirection,
+    float headSpeed,
+    float restitution = 0.55f,
+    float lateralRetention = 0.85f) // 1 = conserva toda la velocidad lateral
+    {
+        headerDirection.Normalize();
+
+        float ballParallel = Vector3.Dot(ballVelocity, headerDirection);
+
+        Vector3 ballPerpendicular =
+            (ballVelocity - ballParallel * headerDirection) * lateralRetention;
+
+        float newParallel =
+            (1f + restitution) * headSpeed - restitution * ballParallel;
+
+        return ballPerpendicular + newParallel * headerDirection;
     }
     public static void getV02(Vector3 pos0, Vector3 posf, ref GetV0DOTSResult result, float maxKickForce, float maxControlSpeed, float maxControlSpeedLerpDistance, float t, float k, float vfMagnitude)
     {

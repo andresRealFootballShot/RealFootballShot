@@ -33,11 +33,12 @@ public static class ParabolicPassBurst
         float maxControlSpeedLerpDistance,
         float t,
         float k,
-        float vfMagnitude)
+        float vfMagnitude,float3 ballVelocity)
     {
         float3 flatPosf =
             new float3(posf.x, pos0.y, posf.z);
-
+        float3 dir = posf - pos0;
+        if (pos0.y > 1) maxKickForce = math.length(CalculateHeaderVelocity(ballVelocity,dir, 7,0.55f,0.85f));
         float d =
             math.distance(pos0, flatPosf);
 
@@ -154,7 +155,36 @@ public static class ParabolicPassBurst
             result.ballReachTargetPositionTime = t2;
         }
     }
+    public static float HeadBall(float ballSpeed,float headSpeed)
+    {
+        float e = 0.5f;
+        return (1+e)*headSpeed-e*ballSpeed;
+    }
+    public static float3 CalculateHeaderVelocity(
+    float3 ballVelocity,
+    float3 headerDirection,
+    float headSpeed,
+    float restitution = 0.55f,
+    float lateralRetention = 0.85f)
+    {
+        // Normalizar la dirección del remate
+        headerDirection = math.normalize(headerDirection);
 
+        // Componente del balón en la dirección del remate
+        float ballParallel = math.dot(ballVelocity, headerDirection);
+
+        // Componente perpendicular
+        float3 ballPerpendicular =
+            (ballVelocity - ballParallel * headerDirection) * lateralRetention;
+
+        // Nueva velocidad paralela
+        float newParallel =
+            (1f + restitution) * headSpeed - restitution * ballParallel;
+
+        // Velocidad final
+        return ballPerpendicular + newParallel * headerDirection;
+    }
+   
     public static float3 ParabolaWithDrag_GetV0(
         float t,
         float3 pos0,

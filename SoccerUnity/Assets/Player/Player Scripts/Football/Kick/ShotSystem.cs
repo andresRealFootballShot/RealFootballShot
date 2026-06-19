@@ -2,6 +2,7 @@ using Unity.Entities;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using static UnityEngine.GraphicsBuffer;
 
 public partial class ShotSystem : SystemBase
 {
@@ -94,6 +95,7 @@ public partial class ShotSystem : SystemBase
         PublicGoalkeeperData goalkeeperPublicPlayerData =
             team.getGoalkeeperPublicPlayerData()
             as PublicGoalkeeperData;
+        PublicPlayerData passer = team.firstReachBallPublicPlayerData;
         if (goalkeeperPublicPlayerData != null)
         {
             for (int y = 0; y <= ySteps; y++)
@@ -111,9 +113,10 @@ public partial class ShotSystem : SystemBase
                     //if(y!=2||x!=3)continue;
                     float fx = x / (float)xSteps;
                     if (id >= arr.Length) break;
+                    float3 targetPosition = math.lerp(left, right, fx);
                     arr[id] = new ShotCandidate
                     {
-                        target = math.lerp(left, right, fx),
+                        target = targetPosition,
 
                         ballPos =
                             MatchComponents.ballComponents.position,
@@ -128,14 +131,20 @@ public partial class ShotSystem : SystemBase
                             goalkeeperPublicPlayerData.values.maxHeightInArea,
 
                         goalCenter = center,
-                        goalHalfWidth= goalHalfWidth,
+                        goalHalfWidth = goalHalfWidth,
                         maxKickForce = 35f,
 
-                        minTime = 0.15f,
+                        minTime = 0.05f,
                         maxTime = 1.8f,
 
                         k = MatchComponents.ballRigidbody.drag,
-                        vf = 9.81f / MatchComponents.ballRigidbody.drag
+                        vf = 9.81f / MatchComponents.ballRigidbody.drag,
+                        reflex = goalkeeperPublicPlayerData.values.maxRandomReflexes,
+                        passerPos = passer.position,
+                        maxAngleControl = passer.playerComponents.playerSkills.MaxAngleControl,
+                        maxVelocityControl = BotControl.GetMaxVelocityControl(targetPosition, MatchComponents.ballComponents.position, passer.playerComponents.playerSkills,1.25f),
+                        ballSpeed = MatchComponents.ballRigidbody.velocity.magnitude,
+
                     };
                     id++;
                 }
@@ -166,11 +175,13 @@ public struct ShotCandidate
 {
     public float3 target;
     public float3 ballPos;
-
+    public float ballSpeed;
     public float3 goalkeeperPos;
     public float goalkeeperSpeed;
     public float goalkeeperMaxHeight;
+    public float reflex;
     public float3 goalCenter;
+   
     public float goalHalfWidth;
     public float maxKickForce;
 
@@ -179,6 +190,8 @@ public struct ShotCandidate
 
     public float k;
     public float vf;
+    public float3 passerPos;
+    public float maxAngleControl,maxVelocityControl;
 }
 public struct ShotResult
 {

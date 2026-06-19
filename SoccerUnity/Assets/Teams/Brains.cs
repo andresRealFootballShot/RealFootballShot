@@ -18,10 +18,10 @@ public class Brains : MonoBehaviour
     Team attackTeam;
     Team defenseTeam;
     public SearchPlayData searchPlayData { get => CullPassPoints.searchPlayData; }
-    public List<LonelyPointElement2> firstReachLonelyPoints = new List<LonelyPointElement2>();
+    public List<LonelyPointElement2> firstReachLonelyPoints { get => CullPassPoints.firstReachLonelyPoints; }
     public List<PublicPlayerData> busyPlayers = new List<PublicPlayerData>();
     LonelyPointElement2 currentFirstLonelyPoint,nextLonelyPoint;
-    PublicPlayerData passerPublicPlayerData;
+    public PublicPlayerData passerPublicPlayerData;
     Vector3 ballReachPosition;
     public float minReachBallTime=0.5f;
     [Header("Debug")]
@@ -55,6 +55,10 @@ public class Brains : MonoBehaviour
         //checkFirstReachBall();
         Attack();
         Defense();
+    }
+    public LonelyPointElement2 GetReachableLonelyPoint(int index)
+    {
+        return firstReachLonelyPoints[index];
     }
     void Attack()
     {
@@ -168,6 +172,7 @@ public class Brains : MonoBehaviour
                 publicPlayerData.playerComponents.scope =  publicPlayerData.playerComponents.movementCtrl.defaultScope;
                 publicPlayerData.playerComponents.movementCtrl.SetTargetPosition(ballReachPosition);
                 LonelyPointElement2 lonelyPoint = currentFirstLonelyPoint;
+                if (publicPlayerData.BotControl.CheckBallControl(this, lonelyPoint.Get3DPosition(),0.25f)) return;
                 PassData straightPassData = lonelyPoint.straightPassData;
                 if (publicPlayerData.playerComponents.BodyBallXZDistance <= publicPlayerData.playerComponents.ballScope+0.25f && wait)
                 {
@@ -269,7 +274,7 @@ public class Brains : MonoBehaviour
         currentWeight = CullPassPointsJob.EvaluatePosition(ballPosition,left,right,ballPosition,0, maxFieldDistance);
         float maxWeight = getMaxWeight(0);
         
-        if (passerPublicPlayerData.playerComponents.botKick!=null&&currentWeight > maxWeight-5&& (isLookingToGoal(goalComponents)||true) &&passerPublicPlayerData.ReachBall())
+        if (passerPublicPlayerData.playerComponents.botKick!=null&&currentWeight > maxWeight-0.05f&& (isLookingToGoal(goalComponents)||true) &&passerPublicPlayerData.ReachBall()&&passerPublicPlayerData.IsBot)
         {
             if (CullPassPoints.bestShot.valid)
             {
@@ -328,7 +333,7 @@ public class Brains : MonoBehaviour
             Gizmos.DrawSphere(currentFirstLonelyPoint.Get3DPosition(0), 0.2f);
 
             
-            if (passerPublicPlayerData != null)
+            if (passerPublicPlayerData != null&& passerPublicPlayerData.IsBot)
             {
                 Vector3 passerPos = passerPublicPlayerData.position;
                 bool passerAvailable = passerPublicPlayerData.playerComponents.botMoveFunctions.CheckPasserAvailable();

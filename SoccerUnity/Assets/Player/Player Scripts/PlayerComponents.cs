@@ -32,6 +32,7 @@ public class PlayerComponents : PlayerComponent
     public float friction;
     public GetTimeToReachPoint GetTimeToReachPosition;
     public BotKick botKick;
+    public BotControl BotControl;
     public Team myTeam, rivalTeam;
     public float maxSpeedRotation { get =>movementValues.rotationSpeed; }
     void Start()
