@@ -2890,6 +2890,7 @@ GameObject:
   - component: {fileID: 3747010005515620666}
   - component: {fileID: 4757934629735853395}
   - component: {fileID: 7809148508847226821}
+  - component: {fileID: 8748864727240346833}
   m_Layer: 0
   m_Name: SoccerComponents
   m_TagString: Untagged
@@ -3038,7 +3039,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   kickPeriod: 0.25
-  kickAvailable: 1
   startKickTime: -1
 --- !u!114 &7809148508847226821
 MonoBehaviour:
@@ -3050,6 +3050,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1af301f93a83d1a49bf7faca3c31377b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8748864727240346833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3747010005515620611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da2d185cafb2fed459ba45eb738a12a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &3747010005541261554
@@ -3226,6 +3238,7 @@ MonoBehaviour:
   botMoveFunctions: {fileID: 7809148508847226821}
   friction: 0
   botKick: {fileID: 4757934629735853395}
+  BotControl: {fileID: 8748864727240346833}
   myTeam: {fileID: 0}
   rivalTeam: {fileID: 0}
 --- !u!114 &3747010005541261547

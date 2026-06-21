@@ -7,8 +7,8 @@ using UnityEngine;
 public class BotKick : PlayerComponent
 {
     public float kickPeriod = 0.25f;
-    public bool kickAvailable{ get => Time.time - startKickTime < kickPeriod; }
-    public float startKickTime=-1;
+    public bool kickAvailable{ get => Time.time - startKickTime >= kickPeriod; }
+    public float startKickTime=0;
     void Start()
     {
         

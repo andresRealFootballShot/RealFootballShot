@@ -4,7 +4,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-[BurstCompile]
+//[BurstCompile]
 public struct ShotJob : IJobParallelFor
 {
     [ReadOnly] public NativeArray<ShotCandidate> candidates;
@@ -35,7 +35,7 @@ public struct ShotJob : IJobParallelFor
                 c.ballPos,
                 c.target,
                 ref r2,
-                c.maxKickForce,1000,0.1f,
+                c.maxKickForce,1000,1000,0.1f,
                 t,
                 c.k,
                 c.vf,c.ballSpeed);

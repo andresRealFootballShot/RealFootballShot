@@ -44,7 +44,7 @@ public class ControllerAim : MonoBehaviour
     {
         if (args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerIDStr))
         {
-            Vector3 kickDirection = args.kickDirection;
+            Vector3 kickDirection = args.kickVelocity;
             if (playerMode == PlayerState.LookingBall || playerMode == PlayerState.WithPossession)
             {
                 if (kickDirection.magnitude < PuppetParameters.maxKickForceToExitWithPossessionState)

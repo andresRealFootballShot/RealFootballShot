@@ -13,9 +13,10 @@ public class BotControl : PlayerComponent
         LonelyPointElement2 lonelyPointElement = brains.GetReachableLonelyPoint(0);
         
         PublicPlayerData passer = brains.passerPublicPlayerData;
-        if (passer.IsBot||passer.IsGoalkeeper||passer.kickAvailable) return false;
-        if (CheckBallControl(targetPosition,passer,ballPosition,precisionRadio,out Vector3 kickVelocity))
+        if (!passer.IsBot||passer.IsGoalkeeper||!passer.kickAvailable) return false;
+        if (passer.BotKick.ReachBall()&&CheckBallControl(targetPosition,passer,ballPosition,precisionRadio,out Vector3 kickVelocity))
         {
+            //EditorApplication.isPaused = true;
             passer.BotKick.Kick(kickVelocity);
             return true;
         }
@@ -47,17 +48,17 @@ public class BotControl : PlayerComponent
         float maxVelocity = Mathf.Lerp(playerSkills.MaxVelocityControl, playerSkills.MinVelocityControl, dir1.magnitude / playerSkills.MaxVelocityDistanceControl);
         maxVelocity = Mathf.Lerp(maxVelocity, playerSkills.MaxVelocityControl, precisionLerp);
         
-        if (angle > playerSkills.MaxAngleControl || MatchComponents.ballSpeed < maxVelocity)
+        if ((angle > playerSkills.MaxAngleControl&&true) || MatchComponents.ballSpeed >= maxVelocity)
         {
             Vector3 axis = Vector3.Cross(dir3, dir4).normalized;
 
             // Si son paralelos
             if (axis == Vector3.zero)
                 axis = Vector3.up;
-            float force = 5;
+            float force = 2;
             // Rota a exactamente 60° hacia el lado donde está b
              result = Quaternion.AngleAxis(controlAngle, axis) * dir3.normalized * force;
-            if (ballPosition.y > 0.7f) result.y = -3;
+            if (ballPosition.y > 0.7f) result.y = -1;
             
             return true;
         }
@@ -78,7 +79,6 @@ public class BotControl : PlayerComponent
         Vector3 targetPosition = shotCandidate.target;
         Vector3 ballPosition = shotCandidate.ballPos;
 
-        Vector3 velocity = MatchComponents.ballVelocity;
         Vector3 playerPosition = shotCandidate.passerPos;
         Vector3 dir1 = targetPosition - ballPosition;
         dir1.y = 0;
@@ -89,7 +89,7 @@ public class BotControl : PlayerComponent
         float angle = Vector3.Angle(dir1, dir2);
 
 
-        if (angle > shotCandidate.maxAngleControl || MatchComponents.ballSpeed < shotCandidate.maxVelocityControl)
+        if (angle > shotCandidate.maxAngleControl || shotCandidate.ballSpeed >= shotCandidate.maxVelocityControl)
         {
             return true;
         }

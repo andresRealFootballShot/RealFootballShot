@@ -95,7 +95,8 @@ public partial class ShotSystem : SystemBase
         PublicGoalkeeperData goalkeeperPublicPlayerData =
             team.getGoalkeeperPublicPlayerData()
             as PublicGoalkeeperData;
-        PublicPlayerData passer = team.firstReachBallPublicPlayerData;
+        PublicPlayerData passer = CullPassPoints.attackTeam.firstReachBallPublicPlayerData;
+        if (passer == null) return arr;
         if (goalkeeperPublicPlayerData != null)
         {
             for (int y = 0; y <= ySteps; y++)

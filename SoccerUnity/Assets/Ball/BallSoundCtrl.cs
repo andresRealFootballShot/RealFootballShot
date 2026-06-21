@@ -24,7 +24,7 @@ public class BallSoundCtrl : MonoBehaviour
     }
     public void ApplySoundKick(KickEventArgs args)
     {
-        float volume = GetVolumeKick(args.kickDirection.magnitude);
+        float volume = GetVolumeKick(args.kickVelocity.magnitude);
         playSound(kick, volume, 10, 1);
     }
     public float GetVolumeKick(float currentForce)

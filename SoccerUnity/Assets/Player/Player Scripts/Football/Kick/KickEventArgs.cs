@@ -4,7 +4,7 @@ using UnityEngine;
 
 public struct KickEventArgs
 {
-    public Vector3 kickDirection;
+    public Vector3 kickVelocity;
     public Vector3 pointKick;
     public Vector3 previousVelocity;
     public Vector3 previousAngularVelocity;
@@ -12,7 +12,7 @@ public struct KickEventArgs
     public string playerID;
     public KickEventArgs(Vector3 kickDirection, Vector3 previousVelocity, Vector3 previousAngularVelocity,Vector3 pointKick, string playerID)
     {
-        this.kickDirection = kickDirection;
+        this.kickVelocity = kickDirection;
         this.previousVelocity = previousVelocity;
         this.previousAngularVelocity = previousAngularVelocity;
         this.playerID = playerID;
@@ -21,7 +21,7 @@ public struct KickEventArgs
     }
     public KickEventArgs(Vector3 kickDirection, Vector3 previousVelocity, Vector3 previousAngularVelocity, int onlineActor,int localActor)
     {
-        this.kickDirection = kickDirection;
+        this.kickVelocity = kickDirection;
         this.previousVelocity = previousVelocity;
         this.previousAngularVelocity = previousAngularVelocity;
         string playerID;

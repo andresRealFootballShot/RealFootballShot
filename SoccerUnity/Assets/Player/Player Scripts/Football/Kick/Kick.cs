@@ -98,7 +98,7 @@ public class Kick : MonoBehaviour
     }
     public static void AddForce(ForceMode _forceMode, KickEventArgs args)
     {
-        if (Vector3.Angle(args.previousVelocity, args.kickDirection) > 90)
+        if (Vector3.Angle(args.previousVelocity, args.kickVelocity) > 90)
         {
             MatchComponents.ballRigidbody.velocity = Vector3.zero;
             MatchComponents.ballRigidbody.angularVelocity = Vector3.zero;
@@ -108,12 +108,12 @@ public class Kick : MonoBehaviour
             MatchComponents.ballRigidbody.velocity = args.previousVelocity;
             MatchComponents.ballRigidbody.angularVelocity = args.previousAngularVelocity;
         }
-        MatchComponents.ballRigidbody.AddForce(args.kickDirection, forceMode);
+        MatchComponents.ballRigidbody.AddForce(args.kickVelocity, forceMode);
         MatchEvents.kick.Invoke(args);
     }
     public static void AddForceAtPosition(ForceMode _forceMode, KickEventArgs args)
     {
-        if (Vector3.Angle(args.previousVelocity, args.kickDirection) > 90)
+        if (Vector3.Angle(args.previousVelocity, args.kickVelocity) > 90)
         {
             MatchComponents.ballRigidbody.velocity = Vector3.zero;
             MatchComponents.ballRigidbody.angularVelocity = Vector3.zero;
@@ -123,7 +123,7 @@ public class Kick : MonoBehaviour
             MatchComponents.ballRigidbody.velocity = args.previousVelocity;
             MatchComponents.ballRigidbody.angularVelocity = args.previousAngularVelocity;
         }
-        MatchComponents.ballRigidbody.AddForceAtPosition(args.kickDirection, args.pointKick, forceMode);
+        MatchComponents.ballRigidbody.AddForceAtPosition(args.kickVelocity, args.pointKick, forceMode);
         //MatchComponents.ballComponents.controllerKickSound.ApplySoundKick(args.vo);
         MatchEvents.kick.Invoke(args);
     }

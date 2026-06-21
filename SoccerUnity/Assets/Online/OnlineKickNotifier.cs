@@ -10,7 +10,7 @@ public class OnlineKickNotifier : IKickNotifier
         Transform ballTransform = MatchComponents.ballComponents.transBall;
         string rpcName = nameof(MatchComponents.ballComponents.kickRPCs.AddForceRPC);
         PlayerID playerID = new PlayerID(args.playerID);
-        MatchComponents.ballComponents.photonViewBall.RPC(rpcName, RpcTarget.All, ballRigidbody.position, ballTransform.eulerAngles, args.kickDirection, args.previousVelocity, args.previousAngularVelocity, playerID.onlineActor, playerID.localActor);
+        MatchComponents.ballComponents.photonViewBall.RPC(rpcName, RpcTarget.All, ballRigidbody.position, ballTransform.eulerAngles, args.kickVelocity, args.previousVelocity, args.previousAngularVelocity, playerID.onlineActor, playerID.localActor);
 
     }
 

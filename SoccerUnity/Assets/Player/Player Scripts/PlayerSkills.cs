@@ -18,7 +18,7 @@ public class PlayerSkills : ScriptableObject
     public float ballTimeControl;
     [Header("Control 2")]
     [Range(0, 180)]
-    public int MaxAngleControl=70;
+    public int MaxAngleControl=120;
     [Range(0, 100)]
     public float MinVelocityControl = 5;
     [Range(0, 100)]

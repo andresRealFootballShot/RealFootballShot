@@ -17,6 +17,10 @@ MonoBehaviour:
   ballControl: 0
   ballForceControl: 0.252
   ballTimeControl: 0.256
+  MaxAngleControl: 120
+  MinVelocityControl: 5
+  MaxVelocityControl: 20
+  MaxVelocityDistanceControl: 50
   drivingSkill: 0
   maxForce: 1.3
   minForce: 0.8

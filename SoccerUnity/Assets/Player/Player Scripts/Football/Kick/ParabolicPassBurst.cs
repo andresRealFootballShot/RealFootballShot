@@ -28,7 +28,7 @@ public static class ParabolicPassBurst
         float3 pos0,
         float3 posf,
         ref GetV0DOTSResultBurst result,
-        float maxKickForce,
+        float maxKickForce, float minControlSpeed,
         float maxControlSpeed,
         float maxControlSpeedLerpDistance,
         float t,
@@ -44,7 +44,7 @@ public static class ParabolicPassBurst
 
         maxControlSpeed =
             math.lerp(
-                2f,
+                minControlSpeed,
                 maxControlSpeed,
                 d / maxControlSpeedLerpDistance);
 
