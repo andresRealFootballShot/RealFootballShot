@@ -162,6 +162,7 @@ public class CullPassPoints : MonoBehaviour
         {
             CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
             CullPassPointsComponent.passerIndex = passerIndex;
+            
             entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
         }
         
@@ -483,6 +484,8 @@ public class CullPassPoints : MonoBehaviour
             {
                 int SentityIndex = searchPlayData.getCullEntity(node, k);
                 Entity Sentity = entities[SentityIndex];
+                CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(Sentity);
+                
                 DynamicBuffer<PlayerPositionElement> PlayerPositionElements = entityManager.GetBuffer<PlayerPositionElement>(Sentity);
                 //int playerCount = searchPlayData.GetPlayerCount(node);
                 int playerCount = teamAttack_size+teamDefense_size;
@@ -509,8 +512,14 @@ public class CullPassPoints : MonoBehaviour
                     playerPositionElement.decceleration = publicPlayerData.playerComponents.movementValues.forwardDeceleration;
                     playerPositionElement.maxSpeedRotation = publicPlayerData.playerComponents.movementValues.rotationSpeed;
                     playerPositionElement.maxSpeed = publicPlayerData.playerComponents.movementValues.maxSpeed.Value;
+                    playerPositionElement.timePrecision = publicPlayerData.IsBot ? 0 : 0.25f;
+                    if (!publicPlayerData.IsBot)
+                    {
+                        CullPassPointsComponent.userIndex = j;
+                    }
                     PlayerPositionElements[j] = playerPositionElement;
                 }
+                entityManager.SetComponentData<CullPassPointsComponent>(Sentity, CullPassPointsComponent);
             }
             
         }
@@ -676,6 +685,11 @@ public class CullPassPoints : MonoBehaviour
         int z = 0;
         foreach (PublicPlayerData publicPlayerData in attackTeam.publicPlayerDatas)
         {
+            
+            LonelyPointElement2 lonelyPointElement2 = new LonelyPointElement2(publicPlayerData.position,bufferSizeComponent.lonelyPointsResultSize+z);
+            lonelyPointElements2[lonelyPointCount] = lonelyPointElement2;
+            z++;
+            lonelyPointCount++;
             if (lonelyPointCount >= cullPassPointsParams.entityPointSize)
             {
                 searchPlayData.SetCullEntity(nodeIndex, entityIndex);
@@ -687,10 +701,64 @@ public class CullPassPoints : MonoBehaviour
                 lonelyPointCount = 0;
 
             }
-            LonelyPointElement2 lonelyPointElement2 = new LonelyPointElement2(publicPlayerData.position,bufferSizeComponent.lonelyPointsResultSize+z);
-            lonelyPointElements2[lonelyPointCount] = lonelyPointElement2;
+        }
+
+
+        LonelyPointElement2 lonelyPointElement3 = new LonelyPointElement2(firstPublicPlayerData.position+ firstPublicPlayerData.bodyTransform.right* firstPublicPlayerData.playerComponents.ballScope, bufferSizeComponent.lonelyPointsResultSize + z);
+        lonelyPointElements2[lonelyPointCount] = lonelyPointElement3;
+        z++;
+        lonelyPointCount++;
+        if (lonelyPointCount >= cullPassPointsParams.entityPointSize)
+        {
+            searchPlayData.SetCullEntity(nodeIndex, entityIndex);
+            CullPassPointsComponent.sizeLonelyPoints = lonelyPointCount;
+            entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
+            entityIndex++;
+            entity = entities[entityIndex];
+            lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
+            lonelyPointCount = 0;
+
+        }
+        LonelyPointElement2 lonelyPointElement4 = new LonelyPointElement2(firstPublicPlayerData.position - firstPublicPlayerData.bodyTransform.right * firstPublicPlayerData.playerComponents.ballScope, bufferSizeComponent.lonelyPointsResultSize + z);
+        lonelyPointElements2[lonelyPointCount] = lonelyPointElement4;
+        z++;
+        lonelyPointCount++;
+        if (lonelyPointCount >= cullPassPointsParams.entityPointSize)
+        {
+            searchPlayData.SetCullEntity(nodeIndex, entityIndex);
+            CullPassPointsComponent.sizeLonelyPoints = lonelyPointCount;
+            entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
+            entityIndex++;
+            entity = entities[entityIndex];
+            lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
+            lonelyPointCount = 0;
+
+        }
+        int points = 5;
+        float lenght=3;
+        float angle = 180 / (points - 1);
+        for(int i = 0;i< points; i++)
+        {
+            Vector3 dir = Quaternion.Euler(0, i*angle, 0) * -firstPublicPlayerData.bodyTransform.right * lenght;
+
+            
+
+            LonelyPointElement2 lonelyPointElement5 = new LonelyPointElement2(firstPublicPlayerData.position + dir, bufferSizeComponent.lonelyPointsResultSize + z);
+            lonelyPointElements2[lonelyPointCount] = lonelyPointElement5;
+
             z++;
             lonelyPointCount++;
+            if (lonelyPointCount >= cullPassPointsParams.entityPointSize)
+            {
+                searchPlayData.SetCullEntity(nodeIndex, entityIndex);
+                CullPassPointsComponent.sizeLonelyPoints = lonelyPointCount;
+                entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
+                entityIndex++;
+                entity = entities[entityIndex];
+                lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
+                lonelyPointCount = 0;
+
+            }
 
         }
 

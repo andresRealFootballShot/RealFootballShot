@@ -64,7 +64,7 @@ public struct PlayerInterceptionJob : IJobParallelFor
             float totalTime = 0;
             
             float verticalDistance = ballPos.y - playerPos.y;
-            if(kickRecoverTime != -1 && kickPeriod - kickRecoverTime > ballTime)
+            if(kickRecoverTime != -1 && kickPeriod - kickRecoverTime > ballTime&&false)
             {
                 scope = 0;
             }

@@ -57,6 +57,7 @@ public class PublicPlayerData : MonoBehaviour
        
         playerComponents.defaultScope = playerComponents.ballScope*0.7f;
         playerComponents.scope = playerComponents.defaultScope;
+        if (!IsBot) MatchComponents.myPublicPlayerData = this;
     }
      
     public static void getPlayerData(PublicPlayerData publicPlayerData, int index, out PlayerDataComponent playerDataComponent)

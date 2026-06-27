@@ -9,7 +9,7 @@ public class BotControl : PlayerComponent
     
     public bool CheckBallControl(Brains brains,Vector3 targetPosition,float precisionRadio)
     {
-
+        return false;
         LonelyPointElement2 lonelyPointElement = brains.GetReachableLonelyPoint(0);
         
         PublicPlayerData passer = brains.passerPublicPlayerData;
@@ -34,14 +34,16 @@ public class BotControl : PlayerComponent
         Vector3 dir2 = ballPosition - playerPosition;
         dir2.y = 0;
         Vector3 pos1 = playerPosition + passer.bodyTransform.forward * passer.playerComponents.ballScope;
-        Vector3 pos2 = playerPosition + passer.bodyTransform.right * (passer.playerComponents.bodyBallRadio + 0.1f);
+        
 
         Vector3 dir3 = playerPosition - pos1;
         dir3.y = 0;
         Vector3 dir4 = targetPosition - pos1;
         dir4.y = 0;
+        Vector3 pos2 = playerPosition - Vector3.Cross(dir3, dir4).y * passer.bodyTransform.right * (passer.playerComponents.bodyBallRadio + 0.1f);
         float controlAngle = Vector3.Angle(dir3, pos2 - pos1);
-
+        Vector3 dir5 = pos2 - pos1;
+        dir5.y = 0;
         float angle = Vector3.Angle(dir1, dir2);
         float precisionLerp = precisionRadio / 10;
 
@@ -55,10 +57,11 @@ public class BotControl : PlayerComponent
             // Si son paralelos
             if (axis == Vector3.zero)
                 axis = Vector3.up;
-            float force = 2;
+            
+            float force = Mathf.Min(ParabolicPassDOTS.ParabolaWithDrag_GetV0(passer.BotKick.kickPeriod,ballPosition, pos2,MatchComponents.ballRigidbody.drag,9.81f).magnitude,5);
             // Rota a exactamente 60° hacia el lado donde está b
-             result = Quaternion.AngleAxis(controlAngle, axis) * dir3.normalized * force;
-            if (ballPosition.y > 0.7f) result.y = -1;
+             result = dir5.normalized * force*0.7f;
+            //if (ballPosition.y > 0.7f) result.y = -1;
             
             return true;
         }

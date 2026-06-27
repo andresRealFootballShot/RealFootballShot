@@ -94,7 +94,7 @@ public class MovimentValues : MonoBehaviour
     public float minSpeedForChangeDirection=1;
     public float directionRotationSpeed=360;
 
-    public float maxSpeedForReachBall;
+    public float maxSpeedForReachBall, defaultMaxSpeedForReachBall=2;
     public float maxAngleForRun,maxAngleForRun2;
     public float stopOffset;
     public enum MovePhase

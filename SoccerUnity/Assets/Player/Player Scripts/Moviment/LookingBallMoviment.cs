@@ -5,6 +5,7 @@ using UnityEngine;
 public class LookingBallMoviment : Moviment
 {
     public Sprint sprint;
+    public Vector3 offsetPosition=new Vector3(-0.5f,0,0);
     void Start()
     {
     }
@@ -40,6 +41,7 @@ public class LookingBallMoviment : Moviment
         Vector3 right = Vector3.Cross(Vector3.up, MyFunctions.setY0ToVector3(ballPosY0 - bodyPos));
         right.Normalize();
         TargetPosition = ballPosY0 - right * 0.3f;
+        //TargetPosition = ballPosY0 + transCamera.TransformDirection(offsetPosition);
         //float distance = Vector3.Distance(ballPos, bodyPos + transModelo.right * 0.3f) / controllerDistance.maxDistance;
         float offset = radio + 0.3f;
         float d = Vector3.Distance(MyFunctions.setY0ToVector3(ballPosY0 - right * 0.3f), MyFunctions.setY0ToVector3(bodyPos));

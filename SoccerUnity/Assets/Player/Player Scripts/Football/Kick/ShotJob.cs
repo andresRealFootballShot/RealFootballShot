@@ -24,10 +24,12 @@ public struct ShotJob : IJobParallelFor
 
         float left = c.minTime;
         float right = c.maxTime;
-
-        for (int i = 0; i < 8; i++)
+        int count = 8;
+        float increment = (right-left)/ count;
+           
+        for (int i = 0; i < count; i++)
         {
-            float t = (left + right) * 0.5f;
+            float t = increment * i ;
 
             GetV0DOTSResultBurst r2 = default;
 
@@ -41,7 +43,7 @@ public struct ShotJob : IJobParallelFor
                 c.vf,c.ballSpeed);
             if (!r2.foundedResult)
             {
-                left = t;
+                right = t;
                 continue;
             }
 
@@ -53,13 +55,13 @@ public struct ShotJob : IJobParallelFor
 
             if (DefenderBlocks(c.ballPos, c.target))
             {
-                left = t;
+                right = t;
                 continue;
             }
 
             if (GoalkeeperBlocks(c, r2.v0, t,out float goalkeeperBallDistance))
             {
-                left = t;
+                right = t;
                 continue;
             }
             
@@ -74,10 +76,8 @@ public struct ShotJob : IJobParallelFor
                     r2.v0Magnitude / c.maxKickForce);
             if (r2.v0Magnitude < 7 ) speedScore = 0;
             float goalkeeperBallDistanceScore = Mathf.Clamp01(goalkeeperBallDistance / 5);
-            float score =
-                centerScore * 100f +
-                speedScore * 20f+ goalkeeperBallDistanceScore*20;
-
+            float score =centerScore * 20f + speedScore * 20f+ goalkeeperBallDistanceScore*20;
+            //float score = goalkeeperBallDistanceScore * 50;
             if (score > best.score)
             {
                 best.valid = true;
@@ -151,6 +151,10 @@ public struct ShotJob : IJobParallelFor
                 math.distance(
                     c.goalkeeperPos,
                     ball);
+            if (dist < distance)
+            {
+                distance=dist;
+            }
             if ((dist / c.goalkeeperSpeed)+c.reflex <= t)
             {
                 distance = dist;

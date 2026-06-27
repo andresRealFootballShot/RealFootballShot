@@ -141,7 +141,7 @@ namespace CullPositionPoint
         public float distanceWeightLerp;
         public Vector2 midfield, defenseGoalPosition;
         public float defenseTargetOffside;
-        public int passerIndex;
+        public int passerIndex,userIndex;
     }
     public struct PlayerPositionElement : IBufferElementData
     {
@@ -156,7 +156,8 @@ namespace CullPositionPoint
         public float maxSpeedRotation;
         public float minSpeedForRotate, minSpeedForRotate2;
         public float maxSpeed;
-        public PlayerPositionElement(Vector2 position, Vector2 bodyForward, Vector2 normalizedVelocity, float currentSpeed, float maxSpeedForReachBall,float scope=0,float acceleration = 0, float decceleration = 0,float maxAngleForRun = 0,float maxSpeedRotation = 0, float minSpeedForRotate = 0,float maxSpeed=10)
+        public float timePrecision;
+        public PlayerPositionElement(Vector2 position, Vector2 bodyForward, Vector2 normalizedVelocity, float currentSpeed, float maxSpeedForReachBall,float scope=0,float acceleration = 0, float decceleration = 0,float maxAngleForRun = 0,float maxSpeedRotation = 0, float minSpeedForRotate = 0,float maxSpeed=10,float timePrecision=0)
         {
             this.position = position;
             this.bodyForward = bodyForward;
@@ -172,7 +173,8 @@ namespace CullPositionPoint
             this.minSpeedForRotate = minSpeedForRotate;
             minSpeedForRotate2 = 0;
             this.maxSpeed=maxSpeed;
-    }
+            this.timePrecision = timePrecision;
+        }
     }
     public struct PlayerGenericParams
     {

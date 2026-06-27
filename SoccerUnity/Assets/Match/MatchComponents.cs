@@ -24,4 +24,5 @@ public class MatchComponents : MonoBehaviour
     public static MatchRulesSettings rulesSettings { get =>rulesComponents.settings; }
     public static GameSounds gameSounds;
     public static CullPassPoints CullPassPoints;
+    public static PublicPlayerData myPublicPlayerData;
 }

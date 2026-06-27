@@ -645,7 +645,7 @@ LonelyPointElement2 GetDebugLonelyPoint(int index)
         Vector2 playerPos2 = searchPlayData.GetPlayerPosition(0, lonelyPointElement.attackReachIndex);
         Vector3 playerPos = new Vector3(playerPos2.x, 0, playerPos2.y);
         Debug.DrawLine(playerPos + Vector3.up * 0.25f, pos + Vector3.up * 0.25f, Color.black);
-        string pass = "straight=" + lonelyPointElement.straightReachBall + " parabolic=" + lonelyPointElement.parabolicReachBall+ " pass force="+ passData.passVelocity.magnitude + " StraightDistanceDefenseReachBall=" + lonelyPointElement.straightPassData.distanceDefenseReachBall.ToString("f2") + " ParabolicDistanceDefenseReachBall=" + lonelyPointElement.parabolicPassData.distanceDefenseReachBall.ToString("f2") ;
+        string pass = "straight=" + lonelyPointElement.straightReachBall + " parabolic=" + lonelyPointElement.parabolicReachBall+ " pass force="+ passData.passVelocity.magnitude + " StraightDistanceDefenseReachBall=" + lonelyPointElement.straightPassData.distanceDefenseReachBall.ToString("f2") + " straightDefense=" + lonelyPointElement.straightPassData.defenseReachIndex + " ParabolicDistanceDefenseReachBall=" + lonelyPointElement.parabolicPassData.distanceDefenseReachBall.ToString("f2") + " parabolicDefense=" + + lonelyPointElement.parabolicPassData.defenseReachIndex;
         
         Vector3 pos3 = new Vector3(lonelyPointElement.position.x, 1, lonelyPointElement.position.y);
         Vector3 pos4 = new Vector3(previousLonelyPoint.position.x, 1, previousLonelyPoint.position.y);

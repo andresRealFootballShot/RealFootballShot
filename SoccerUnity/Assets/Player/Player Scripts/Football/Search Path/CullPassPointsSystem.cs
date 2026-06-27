@@ -73,22 +73,23 @@ public class CullPassPointsSystem : SystemBase
             //SearchPlayData.ClearCullEntities();
         if (reset)
         {
-                Clear();
+            Clear();
             
-                CullPassPoints.CreatePlayerTargetPositions();
-                /*
-                SearchPlayData.posibleNodes.Clear();
-                Snodes.Clear();
-                SearchPlayData.getSortedNodes(ref Snodes, 1);
-                CullPassPoints.SetBallPosition(Snodes, 1, ballPosition);
-                SearchPlayData.AddPosibleNode(0);
-                //Calculamos las posiciones del equipo que defiende para la futura posición del balón
-                CullPassPoints.CalculateNextPositions(0, ballPosition, FieldPositionsData.HorizontalPositionType.Right,defenseTeam);
-                CullPassPoints.UpdateNextPlayerPoints(1, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
-                CullPassPoints.CompleteTriangulatorJob(1);
-                RemovePosibleNodes(1);*/
-                //if(CullPassPoints.debugTestLonelyPoints)
-               
+            CullPassPoints.CreatePlayerTargetPositions();
+            /*
+            SearchPlayData.posibleNodes.Clear();
+            Snodes.Clear();
+            SearchPlayData.getSortedNodes(ref Snodes, 1);
+            CullPassPoints.SetBallPosition(Snodes, 1, ballPosition);
+            SearchPlayData.AddPosibleNode(0);
+            //Calculamos las posiciones del equipo que defiende para la futura posición del balón
+            CullPassPoints.CalculateNextPositions(0, ballPosition, FieldPositionsData.HorizontalPositionType.Right,defenseTeam);
+            CullPassPoints.UpdateNextPlayerPoints(1, FieldPositionsData.HorizontalPositionType.Right, defenseTeam, defenseTeam.playersNoGoalkeeperCount / 2);
+            CullPassPoints.CompleteTriangulatorJob(1);
+            RemovePosibleNodes(1);*/
+            //if(CullPassPoints.debugTestLonelyPoints)
+            SearchPlayData.getSortedNodes(ref Snodes, 1);
+            CullPassPoints.CalculateFirstReachPlayerToBall(Snodes);
             if (CullPassPoints.debugTestLonelyPoints)
             {
                CullPassPoints.PlaceTestLonelyPoint();
@@ -99,8 +100,7 @@ public class CullPassPointsSystem : SystemBase
                 CullPassPoints.PlacePoints(0);
             }
 
-            SearchPlayData.getSortedNodes(ref Snodes, 1);
-            CullPassPoints.CalculateFirstReachPlayerToBall(Snodes);
+            
             CullPassPoints.SetBallPosition(Snodes, 1, CullPassPoints.ballReachPosition, CullPassPoints.firstPlayerReachTime);
 
             nodeCalculationPerFrameTotal = 1;

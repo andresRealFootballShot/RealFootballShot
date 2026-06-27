@@ -8,6 +8,7 @@ public class PossessionBallMoviment : Moviment
     public AnimationCurve speedRotationCurve,distanceCurve;
     float currentSpeed;
     public float acceleration = 5f;
+    public Vector3 posOffset=new Vector3(-0.5f,0,0);
     void Start()
     {
     }
@@ -77,7 +78,7 @@ public class PossessionBallMoviment : Moviment
             currentSpeed = verticalRig;
         }
         ForwardDesiredSpeed = currentSpeed;
-        TargetPosition = ballPosition;
+        TargetPosition = ballPosition+transCamera.TransformDirection(posOffset);
         //float horizontalSpeed = getHorizontalSpeed(componentsPlayer.transBody.forward * verticalRig);
         //float verticalSpeed = getVerticalSpeed(componentsPlayer.transBody.forward * verticalRig);
         //anim.SetFloat("vertical", verticalSpeed, 0.1f, Time.deltaTime * GeneralPlayerParameters.speedAnim);

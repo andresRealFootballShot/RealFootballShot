@@ -198,8 +198,10 @@ MonoBehaviour:
   ballDriving: {fileID: 0}
   playerSkills: {fileID: 11400000, guid: 6512255020a373d46a7e83d0c690b936, type: 2}
   playerParameters: {fileID: 11400000, guid: 34ccf7b9b5539f048997ee20523139cc, type: 2}
+  botMoveFunctions: {fileID: 0}
   friction: 0
   botKick: {fileID: 0}
+  BotControl: {fileID: 0}
   myTeam: {fileID: 0}
   rivalTeam: {fileID: 0}
 --- !u!114 &5276792245282462272
@@ -11612,6 +11614,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1786609019844001977, guid: c8c0af1606e548c468813579471d55b2, type: 3}
+      propertyPath: posOffset.x
+      value: -0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1786609019844001977, guid: c8c0af1606e548c468813579471d55b2, type: 3}
+      propertyPath: distanceCurve.m_Curve.Array.data[1].value
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1869828173202982061, guid: c8c0af1606e548c468813579471d55b2, type: 3}
       propertyPath: _volumenAdjust.m_Curve.Array.size
       value: 2
@@ -12289,6 +12299,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxKickForce: 33
   scopeOffset: 0.25
+  passScopeOffset: 0.1
 --- !u!1001 &4304605041844761346
 PrefabInstance:
   m_ObjectHideFlags: 0
