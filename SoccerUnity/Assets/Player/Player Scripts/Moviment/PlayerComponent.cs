@@ -39,7 +39,7 @@ public class PlayerComponent : MonoBehaviour
     protected float bodyRadio { get => playerComponents.playerData.bodyRadio; }
     protected float bodyHeight { get => playerComponents.playerData.height; }
     public float bodyBallRadio { get => bodyRadio + ballRadio; }
-    public float MaxSpeed { get => playerComponents.movementValues.maxForwardSpeed; }
+    public float MaxSpeed { get => playerComponents.movementValues.maxForwardSpeed; set => playerComponents.movementValues.maxForwardSpeed = value; }
     public float MinForwardSpeed { get => playerComponents.movementValues.MinForwardSpeed; set => playerComponents.movementValues.MinForwardSpeed = value; }
     public float ForwardDesiredSpeed { get => playerComponents.movementValues.ForwardDesiredSpeed; set => playerComponents.movementValues.ForwardDesiredSpeed = value; }
     public Vector3 DesiredDirection { get => movementValues.DesiredDirection; set => movementValues.DesiredDirection = value; }

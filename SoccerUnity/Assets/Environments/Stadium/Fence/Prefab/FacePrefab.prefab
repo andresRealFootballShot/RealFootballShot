@@ -89,20 +89,40 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9999849
+      value: 0.70710313
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.70710313
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.0054977355
+      value: -0.0022769547
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.0022769547
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -0.63
+      value: -1.26
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0.891
       objectReference: {fileID: 0}
     - target: {fileID: -7573516113195751166, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 4294967295
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 2a64cd421f7255148ac569901b32c5ec, type: 2}
     - target: {fileID: -3448227548844017777, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -111,6 +131,10 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 4294967295
       objectReference: {fileID: 0}
+    - target: {fileID: -1508032249791739073, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 3115343dbaa0d8e4380a49299f225564, type: 2}
     - target: {fileID: 100000, guid: b96fc74c65fd9db40bfde7740f7a9d17, type: 3}
       propertyPath: m_Name
       value: chainlink_group-2

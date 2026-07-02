@@ -2170,6 +2170,7 @@ GameObject:
   - component: {fileID: 6244234487330640569}
   - component: {fileID: 6704183389520453890}
   - component: {fileID: 7617802844254515038}
+  - component: {fileID: 8760785097259225321}
   m_Layer: 0
   m_Name: Hand
   m_TagString: GoalKeeper
@@ -2274,8 +2275,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   initMaxSpeed: 5
-  minRandomReflexes: 0.1
-  maxRandomReflexes: 0.2
+  minRandomReflexes: 0.2
+  maxRandomReflexes: 0.1
   speedRotation: 5
   maxVelocityInterseccionCenterVelocity: 10
   minVelocityInterseccionCenterVelocity: 2
@@ -2502,7 +2503,8 @@ MonoBehaviour:
   playerParameters: {fileID: 11400000, guid: 34ccf7b9b5539f048997ee20523139cc, type: 2}
   botMoveFunctions: {fileID: 7617802844254515038}
   friction: 0
-  botKick: {fileID: 0}
+  botKick: {fileID: 8760785097259225321}
+  BotControl: {fileID: 0}
   myTeam: {fileID: 0}
   rivalTeam: {fileID: 0}
   goalkeeperEvents: {fileID: 4290924186599095116}
@@ -2795,6 +2797,7 @@ MonoBehaviour:
   minSpeedForChangeDirection: 1
   directionRotationSpeed: 360
   maxSpeedForReachBall: 0
+  defaultMaxSpeedForReachBall: 0
   maxAngleForRun: 45
   maxAngleForRun2: 0
   stopOffset: 0
@@ -2842,6 +2845,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1af301f93a83d1a49bf7faca3c31377b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8760785097259225321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5279867306633939452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a160b6cf87acd2429375e65b4bb3fd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kickPeriod: 0.25
 --- !u!1 &5279867306647696566
 GameObject:
   m_ObjectHideFlags: 0

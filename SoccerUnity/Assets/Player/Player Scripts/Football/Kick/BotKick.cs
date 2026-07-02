@@ -8,7 +8,10 @@ public class BotKick : PlayerComponent
 {
     public float kickPeriod = 0.25f;
     public bool kickAvailable{ get => Time.time - startKickTime >= kickPeriod; }
-    public float startKickTime=0;
+    public float startKickTime{ get; set; }
+    public float controlTime { get; set; }
+    public bool controlTimeAvailable { get => Time.time - startControlTime >= controlTime; }
+    public float startControlTime { get; set; }
     void Start()
     {
         

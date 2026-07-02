@@ -119,10 +119,12 @@ public struct CullPassPointsJob : IJobEntityBatch
                     lonelyPoint.parabolicPassData.defenseReachTime = defenseParabolicReachTime;
                     lonelyPoint.parabolicPassData.distanceDefenseReachBall = parabolicMinDistancePlayer_Ball;
                     lonelyPoint.parabolicPassData.defenseReachPosition = new Vector2(parabolicDefenseReachPosition.x, parabolicDefenseReachPosition.z);
-                    weight = EvaluatePosition(lonelyPoint.position, CullPassPointsParams.post1Position, CullPassPointsParams.post2Position, ballPosition, parabolicMinDistancePlayer_Ball, maxFieldDistance);
+                    bool reachPlayerIsUser = lonelyPoint.parabolicPassData.defenseReachIndex == CullPassPointsParams.userIndex;
+                    weight = EvaluatePosition(lonelyPoint.position, CullPassPointsParams.post1Position, CullPassPointsParams.post2Position, ballPosition, parabolicMinDistancePlayer_Ball, maxFieldDistance, reachPlayerIsUser);
                 }else
                 {
-                    weight = EvaluatePosition(lonelyPoint.position, CullPassPointsParams.post1Position, CullPassPointsParams.post2Position, ballPosition, straightMinDistancePlayer_Ball, maxFieldDistance);
+                    bool reachPlayerIsUser = lonelyPoint.straightPassData.defenseReachIndex == CullPassPointsParams.userIndex;
+                    weight = EvaluatePosition(lonelyPoint.position, CullPassPointsParams.post1Position, CullPassPointsParams.post2Position, ballPosition, straightMinDistancePlayer_Ball, maxFieldDistance, reachPlayerIsUser);
                     //Debug.Log("aaaaa ballReachTargetPositionTime=" + getV0DOTSResult.ballReachTargetPositionTime + " defenseReachTime=" + defenseReachTimeResult);
                 }
                 //calculateWeight(ref lonelyPoint, ref CullPassPointsParams, ballPosition,straightMinDistancePlayer_Ball, parabolicMinDistancePlayer_Ball);
@@ -212,7 +214,7 @@ public struct CullPassPointsJob : IJobEntityBatch
         Vector2 post2Position,
         Vector2 ballPosition,
         float MinDistanceRival_Ball,
-        float maxFieldDistance
+        float maxFieldDistance,bool reachPlayerIsUser
     )
     {
         // --- DISTANCIA A LA PORTERÍA ---
@@ -235,7 +237,7 @@ public struct CullPassPointsJob : IJobEntityBatch
         float distanceToBall = Vector2.Distance(lonelyPoint, ballPosition);
         // Penalizamos posiciones muy lejos del balón, pero no demasiado cerca
         float ballWeight = Mathf.Clamp01(1f - Mathf.Clamp01((distanceToBall) / 50));
-        float l = Mathf.Lerp(0.5f, 5, distanceToGoal / maxFieldDistance);
+        float l = Mathf.Lerp(0.1f, 7, distanceToGoal / maxFieldDistance);
         float l2 = Mathf.Clamp(MinDistanceRival_Ball / l, -1, 1);
         float reachWeight =(1- l2)/2;
         // --- PRESIÓN DEL RIVAL ---
@@ -243,17 +245,18 @@ public struct CullPassPointsJob : IJobEntityBatch
 
         // --- PESO FINAL ---
         // Combinamos los factores. Ajusta los coeficientes según tu necesidad.
-        
+        float isUserWeight = reachPlayerIsUser ? 1 : 0;
         float finalWeight = 
             0.5f * distanceWeight +    // importancia de la distancia a portería
             0.3f * angleWeight +       // importancia de estar centrado
-            0.1f * ballWeight         // importancia de estar cerca del balón
+            0.1f * ballWeight+         // importancia de estar cerca del balón
+            0.3f* isUserWeight
         ;
         if (MinDistanceRival_Ball > 0)
         {
-            finalWeight = finalWeight * 0.2f + reachWeight * 0.5f;
+            finalWeight += reachWeight * 0.2f;
         }
-        finalWeight = MinDistanceRival_Ball > 0 ? finalWeight - 1.5f : finalWeight;
+        finalWeight = MinDistanceRival_Ball > 0 ? finalWeight - 2f : finalWeight;
         // Clamp opcional para mantenerlo entre -1 y 1
         return Mathf.Clamp(finalWeight, -2f, 1f);
     }

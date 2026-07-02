@@ -18,6 +18,7 @@ public class MovimentValues : MonoBehaviour
     public Variable<float> maximumJumpForceVar = new Variable<float>();
     public float forwardRunSpeed = 7, forwardSprintSpeed = 3.5f;
     public float maxForwardSpeed { get; set; }
+    public float defaultMaxForwardSpeed { get; set; }
     public float backRunSpeed = 4;
     public float backSprintSpeed = 2f;
     public float maxBackSpeed{get;set;}
@@ -118,6 +119,7 @@ public class MovimentValues : MonoBehaviour
         maxBackSpeed = backRunSpeed + backSprintSpeed;
         maxHorizontalSpeed = horizontalRunSpeed + horizontalSprintSpeed;
         maxForwardSpeed = MaxForwardRunSpeed + MaxForwardSprintSpeed;
+        defaultMaxForwardSpeed = maxForwardSpeed;
     }
     void calculateAccelerations()
     {

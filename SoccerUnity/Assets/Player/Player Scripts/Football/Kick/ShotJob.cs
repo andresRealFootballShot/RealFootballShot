@@ -4,7 +4,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-//[BurstCompile]
+[BurstCompile]
 public struct ShotJob : IJobParallelFor
 {
     [ReadOnly] public NativeArray<ShotCandidate> candidates;
@@ -27,7 +27,7 @@ public struct ShotJob : IJobParallelFor
         int count = 8;
         float increment = (right-left)/ count;
            
-        for (int i = 0; i < count; i++)
+        for (int i = count-1; i >= 0; i--)
         {
             float t = increment * i ;
 
@@ -40,7 +40,7 @@ public struct ShotJob : IJobParallelFor
                 c.maxKickForce,1000,1000,0.1f,
                 t,
                 c.k,
-                c.vf,c.ballSpeed);
+                c.vf,c.ballVelocity);
             if (!r2.foundedResult)
             {
                 right = t;
@@ -59,7 +59,7 @@ public struct ShotJob : IJobParallelFor
                 continue;
             }
 
-            if (GoalkeeperBlocks(c, r2.v0, t,out float goalkeeperBallDistance))
+            if (GoalkeeperBlocks(c, r2.v0, 2f,out float goalkeeperBallDistance))
             {
                 right = t;
                 continue;
@@ -71,10 +71,9 @@ public struct ShotJob : IJobParallelFor
     1f - math.saturate(
         distToCenter / c.goalHalfWidth);
 
-            float speedScore =
-                1f - math.saturate(
+            float speedScore =math.saturate(
                     r2.v0Magnitude / c.maxKickForce);
-            if (r2.v0Magnitude < 7 ) speedScore = 0;
+            //if (r2.v0Magnitude < 7 ) speedScore = 0;
             float goalkeeperBallDistanceScore = Mathf.Clamp01(goalkeeperBallDistance / 5);
             float score =centerScore * 20f + speedScore * 20f+ goalkeeperBallDistanceScore*20;
             //float score = goalkeeperBallDistanceScore * 50;
@@ -131,10 +130,12 @@ public struct ShotJob : IJobParallelFor
       float totalTime,out float distance)
     {
         distance = Mathf.Infinity;
-        for (int i = 1; i <= 10; i++)
+        int count = 20;
+        float scope = 1;
+        for (int i = 1; i <= count; i++)
         {
             float t =
-                totalTime * i / 10f;
+                totalTime * i / count;
 
             float3 ball =
                 ParabolicPassBurst.GetPositionAtTime(
@@ -146,14 +147,14 @@ public struct ShotJob : IJobParallelFor
 
             if (ball.y > c.goalkeeperMaxHeight)
                 continue;
-
+            
             float dist =
                 math.distance(
                     c.goalkeeperPos,
-                    ball);
+                    ball)-scope;
             if (dist < distance)
             {
-                distance=dist;
+                distance=Mathf.Clamp(dist,0,Mathf.Infinity);
             }
             if ((dist / c.goalkeeperSpeed)+c.reflex <= t)
             {

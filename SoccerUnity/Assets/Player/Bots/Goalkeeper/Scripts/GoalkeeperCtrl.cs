@@ -639,7 +639,7 @@ public class GoalkeeperCtrl : MonoBehaviour,ILoad
             {
                 //Para evitar cortar el estado jump()
                 changeDirection = true;
-                float reflexes = Random.Range(goalkeeperValues.minRandomReflexes, goalkeeperValues.maxRandomReflexes);
+                float reflexes = goalkeeperValues.minRandomReflexes+ Random.Range(0, goalkeeperValues.maxRandomReflexes);
                 DisableBehaviourForAWhile(reflexes);
                 result = true;
             }

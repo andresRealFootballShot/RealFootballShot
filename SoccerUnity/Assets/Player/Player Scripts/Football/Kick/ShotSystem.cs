@@ -39,10 +39,11 @@ public partial class ShotSystem : SystemBase
                 results = results
             };
 
-            JobHandle handle =
-                job.Schedule(candidates.Length, 32);
-
+            JobHandle handle =job.Schedule(candidates.Length, 32);
             handle.Complete();
+            //job.Run(candidates.Length);
+
+            
 
             CullPassPoints.bestShot = default;
             CullPassPoints.bestShot.score = -999999f;
@@ -144,7 +145,7 @@ public partial class ShotSystem : SystemBase
                         passerPos = passer.position,
                         maxAngleControl = passer.playerComponents.playerSkills.MaxAngleControl,
                         maxVelocityControl = BotControl.GetMaxVelocityControl(targetPosition, MatchComponents.ballComponents.position, passer.playerComponents.playerSkills,1.25f),
-                        ballSpeed = MatchComponents.ballRigidbody.velocity.magnitude,
+                        ballVelocity = MatchComponents.ballRigidbody.velocity,
 
                     };
                     id++;
@@ -176,7 +177,7 @@ public struct ShotCandidate
 {
     public float3 target;
     public float3 ballPos;
-    public float ballSpeed;
+    public float3 ballVelocity;
     public float3 goalkeeperPos;
     public float goalkeeperSpeed;
     public float goalkeeperMaxHeight;

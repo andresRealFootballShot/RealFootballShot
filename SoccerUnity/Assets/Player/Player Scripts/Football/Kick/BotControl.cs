@@ -4,6 +4,8 @@ using CullPositionPoint;
 using DOTS_ChaserDataCalculation;
 using FieldTriangleV2;
 using TMPro;
+using Unity.Entities.UniversalDelegates;
+using Unity.Mathematics;
 public class BotControl : PlayerComponent
 {
     
@@ -87,12 +89,18 @@ public class BotControl : PlayerComponent
         dir1.y = 0;
         Vector3 dir2 = ballPosition - playerPosition;
         dir2.y = 0;
-
+        Vector3 dir3 =  playerPosition- ballPosition;
+        dir3.y = 0;
 
         float angle = Vector3.Angle(dir1, dir2);
-
-
-        if (angle > shotCandidate.maxAngleControl || shotCandidate.ballSpeed >= shotCandidate.maxVelocityControl)
+        float angle2 = math.degrees(
+        math.acos(
+        math.clamp(
+            math.dot(math.normalize(dir3), math.normalize(shotCandidate.ballVelocity)),
+            -1f,
+            1f)));
+        float ballSpeed = math.length(shotCandidate.ballVelocity);
+        if (angle > shotCandidate.maxAngleControl || ballSpeed >= shotCandidate.maxVelocityControl)
         {
             return true;
         }

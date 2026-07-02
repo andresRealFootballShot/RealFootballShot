@@ -130,11 +130,11 @@ PrefabInstance:
     - target: {fileID: -1230327984394414833, guid: fccc49bf3e108b94c8202230c83d6e92, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 2ae41d13a79eb854f89888a794cf5e6e, type: 2}
+      objectReference: {fileID: 2100000, guid: 2a64cd421f7255148ac569901b32c5ec, type: 2}
     - target: {fileID: 13904462140188597, guid: fccc49bf3e108b94c8202230c83d6e92, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 2ae41d13a79eb854f89888a794cf5e6e, type: 2}
+      objectReference: {fileID: 2100000, guid: 2a64cd421f7255148ac569901b32c5ec, type: 2}
     - target: {fileID: 919132149155446097, guid: fccc49bf3e108b94c8202230c83d6e92, type: 3}
       propertyPath: m_Name
       value: chainlink_group-3
