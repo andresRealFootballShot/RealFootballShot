@@ -616,7 +616,7 @@ LonelyPointElement2 GetDebugLonelyPoint(int index)
          color = Color.red;
      }
      Gizmos.color = color;
-     Gizmos.DrawSphere(pos + Vector3.up * 0.25f, 0.2f);
+     Gizmos.DrawSphere(pos + Vector3.up * 0.25f, 0.1f);
      GUIStyle style = new GUIStyle();
      style.fontSize = 16;
      style.normal.textColor = infoColor;

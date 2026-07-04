@@ -274,6 +274,7 @@ public class BallInterceptionSystem : MonoBehaviour
                     endPlayerDirection = endPlayerDirections[i];
                     Teams.getTeamFromPlayer(Teams.allPlayers[i].playerID, out Team team);
                     team.firstReachBallPublicPlayerData = Teams.allPlayers[i];
+                    team.firstReachBallTime = ballTime;
                 }
             }
         }

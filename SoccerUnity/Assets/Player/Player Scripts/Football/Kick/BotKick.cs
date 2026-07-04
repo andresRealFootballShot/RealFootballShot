@@ -11,7 +11,7 @@ public class BotKick : PlayerComponent
     public float startKickTime{ get; set; }
     public float controlTime { get; set; }
     public bool controlTimeAvailable { get => Time.time - startControlTime >= controlTime; }
-    public float startControlTime { get; set; }
+    public float startControlTime { get; set; } = -10;
     void Start()
     {
         

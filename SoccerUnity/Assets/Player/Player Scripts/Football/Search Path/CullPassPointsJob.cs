@@ -15,7 +15,7 @@ using static FieldTriangleSpace.FieldOfTrianglesCreator;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using Unity.Mathematics;
-[BurstCompile]
+//[BurstCompile]
 public struct CullPassPointsJob : IJobEntityBatch
 {
     public BufferTypeHandle<LonelyPointElement2> lonelyPointsHandle;
@@ -103,7 +103,7 @@ public struct CullPassPointsJob : IJobEntityBatch
                 lonelyPoint.straightPassData.distanceDefenseReachBall = straightMinDistancePlayer_Ball;
                 parabolicMinDistancePlayer_Ball = Mathf.NegativeInfinity;
                 lonelyPoint.parabolicPassData.Clear();
-                
+                bool reachPlayerIsUser = lonelyPoint.attackReachIndex == CullPassPointsParams.userIndex;
                 if (straightMinDistancePlayer_Ball > 0)
                 {
                     TestResult.straightReachBall = false;
@@ -119,11 +119,10 @@ public struct CullPassPointsJob : IJobEntityBatch
                     lonelyPoint.parabolicPassData.defenseReachTime = defenseParabolicReachTime;
                     lonelyPoint.parabolicPassData.distanceDefenseReachBall = parabolicMinDistancePlayer_Ball;
                     lonelyPoint.parabolicPassData.defenseReachPosition = new Vector2(parabolicDefenseReachPosition.x, parabolicDefenseReachPosition.z);
-                    bool reachPlayerIsUser = lonelyPoint.parabolicPassData.defenseReachIndex == CullPassPointsParams.userIndex;
+                    
                     weight = EvaluatePosition(lonelyPoint.position, CullPassPointsParams.post1Position, CullPassPointsParams.post2Position, ballPosition, parabolicMinDistancePlayer_Ball, maxFieldDistance, reachPlayerIsUser);
                 }else
                 {
-                    bool reachPlayerIsUser = lonelyPoint.straightPassData.defenseReachIndex == CullPassPointsParams.userIndex;
                     weight = EvaluatePosition(lonelyPoint.position, CullPassPointsParams.post1Position, CullPassPointsParams.post2Position, ballPosition, straightMinDistancePlayer_Ball, maxFieldDistance, reachPlayerIsUser);
                     //Debug.Log("aaaaa ballReachTargetPositionTime=" + getV0DOTSResult.ballReachTargetPositionTime + " defenseReachTime=" + defenseReachTimeResult);
                 }
@@ -249,7 +248,6 @@ public struct CullPassPointsJob : IJobEntityBatch
         float finalWeight = 
             0.5f * distanceWeight +    // importancia de la distancia a portería
             0.3f * angleWeight +       // importancia de estar centrado
-            0.1f * ballWeight+         // importancia de estar cerca del balón
             0.3f* isUserWeight
         ;
         if (MinDistanceRival_Ball > 0)

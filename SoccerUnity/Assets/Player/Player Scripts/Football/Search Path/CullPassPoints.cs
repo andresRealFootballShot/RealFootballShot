@@ -750,12 +750,13 @@ public class CullPassPoints : MonoBehaviour
             lonelyPointCount = 0;
 
         }
-        int points = 5;
-        float lenght=3;
-        float angle = 180 / (points - 1);
+        int points = 4;
+        float lenght=4;
+        float angle2 = 90;
+        float angle = angle2 / (points - 1);
         for(int i = 0;i< points; i++)
         {
-            Vector3 dir = Quaternion.Euler(0, i*angle, 0) * -firstPublicPlayerData.bodyTransform.right * lenght;
+            Vector3 dir = Quaternion.Euler(0, i*angle+(180-angle2)/2, 0) * -firstPublicPlayerData.bodyTransform.right * lenght;
 
             
 
