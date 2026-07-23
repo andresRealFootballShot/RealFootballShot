@@ -4,7 +4,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-[BurstCompile]
+//[BurstCompile]
 public struct ShotJob : IJobParallelFor
 {
     [ReadOnly] public NativeArray<ShotCandidate> candidates;

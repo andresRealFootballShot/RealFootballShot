@@ -34,7 +34,7 @@ public class PlaytimeCtrl : MonoBehaviour
         setupCamera();
         setupPublicPlayerData();
         //Intro();
-        setupTypeMatch();
+        //setupTypeMatch();
         setupMatchLoadedEvent();
         setupFieldPositionMenu();
         CheckBallIsInFullArea.SetState(false);
@@ -66,11 +66,11 @@ public class PlaytimeCtrl : MonoBehaviour
     }
     void setTeamSide()
     {
-        Teams.teamsList[0].setLineup(Lineup.TypeLineup.Default);
-        Teams.teamsList[1].setLineup(Lineup.TypeLineup.Default);
-        SideOfFieldCtrl.setTeamSide(Teams.teamsList[0].TeamName, SideOfFieldID.One);
+        //Teams.teamsList[0].setLineup(Lineup.TypeLineup.Default);
+        //Teams.teamsList[1].setLineup(Lineup.TypeLineup.Default);
+        //SideOfFieldCtrl.setTeamSide(Teams.teamsList[0].TeamName, SideOfFieldID.One);
         //Teams.teamsList[0].setSideOfField(SideOfFieldID.One);
-        SideOfFieldCtrl.setTeamSide(Teams.teamsList[1].TeamName, SideOfFieldID.Two);
+        //SideOfFieldCtrl.setTeamSide(Teams.teamsList[1].TeamName, SideOfFieldID.Two);
         //Teams.teamsList[1].setSideOfField(SideOfFieldID.Two);
     }
     void setupGoalkeeperTrigger()
@@ -259,7 +259,7 @@ public class PlaytimeCtrl : MonoBehaviour
         TypeMatch.SizeFootballField = SizeFootballFieldID.ElevenVSEleven;
         TypeMatch.typeMatch = TypeMatchID.Playtime;
         TypeMatch.typeNormalMatch = TypeNormalMatch.TenVSTen;
-        TypeMatch.maxPlayers = 20;
+        TypeMatch.maxFieldPlayers = 20;
         MatchEvents.typeMatchSetuped.Invoke();
     }
     void setupMatchLoadedEvent()

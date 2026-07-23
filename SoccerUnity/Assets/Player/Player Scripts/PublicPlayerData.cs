@@ -12,6 +12,7 @@ public class PublicPlayerData : MonoBehaviour
     public Variable<string> playerNameVar = new Variable<string>();
     public Variable<Vector3> initPosition = new Variable<Vector3>();
     public Variable<Quaternion> initRotation = new Variable<Quaternion>();
+    public TypeFieldPosition.Type fieldPositionType;
     public float maxSpeed { get {return maxSpeedVar.Value; } set { maxSpeedVar.Value=value; } }
     public bool kickAvailable { get {return playerComponents.botKick.kickAvailable; }  }
     public BotKick BotKick { get {return playerComponents.botKick; }  }
@@ -21,8 +22,10 @@ public class PublicPlayerData : MonoBehaviour
     public float resistance { get { return resistanceVar.Value; } set { resistanceVar.Value = value; } }
     public float bodyRadio { get { return playerData.bodyRadio; } set { playerData.bodyRadio = value; } }
     public Vector3 position { get { return bodyTransform.position; } set { bodyTransform.position = value; } }
+    public Transform modelTransform { get { return playerComponents.modelTransform; } set { playerComponents.modelTransform = value; } }
     public Vector3 InitPosition { get { return initPosition.Value; } set { initPosition.Value = value; } }
     public Quaternion InitRotation { get { return initRotation.Value; } set { initRotation.Value = value; } }
+    public NoPossessionMode NoPossessionMode { get { return playerData.noPossessionMode; } set { playerData.noPossessionMode = value; } }
     public SoccerPlayerData SoccerPlayerData { get { return playerComponents.soccerPlayerData; }}
     //public float maximumJumpHeight { get; set; }
     public SortedList<float, Area> maximumJumpHeights { get; set; } = new SortedList<float, Area>();
@@ -44,9 +47,14 @@ public class PublicPlayerData : MonoBehaviour
     public PlayerData playerData { get => playerComponents.playerData; }
     public PlayerComponents playerComponents;
     public virtual bool IsGoalkeeper { get => false; }
-    public bool IsBot = true;
+    public bool initPuppet;
+    public bool IsBot{ get => playerType.Value==PlayerTypeID.Bot; }
+    public bool IsPuppet{ get => playerType.Value==PlayerTypeID.Puppet; }
     public Team team { get; set; }
     public Team rivalTeam { get; set; }
+    public bool canChangeType = true;
+    public PlayerType playerType;
+    public GameObject puppetBehaviour, botBehaviour;
     public float getTimeToReachPosition(Vector3 position,float scope)
     {
         return playerComponents.GetTimeToReachPosition.getTimeToReachPointDelegate(position,scope);
@@ -57,9 +65,14 @@ public class PublicPlayerData : MonoBehaviour
        
         playerComponents.defaultScope = playerComponents.ballScope*0.7f;
         playerComponents.scope = playerComponents.defaultScope;
-        if (!IsBot) MatchComponents.myPublicPlayerData = this;
+        if (initPuppet) MatchComponents.currentPublicPlayerData = this;
+        if(canChangeType)
+            ChangePlayerType(playerType.Value, true);
     }
-     
+    public void SetNextNoPossesionMode()
+    {
+        playerData.noPossessionMode = playerData.GetNextNoPossessionMode();
+    }
     public static void getPlayerData(PublicPlayerData publicPlayerData, int index, out PlayerDataComponent playerDataComponent)
     {
 
@@ -138,5 +151,65 @@ public class PublicPlayerData : MonoBehaviour
         playerComponents.stopOffset = 0;
         playerComponents.movementCtrl.startMoveTimes();
 
+    }
+    public void ChangePlayerType(PlayerTypeID playerTypeID,bool reset)
+    {
+        if (!canChangeType) return;
+        switch (playerTypeID)
+        {
+            case PlayerTypeID.Bot:
+                if (this.playerType.Value != PlayerTypeID.Bot|| reset)
+                {
+                    puppetBehaviour.SetActive(false);
+                    botBehaviour.SetActive(true);
+                    this.playerType.Value= PlayerTypeID.Bot;
+                }
+                break;
+            case PlayerTypeID.Puppet:
+                if (this.playerType.Value != PlayerTypeID.Puppet || reset)
+                {
+                    puppetBehaviour.SetActive(true);
+                    botBehaviour.SetActive(false);
+                    this.playerType.Value = PlayerTypeID.Puppet;
+                }
+                break;
+        }
+    }
+    public void ChangePlayerType(PlayerTypeID playerTypeID)
+    {
+        if (!canChangeType) return;
+        switch (playerTypeID)
+        {
+            case PlayerTypeID.Bot:
+                    puppetBehaviour.SetActive(false);
+                    botBehaviour.SetActive(true);
+                    this.playerType.Value = PlayerTypeID.Bot;
+                break;
+            case PlayerTypeID.Puppet:
+                    puppetBehaviour.SetActive(true);
+                    botBehaviour.SetActive(false);
+                    this.playerType.Value = PlayerTypeID.Puppet;
+                    MatchComponents.currentPublicPlayerData = this;
+                    ComponentsPlayer.currentComponentsPlayer = MatchComponents.currentPublicPlayerData.playerComponents.ComponentsPlayer;
+                    ComponentsPlayer.myMonoPlayerID = MatchComponents.currentPublicPlayerData.playerIDMono;
+                break;
+        }
+    }
+    public void ChangeNoPossessionMode(NoPossessionMode NoPossessionMode)
+    {
+        if (!canChangeType) return;
+        switch (NoPossessionMode)
+        {
+            case NoPossessionMode.Freelance:
+                playerData.noPossessionMode = NoPossessionMode.Freelance;
+                break;
+            case NoPossessionMode.Automatic:
+                playerData.noPossessionMode = NoPossessionMode.Automatic;
+                break;
+        }
+    }
+    public void ChangeOtherPlayerType()
+    {
+        ChangePlayerType(playerType.GetOtherPlayerType(), true);
     }
 }

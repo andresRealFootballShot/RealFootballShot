@@ -8,17 +8,19 @@ public class PlayerComponents : PlayerComponent
     public override PlayerComponents playerComponents { get => this; }
     public Transform root;
     public new PublicPlayerData publicPlayerData;
+    public LookingBallMoviment LookingBallMoviment;
     public new PlayerData playerData = new PlayerData();
     public PlayerEvents playerEvents;
     public AddPlayerToTeam addPlayerToTeam;
     public string movimentValuesType;
-    [HideInInspector]
+    
     public new MovimentValues movementValues;
     public MovementCtrl movementCtrl;
     public SoccerPlayerData soccerPlayerData;
     public Animator animator;
     public MyRaycastHit wallRayCast;
     public new Transform bodyTransform { get => publicPlayerData.bodyTransform; }
+    public Transform modelTransform;
     
     public new Rigidbody rigidbody;
     public ResistanceCtrl resistanceCtrl;
@@ -34,6 +36,8 @@ public class PlayerComponents : PlayerComponent
     public BotKick botKick;
     public BotControl BotControl;
     public Team myTeam, rivalTeam;
+    public ComponentsPlayer ComponentsPlayer;
+    
     public float maxSpeedRotation { get =>movementValues.rotationSpeed; }
     void Start()
     {

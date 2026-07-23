@@ -15,6 +15,7 @@ public class PruebasResetBallPosition : MonoBehaviour
 #if UNITY_EDITOR
     void Update()
     {
+        return;
         if (Input.GetKeyDown(KeyCode.R))
         {
             

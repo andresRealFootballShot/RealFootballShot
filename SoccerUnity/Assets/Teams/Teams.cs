@@ -192,7 +192,19 @@ public class Teams : MonoBehaviour,ILoad,IClearBeforeLoadScene
         }
         return false;
     }
-
+    public static Team getTeamFromPlayer(string playerID)
+    {
+        Team team = null;
+        foreach (var item in teamsList)
+        {
+            if (item.ContainsPlayer(playerID))
+            {
+                team = item;
+                return team;
+            }
+        }
+        return team;
+    }
     public static List<string> getPlayersOfAllTeams()
     {
         List<string> players = new List<string>();

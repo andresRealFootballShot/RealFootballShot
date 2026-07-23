@@ -8,4 +8,10 @@ public enum PlayerTypeID
 }
 public class PlayerType : MonoVariable<PlayerTypeID>
 {
+    public PlayerTypeID GetOtherPlayerType()
+    {
+
+        if (Value == PlayerTypeID.Bot) return PlayerTypeID.Puppet;
+        else return PlayerTypeID.Bot;
+    }
 }

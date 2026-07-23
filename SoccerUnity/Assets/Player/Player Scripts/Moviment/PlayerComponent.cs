@@ -7,6 +7,7 @@ public class PlayerComponent : MonoBehaviour
 {
     public virtual PlayerComponents playerComponents { get; set; }
     public PlayerData playerData { get => playerComponents.playerData; }
+    public ComponentsPlayer ComponentsPlayer { get => playerComponents.ComponentsPlayer; }
     protected MovimentValues movementValues { get => playerComponents.movementValues; }
     public PublicPlayerData publicPlayerData { get => playerComponents.publicPlayerData; }
     protected PlayerSkills playerSkills { get => playerComponents.playerSkills; }
@@ -16,6 +17,7 @@ public class PlayerComponent : MonoBehaviour
     protected Vector3 bodyForward { get => playerComponents.bodyTransform.forward; }
     protected Vector3 bodyRight { get => playerComponents.bodyTransform.right; }
     public Vector3 bodyY0Forward { get => MyFunctions.setYToVector3(bodyForward, 0).normalized; }
+    public Transform modelTransform { get => playerComponents.modelTransform; }
     public Vector3 Velocity { get => playerData.Velocity; set { 
             playerData.Velocity = value; playerData.VerticalSpeed = Vector3.Dot(bodyY0Forward,value);
             playerData.HorizontalSpeed = Vector3.Dot(bodyTransform.right, value);

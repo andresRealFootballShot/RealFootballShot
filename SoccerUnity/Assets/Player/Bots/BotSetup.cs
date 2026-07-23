@@ -11,7 +11,8 @@ public class BotSetup : MonoBehaviour
     public bool ballControl = true;
     public string typePlayerSkills;
     public List<PlayerSkills> playerSkillsList;
-    void Start()
+    public PlayerComponents PlayerComponents;
+    void Awake()
     {
         setupPlayerSkills();
         setup();
@@ -22,8 +23,7 @@ public class BotSetup : MonoBehaviour
         {
             if (item.typePlayerSkills.Equals(typePlayerSkills))
             {
-                PlayerComponents playerComponents = MyFunctions.GetComponentInChilds<PlayerComponents>(gameObject, true);
-                playerComponents.playerSkills = Instantiate(item);
+                PlayerComponents.playerSkills = Instantiate(item);
                 break;
             }
         }

@@ -1,16 +1,52 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+public enum NoPossessionMode
+{
+    Automatic, Freelance
+}
 public class LookingBallMoviment : Moviment
 {
     public Sprint sprint;
     public Vector3 offsetPosition=new Vector3(-0.5f,0,0);
+    NoPossessionMode noPossessionMode { get => playerData.noPossessionMode; set => playerData.noPossessionMode = value; }
+    float rightOffset = 0.3f;
     void Start()
     {
     }
     
     void Update()
+    {
+        switch (noPossessionMode)
+        {
+            case NoPossessionMode.Automatic:
+                AutomaticMode();
+                break;
+            case NoPossessionMode.Freelance:
+                FreelanceMode();
+                break;
+        }
+
+    }
+    void AutomaticMode()
+    {
+        CullPassPoints cullPassPoints = MatchComponents.CullPassPoints;
+        Vector3 ballPosition = MatchComponents.ballPosition;
+        ballPosition.y = 0;
+        Vector3 reachPosition= playerData.validReachPosition ? playerData.ballReachPosition : ballPosition;
+        Vector3 lookDir = reachPosition - bodyPosition;
+        lookDir.y = 0;
+        LookTarget = true;
+        TargetPosition = reachPosition - bodyRight * rightOffset;
+        ForwardDesiredSpeed = MaxSpeed;
+        //DesiredLookDirection = lookDir;
+
+        //DesiredDirection = lookDir;
+        playerComponents.movementCtrl.BotMove(Time.deltaTime);
+        //playerComponents.movementCtrl.getAdjustedForwardVelocitySpeed(Time.deltaTime);
+        playerComponents.movementCtrl.animator(Time.deltaTime);
+    }
+    void FreelanceMode()
     {
         Animator anim = componentsPlayer.animatorPlayer;
 
@@ -37,21 +73,21 @@ public class LookingBallMoviment : Moviment
 
         angle = FindAngle(Vector3.forward, new Vector3(horizontalAxes, 0, verticalAxes));
         vertical = Mathf.Clamp01(new Vector3(horizontalAxes, 0, verticalAxes).magnitude);
-        
+
         Vector3 right = Vector3.Cross(Vector3.up, MyFunctions.setY0ToVector3(ballPosY0 - bodyPos));
         right.Normalize();
         TargetPosition = ballPosY0 - right * 0.3f;
         //TargetPosition = ballPosY0 + transCamera.TransformDirection(offsetPosition);
         //float distance = Vector3.Distance(ballPos, bodyPos + transModelo.right * 0.3f) / controllerDistance.maxDistance;
         float offset = radio + 0.3f;
-        float d = Vector3.Distance(MyFunctions.setY0ToVector3(ballPosY0 - right * 0.3f), MyFunctions.setY0ToVector3(bodyPos));
+        float d = Vector3.Distance(MyFunctions.setY0ToVector3(ballPosY0 - right * rightOffset), MyFunctions.setY0ToVector3(bodyPos));
         float distance = Mathf.Clamp01(d - offset) / (controllerDistance.maxDistance);
         distance = distance < 0.001f ? 0 : distance;
 
         if (Input.GetKeyDown(ComponentsKeys.defensivePosition))
         {
             movementValues.isDefensivePosition = !movementValues.isDefensivePosition;
-           
+
         }
         if (movementValues.isDefensivePosition)
         {
@@ -68,26 +104,26 @@ public class LookingBallMoviment : Moviment
             //transModelo.rotation = transModeloRotation;
             DesiredLookDirection = dirRotated;
             DesiredDirection = dirRotated;
-            
+
         }
 
         float magnitudeBallVelocity = Mathf.Clamp01(ballVelocity.magnitude / movimentValues.maxVelocityBall);
         targetVelocityBall = Mathf.Lerp(targetVelocityBall, magnitudeBallVelocity, Time.deltaTime * movimentValues.speedChangeVelocityBall);
         curveVelocityEvaluated = movimentValues.curveVelocity.Evaluate(targetVelocityBall);
-        
+
         //float distance = movimentValues.distanceCurve.Evaluate(distance);
 
         speedRotation2 = movimentValues.speedRotationCurve.Evaluate((1 - getSpeedRotation1(verticalAxes, horizontalAxes) / 180));
         //verticalRig = speedRotation2 * vertical *Mathf.Lerp(curveVelocityEvaluated * movimentValues.maxVelocityBall, movimentValues.MaxForwardRunSpeed + movimentValues.MaxForwardSprintSpeed * sprintAxes, distance+Mathf.Abs(angle/180));
         verticalRig = vertical * (playerComponents.getRunSpeed() + playerComponents.getSprintSpeed() * sprintAxes);
 
-        
+
         ForwardDesiredSpeed = verticalRig;
 
         playerComponents.movementCtrl.rotation(Time.deltaTime);
         playerComponents.movementCtrl.getAdjustedForwardVelocitySpeed(Time.deltaTime);
         playerComponents.movementCtrl.animator(Time.deltaTime);
-        
+
 
 
         /*
@@ -99,9 +135,7 @@ public class LookingBallMoviment : Moviment
         anim.SetFloat("vertical", verticalSpeed, 0.1f,Time.deltaTime * GeneralPlayerParameters.speedAnim);
         anim.SetFloat("horizontal", horizontalSpeed, 0.1f, Time.deltaTime * GeneralPlayerParameters.speedAnim);*/
 
-
     }
-    
     private void FixedUpdate()
     {
         if (!componentsPlayer.scriptsPlayer.raycastWall.isHitting)
@@ -110,7 +144,10 @@ public class LookingBallMoviment : Moviment
             
             //componentsPlayer.rigBody.MovePosition(componentsPlayer.rigBody.position + componentsPlayer.transBody.forward * verticalRig * Time.fixedDeltaTime);
         }
-        playerComponents.movementCtrl.movement(Time.fixedDeltaTime);
+        if (playerComponents != null&& noPossessionMode==NoPossessionMode.Freelance)
+        {
+            playerComponents.movementCtrl.movement(Time.fixedDeltaTime);
+        }
     }
     
 }

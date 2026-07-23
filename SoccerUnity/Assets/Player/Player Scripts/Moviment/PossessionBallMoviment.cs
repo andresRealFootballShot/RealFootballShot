@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class PossessionBallMoviment : Moviment
 {
     public float adjustDistanceWithPossession;
@@ -48,13 +49,14 @@ public class PossessionBallMoviment : Moviment
         //Debug.DrawRay(bodyPos, dirBodyBall, Color.green);
         if (vertical != 0 && distance>=0)
         {
-            float normalizedVelocity = componentsPlayer.scriptsPlayer.movimentValues.velocityObsolete.Value / componentsPlayer.scriptsPlayer.movimentValues.maxSpeed.Value;
+            float normalizedVelocity = componentsPlayer.playerComponents.Speed / componentsPlayer.scriptsPlayer.movimentValues.maxSpeed.Value;
             speedRotation = movimentValues.rotationSpeed;
+            //Vector3 dirRotated = Quaternion.AngleAxis(angle, Vector3.up) * dirBodyBall;
             Vector3 dirRotated = Quaternion.AngleAxis(angle, Vector3.up) * dirBodyBall;
             //Quaternion transModeloRotation = Quaternion.Lerp(transModelo.rotation, Quaternion.LookRotation(dirRotated), Time.deltaTime * speedRotation);
             //transModelo.rotation = transModeloRotation;
 
-            DesiredLookDirection = dirRotated;
+            
 
             //DesiredDirection = dirRotated;
         }
@@ -78,7 +80,11 @@ public class PossessionBallMoviment : Moviment
             currentSpeed = verticalRig;
         }
         ForwardDesiredSpeed = currentSpeed;
+        LookTarget = false;
         TargetPosition = ballPosition+transCamera.TransformDirection(posOffset);
+        Vector3 lookDirection = MatchComponents.ballPosition - bodyPosition;
+        lookDirection.y = 0;
+        DesiredLookDirection = lookDirection;
         //float horizontalSpeed = getHorizontalSpeed(componentsPlayer.transBody.forward * verticalRig);
         //float verticalSpeed = getVerticalSpeed(componentsPlayer.transBody.forward * verticalRig);
         //anim.SetFloat("vertical", verticalSpeed, 0.1f, Time.deltaTime * GeneralPlayerParameters.speedAnim);

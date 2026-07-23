@@ -65,12 +65,12 @@ public struct CullPassPointsJob : IJobEntityBatch
                 Vector3 lonelyPosition = new Vector3(lonelyPoint.position.x, BallParams.BallPosition.y, lonelyPoint.position.y);
                 int attackIndex = -1;
                 Vector2 offsidePos = GetOffsideLine(ballPosition, CullPassPointsParams.defenseGoalPosition, CullPassPointsParams.midfield, defenseIndexStart, defenseIndexEnd, ref PlayerPositions);
-                float reachTime2 = GetTimeToReachPosition(ref PlayerPositions, ref PlayerGenericParams, attackIndexStart , attackIndexEnd, lonelyPosition, ref attackIndex,offsidePos, CullPassPointsParams.defenseGoalPosition,t0,CullPassPointsParams.passerIndex,ballPosition,lonelyPosition);
+                float reachTime2 = GetTimeToReachPosition(ref PlayerPositions, ref PlayerGenericParams, attackIndexStart , attackIndexEnd, lonelyPosition, ref attackIndex,offsidePos, CullPassPointsParams.defenseGoalPosition,t0,CullPassPointsParams.passerIndex,ballPosition,lonelyPosition, lonelyPoint);
                 
                 float reachTime = attackIndex==CullPassPointsParams.passerIndex ? reachTime2 : Mathf.Max(reachTime2-t0,0);
                 if (attackIndex != -1)
                 {
-                    reachTime += PlayerPositions[attackIndex].timePrecision;
+                    //reachTime += PlayerPositions[attackIndex].timePrecision;
                 }
                 lonelyPoint.attackReachIndex = attackIndex;
                 lonelyPoint.attackReachTime = reachTime2;
@@ -84,7 +84,7 @@ public struct CullPassPointsJob : IJobEntityBatch
                 PathDataDOTS.normalizedV0 = getV0DOTSResult.v0.normalized;
                 lonelyPoint.straightPassData.ballReachTime = getV0DOTSResult.ballReachTargetPositionTime;
                 
-                getMinReachDistance_StraightPass(true,ref PlayerPositions, ref PlayerGenericParams, defenseIndexStart, defenseIndexEnd, lonelyPosition, BallParams.BallPosition, ref PathDataDOTS, out straightMinDistancePlayer_Ball, out defenseReachIndex, out defenseStraightReachTimeResult,0,out Vector3 straightDefenseReachPosition);
+                getMinReachDistance_StraightPass(true,ref PlayerPositions, ref PlayerGenericParams, defenseIndexStart, defenseIndexEnd, lonelyPosition, BallParams.BallPosition, ref PathDataDOTS, out straightMinDistancePlayer_Ball, out defenseReachIndex, out defenseStraightReachTimeResult,0,out Vector3 straightDefenseReachPosition, lonelyPoint);
                 //Debug.Log(defenseReachTimeResult);
                 TestResult.GetV0DOTSResult1 = getV0DOTSResult;
                 TestResult.defenseLonelyPointReachTime = defenseStraightReachTimeResult;
@@ -232,10 +232,16 @@ public struct CullPassPointsJob : IJobEntityBatch
         // Normalizamos ángulo: máximo ángulo = 1, mínimo = 0
         float angleWeight = angle / 180f;
 
+        float angle2 = Vector3.Angle(goalCenter - ballPosition, lonelyPoint - ballPosition);
         // --- DISTANCIA AL BALÓN ---
         float distanceToBall = Vector2.Distance(lonelyPoint, ballPosition);
         // Penalizamos posiciones muy lejos del balón, pero no demasiado cerca
-        float ballWeight = Mathf.Clamp01(1f - Mathf.Clamp01((distanceToBall) / 50));
+        float ballWeight = Mathf.Clamp01(1f - Mathf.Clamp01(distanceToBall / 30));
+        ballWeight = Mathf.Lerp(0, ballWeight, Mathf.Clamp01((distanceToBall-5) / 5));
+        ballWeight = Mathf.Lerp(ballWeight,0,angle2/180);
+        float radio = Mathf.Lerp(0.01f, 5, Mathf.Clamp01(distanceToBall / 30));
+        radio = Mathf.Lerp(0.01f, radio, Mathf.Clamp01((distanceToBall - 5) / 5));
+        float radioWeight = Mathf.Lerp(1,0,(radio+MinDistanceRival_Ball)/radio);
         float l = Mathf.Lerp(0.1f, 7, distanceToGoal / maxFieldDistance);
         float l2 = Mathf.Clamp(MinDistanceRival_Ball / l, -1, 1);
         float reachWeight =(1- l2)/2;
@@ -246,9 +252,10 @@ public struct CullPassPointsJob : IJobEntityBatch
         // Combinamos los factores. Ajusta los coeficientes según tu necesidad.
         float isUserWeight = reachPlayerIsUser ? 1 : 0;
         float finalWeight = 
-            0.5f * distanceWeight +    // importancia de la distancia a portería
+            0.6f * distanceWeight +    // importancia de la distancia a portería
             0.3f * angleWeight +       // importancia de estar centrado
-            0.3f* isUserWeight
+            0.2f* isUserWeight
+            //+ ballWeight * 0.2f + radioWeight * 0.1f
         ;
         if (MinDistanceRival_Ball > 0)
         {
@@ -371,7 +378,7 @@ public struct CullPassPointsJob : IJobEntityBatch
 
     }
     
-    void getMinReachDistance_StraightPass(bool isStrightPass,ref DynamicBuffer<PlayerPositionElement> PlayerPositions, ref PlayerGenericParams PlayerGenericParams, int indexStart, int indexEnd, Vector3 lonelyPosition, Vector3 ballPosition, ref PathDataDOTS PathDataDOTS, out float distanceResult, out int defenseReachIndex, out float defenseReachTime, float t0,out Vector3 defenseReachPosition)
+    void getMinReachDistance_StraightPass(bool isStrightPass,ref DynamicBuffer<PlayerPositionElement> PlayerPositions, ref PlayerGenericParams PlayerGenericParams, int indexStart, int indexEnd, Vector3 lonelyPosition, Vector3 ballPosition, ref PathDataDOTS PathDataDOTS, out float distanceResult, out int defenseReachIndex, out float defenseReachTime, float t0,out Vector3 defenseReachPosition, LonelyPointElement2 lonelyPoint)
     {
         Vector2 playerPosition2;
         Vector3 playerPosition;
@@ -421,7 +428,7 @@ public struct CullPassPointsJob : IJobEntityBatch
 
             float distanceClosest_LonelyPosition = Vector3.Distance(closestPoint, lonelyPosition);
             
-            PlayerReachDistance2 = getPlayerReachDistance_StraightPass(isStrightPass, playerPosition, lonelyPosition, ballPosition, maxSpeed, ref PathDataDOTS, ref ballPositionAtReachTime, ref PlayerGenericParams,ref playerPositionElement, out playerReachTime2, t0, isGolkeeper, lonelyPosition);
+            PlayerReachDistance2 = getPlayerReachDistance_StraightPass2(isStrightPass, playerPosition, lonelyPosition, ballPosition, maxSpeed, ref PathDataDOTS, ref ballPositionAtReachTime, ref PlayerGenericParams,ref playerPositionElement, out playerReachTime2, t0, isGolkeeper, lonelyPosition);
             
             if (PlayerReachDistance2 > distanceResult)
             {
@@ -526,7 +533,7 @@ public struct CullPassPointsJob : IJobEntityBatch
     }
     float getPlayerReachDistance_StraightPass2(bool isStraightPass, Vector3 playerPosition, Vector3 closestPoint, Vector3 ballPosition, float maxSpeed, ref PathDataDOTS PathDataDOTS, ref Vector3 ballPositionAtReachTime, ref PlayerGenericParams PlayerGenericParams, ref PlayerPositionElement playerPositionElement, out float playerReachTimeResult, float t0, bool isGoalkeeper, Vector3 lonelyPosition)
     {
-        playerReachTimeResult = GetTimeToReachPosition(ref playerPositionElement, playerPositionElement.position, closestPoint, maxSpeed, playerPositionElement.maxSpeedForReachBall, playerPositionElement.currentSpeed, ref PlayerGenericParams, isGoalkeeper, playerPositionElement.scope, ballPosition, lonelyPosition, out Vector3 closestPoint2);
+        playerReachTimeResult = GetTimeToReachPosition2(ref playerPositionElement, playerPositionElement.position, closestPoint, maxSpeed, playerPositionElement.maxSpeedForReachBall, playerPositionElement.currentSpeed, ref PlayerGenericParams, isGoalkeeper, playerPositionElement.scope, ballPosition, lonelyPosition);
 
         float playerReachTimeResult2 = isGoalkeeper ? playerReachTimeResult : playerReachTimeResult - t0;
         if (isStraightPass)
@@ -537,10 +544,10 @@ public struct CullPassPointsJob : IJobEntityBatch
         {
             ballPositionAtReachTime = StraightXZDragPathDOTS.getPositionAtTime(ballPosition, PathDataDOTS.V0, PathDataDOTS.k, Mathf.Max(playerReachTimeResult2, 0));
         }
-        float d1 = Vector3.Distance(ballPosition, closestPoint2);
+        float d1 = Vector3.Distance(ballPosition, closestPoint);
         float d2 = Vector3.Distance(ballPosition, ballPositionAtReachTime);
         int sign = d1 <= d2 ? -1 : 1;
-        float distancePlayer_Ball = sign * Vector3.Distance(closestPoint2, ballPositionAtReachTime);
+        float distancePlayer_Ball = sign * Vector3.Distance(closestPoint, ballPositionAtReachTime);
 
         return distancePlayer_Ball;
     }
@@ -687,7 +694,7 @@ public struct CullPassPointsJob : IJobEntityBatch
         }
         return reachTimeEnd;
     }
-    float GetTimeToReachPosition(ref DynamicBuffer<PlayerPositionElement> PlayerPositions, ref PlayerGenericParams PlayerGenericParams, int indexStart, int indexEnd, Vector3 targetPosition, ref int attackIndex, Vector2 offside, Vector2 defenseGoalPos, float reachBallTime,int passerPlayer,Vector3 ballPosition,Vector3 lonelyPosition)
+    float GetTimeToReachPosition(ref DynamicBuffer<PlayerPositionElement> PlayerPositions, ref PlayerGenericParams PlayerGenericParams, int indexStart, int indexEnd, Vector3 targetPosition, ref int attackIndex, Vector2 offside, Vector2 defenseGoalPos, float reachBallTime,int passerPlayer,Vector3 ballPosition,Vector3 lonelyPosition, LonelyPointElement2 lonelyPoint)
     {
         float reachTimeEnd = Mathf.Infinity;
         Vector2 forward = defenseGoalPos - offside;
@@ -705,7 +712,7 @@ public struct CullPassPointsJob : IJobEntityBatch
             float totalTime;
             bool isGolkeeper = i == indexStart;
             float maxSpeed = isGolkeeper ? PlayerGenericParams.goalkeeperMaxSpeed : playerPositionElement.maxSpeed;
-            if (Vector2.Dot(forward, forward2) <= 0 && Vector2.Dot(forward, dir) <= 0)
+            if (Vector2.Dot(forward, forward2) <= 0 && Vector2.Dot(forward, dir) <= 0||true)
             {
                 totalTime = GetTimeToReachPosition2(ref playerPositionElement, playerPositionElement.position, targetPosition, maxSpeed, playerPositionElement.maxSpeedForReachBall, playerPositionElement.currentSpeed, ref PlayerGenericParams, isGolkeeper, playerPositionElement.scope, ballPosition, lonelyPosition);
             }else if (Vector2.Dot(forward, dir) <= 0)

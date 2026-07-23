@@ -20,7 +20,6 @@ public class InstantiateBall : MonoBehaviour
     {
         BallComponents componentsBall = ball.GetComponent<BallComponents>();
         ComponentsPlayer componentsPlayer = FindObjectOfType<ComponentsPlayer>();
-        componentsPlayer.componentsBall = componentsBall;
     }
     void instantiationError()
     {

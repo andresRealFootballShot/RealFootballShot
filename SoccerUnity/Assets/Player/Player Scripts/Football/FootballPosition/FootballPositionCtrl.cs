@@ -155,7 +155,22 @@ public class FootballPositionCtrl : MonoBehaviour
              { TypeFieldPosition.Type.RightOutsideDefense,PlayerPositionType.LateralBack},
              { TypeFieldPosition.Type.LeftOutsideDefense,PlayerPositionType.LateralBack},
         };
-
+    public static Dictionary<TypeNormalMatch, string> DefensePressureTypeNormalMatch = new Dictionary<TypeNormalMatch, string>() {
+             { TypeNormalMatch.FourVsFour,"Default Defense FourVsFour"},
+             { TypeNormalMatch.TenVSTen,"Default"}
+        };
+    public static Dictionary<TypeNormalMatch, string> AttackPressureTypeNormalMatch = new Dictionary<TypeNormalMatch, string>() {
+             { TypeNormalMatch.FourVsFour,"Default Attack FourVsFour"},
+             { TypeNormalMatch.TenVSTen,"Default Attack"}
+        };
+    public static Dictionary<TypeNormalMatch, string> StartAttackPressureTypeNormalMatch = new Dictionary<TypeNormalMatch, string>() {
+             { TypeNormalMatch.FourVsFour,"Start Attack FourVsFour"},
+             { TypeNormalMatch.TenVSTen,"Start Attack"}
+        };
+    public static Dictionary<TypeNormalMatch, string> StartDefensePressureTypeNormalMatch = new Dictionary<TypeNormalMatch, string>() {
+             { TypeNormalMatch.FourVsFour,"Start Defense FourVsFour"},
+             { TypeNormalMatch.TenVSTen,"Start Defense"}
+        };
     /* void Start()
     {
        string text = File.ReadAllText(Application.dataPath + "/Player/Player Scripts/Football/FootballPosition/FieldPoints.json");
@@ -307,14 +322,14 @@ public class FootballPositionCtrl : MonoBehaviour
     {
         return playerPositionType.Equals(PlayerPositionType.CenterBack) || playerPositionType.Equals(PlayerPositionType.LateralBack);
     }
-    public Vector3 GetLastPlayerPosition(Vector3 ballPosition,string teamName)
+    public Vector3 GetLastPlayerPosition(Vector3 ballPosition,string teamName,string lineup,string pressure)
     {
         Team team = Teams.getTeamByName(teamName);
         PressureFieldPositionDatas PressureFieldPositionDatas;
-        if (!getCurrentPressureFieldPositions(out PressureFieldPositionDatas)) return Vector3.positiveInfinity;
+        if (!getPressureFieldPositions(out PressureFieldPositionDatas, lineup, pressure)) return Vector3.positiveInfinity;
         Vector3 normailizedBallPosition = getNormalizedPosition(horizontalPositionType, ballPosition, team.SideOfField);
         float offsideLineValueY = GetOffsideLineGetValue(PressureFieldPositionDatas, normailizedBallPosition, out float offsideWeight);
-        FieldPositionsData FieldPositionData = PressureFieldPositionDatas.FieldPositionDatas.Find(x => x.playerPositionType.Equals(PlayerPositionType.LateralBack));
+        FieldPositionsData FieldPositionData = PressureFieldPositionDatas.FieldPositionDatas.Find(x => x.playerPositionType.Equals(PlayerPositionType.CenterBack));
         getWeightyValue4(normailizedBallPosition, FieldPositionData.points, offsideLineValueY, FieldPositionData.playerPositionType, offsideWeight, out Vector2 weightyValue);
         
 

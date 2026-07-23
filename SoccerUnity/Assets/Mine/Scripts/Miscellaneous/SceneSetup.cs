@@ -54,7 +54,7 @@ public class SceneSetup : MonoBehaviour
         if (playerGObj != null)
         {
             PlayerIDMonoBehaviour myPlayerID = playerGObj.GetComponent<PlayerIDMonoBehaviour>();
-            ComponentsPlayer.myMonoPlayerID = myPlayerID;
+            //ComponentsPlayer.myMonoPlayerID = myPlayerID;
         }
         ComponentsPlayer.currentComponentsPlayer = FindObjectOfType<ComponentsPlayer>();
         //myPlayerID.awake();

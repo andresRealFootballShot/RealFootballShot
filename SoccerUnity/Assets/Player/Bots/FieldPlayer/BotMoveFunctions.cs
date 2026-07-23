@@ -36,14 +36,14 @@ public class BotMoveFunctions : PlayerComponent
         Vector3 forward = goalPosition - offsideLine;
         Vector3 dir = playerPosition - offsideLine;
         forward.y = 0;
-        Debug.DrawLine(offsideLine, offsideLine + Vector3.up * 4, Color.yellow);
+        //Debug.DrawLine(offsideLine, offsideLine + Vector3.up * 4, Color.yellow);
         Vector3 targetPosition = lonelyPointElement.Get3DPosition(0);
         available = false;
         goLonelyPoint = true;
         lonelyPointPosition = lonelyPointElement.Get3DPosition(0);
-        if (Vector2.Dot(forward, dir) <= 0 && SegmentLineIntersectionXZ(playerPosition, targetPosition, offsideLine, offsideLine + Vector3.right, out Vector3 offsidePoint))
+        if (Vector2.Dot(forward, dir) <= 0 && SegmentLineIntersectionXZ(playerPosition, targetPosition, offsideLine, offsideLine + Vector3.right, out Vector3 offsidePoint)&&false)
         {
-            Debug.DrawLine(offsidePoint, offsidePoint + Vector3.up * 3, Color.black);
+            //Debug.DrawLine(offsidePoint, offsidePoint + Vector3.up * 3, Color.black);
             publicPlayerData.playerComponents.movementCtrl.scope = 0.1f;
             publicPlayerData.SetTargetPosition(offsidePoint);
             avoidOffside = true;

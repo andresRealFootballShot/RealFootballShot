@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using DOTS_ChaserDataCalculation;
+using System.Linq;
 
 public class Team : MonoBehaviour
 {
     public string initName;
     public Variable<string> nameTeamVar=new Variable<string>();
     public List<string> players = new List<string>();
+    public Dictionary<string,TypeFieldPosition.Type> waitToJoinPlayers = new Dictionary<string, TypeFieldPosition.Type>();
     public List<PublicPlayerData> publicPlayerDatas = new List<PublicPlayerData>();
     public List<PublicPlayerData> outfieldPublicPlayerDatas = new List<PublicPlayerData>();
     public List<PlayerDataComponent> playerDataComponents = new List<PlayerDataComponent>();
@@ -31,8 +33,8 @@ public class Team : MonoBehaviour
     public Equipement equipament;
     public MyEvent<SideOfField> sideOfFieldChanged;
     public MyEvent lineupChanged;
-    public int teamMaxPlayers { get => TypeMatch.maxPlayers / TypeMatch.getTemsSize() + 1; }
-    public int teamMaxFieldPlayers { get => TypeMatch.maxPlayers / TypeMatch.getTemsSize(); }
+    public int teamMaxPlayers { get => TypeMatch.maxFieldPlayers / TypeMatch.getTemsSize() + 1; }
+    public int teamMaxFieldPlayers { get => TypeMatch.maxFieldPlayers / TypeMatch.getTemsSize(); }
     public int playersNoGoalkeeperCount { get; set; }
     public TeamHUD teamHUD;
     public SideOfField SideOfField { get; set; }
@@ -40,6 +42,9 @@ public class Team : MonoBehaviour
     public Vector3 goalPosition { get => MyFunctions.setY0ToVector3( SideOfField.goalComponents.transform.position); }
     public PublicPlayerData firstReachBallPublicPlayerData;
     public float firstReachBallTime { get; set; }
+    public TeamSetup teamSetup;
+    public bool startAttack { get; set; }
+    public string startPressure { get => startAttack ? "Start Attack" : "Start Defense"; }
     public void Load()
     {
         nameTeamVar.Value = initName;
@@ -72,13 +77,32 @@ public class Team : MonoBehaviour
         
         choosedLineup.setLineup(typeLineup);
         fieldPositionOfPlayers.Clear();
-        List<TypeFieldPosition.Type> list = FieldPositionsCtrl.getFieldPositions(choosedLineup.typeLineup);
+        List<TypeFieldPosition.Type> list = TypeMatch.fieldPositioinsInTypeMatch[TypeMatch.typeNormalMatch];
         foreach (var item in list)
         {
             fieldPositionOfPlayers.Add(item, "None");
             //print(TeamName+" setLineup " + item.ToString());
         }
-        fieldPositionOfPlayers.Add(TypeFieldPosition.Type.GoalKeeper, "None");
+        Dictionary<string, TypeFieldPosition.Type> newWaitToJoinPlayers = new Dictionary<string, TypeFieldPosition.Type>();
+        foreach (KeyValuePair<string, TypeFieldPosition.Type> value in waitToJoinPlayers)
+        {
+            if (containsFieldPosition(value.Value))
+            {
+                players.Add(value.Key);
+                assignFieldPositionToPlayer(value.Key, value.Value.ToString());
+                MatchEvents.playerAddedToTeam.Invoke(new PlayerAddedToTeamEventArgs(value.Key, TeamName, null));
+                StartCoroutine(waitUntilPublicPlayerDataIsAvailable(value.Key));
+
+            }
+            else
+            {
+                newWaitToJoinPlayers.Add(value.Key, value.Value);
+            }
+        }
+
+        waitToJoinPlayers.Clear();
+        waitToJoinPlayers = newWaitToJoinPlayers;
+        //fieldPositionOfPlayers.Add(TypeFieldPosition.Type.GoalKeeper, "None");
         DebugsList.testing.print("setLineup team=" + TeamName + " | typeLineup=" + typeLineup.ToString());
         lineupChanged.Invoke();
        
@@ -118,16 +142,14 @@ public class Team : MonoBehaviour
         }
         return list;
     }
-    public bool getPublicPlayerData(List<TypeFieldPosition.Type> types,out PublicPlayerData publicPlayerData)
+    public bool getPublicPlayerData(TypeFieldPosition.Type type,out PublicPlayerData publicPlayerData)
     {
-        foreach (var type in types)
+        if (fieldPositionOfPlayers.ContainsKey(type))
         {
-            if (fieldPositionOfPlayers.ContainsKey(type))
-            {
-                publicPlayerData = getPublicPlayerData(fieldPositionOfPlayers[type]);
-                return true;
-            }
+            publicPlayerData = getPublicPlayerData(fieldPositionOfPlayers[type]);
+            return true;
         }
+        
         publicPlayerData = null;
         return false;
     }
@@ -238,17 +260,25 @@ public class Team : MonoBehaviour
     }
     public bool addPlayer(string playerID, string typeFieldPositionString)
     {
-        int teamMaxPlayers = TypeMatch.maxPlayers / 2 + 1;
+        int teamMaxPlayers = TypeMatch.maxFieldPlayers / 2 + 1;
         TypeFieldPosition.Type typeFieldPosition = MyFunctions.parseEnum<TypeFieldPosition.Type>(typeFieldPositionString);
         //El + 1 es por el portero
         if (teamMaxPlayers > players.Count)
         {
-            if (!playerID.Equals("None") && (typeFieldPosition == TypeFieldPosition.Type.None || containsFieldPosition(typeFieldPosition)))
+            if (!playerID.Equals("None") || (typeFieldPosition == TypeFieldPosition.Type.None))
             {
-                players.Add(playerID);
-                assignFieldPositionToPlayer(playerID, typeFieldPositionString);
-                MatchEvents.playerAddedToTeam.Invoke(new PlayerAddedToTeamEventArgs(playerID, TeamName,null));
-                StartCoroutine(waitUntilPublicPlayerDataIsAvailable(playerID));
+                
+                if (containsFieldPosition(typeFieldPosition))
+                {
+                    players.Add(playerID);
+                    assignFieldPositionToPlayer(playerID, typeFieldPositionString);
+                    MatchEvents.playerAddedToTeam.Invoke(new PlayerAddedToTeamEventArgs(playerID, TeamName, null));
+                    StartCoroutine(waitUntilPublicPlayerDataIsAvailable(playerID));
+                }
+                else
+                {
+                    waitToJoinPlayers.Add(playerID, typeFieldPosition);
+                }
                 return true;
             }
         }
@@ -274,6 +304,7 @@ public class Team : MonoBehaviour
         yield return new WaitUntil(() => PublicPlayerDataList.all.ContainsKey(playerID));
         PublicPlayerData publicPlayerData = PublicPlayerDataList.all[playerID];
         publicPlayerData.team = this;
+        
         Team rivalTeam = Teams.getRivalTeam(this.TeamName);
         publicPlayerData.rivalTeam = rivalTeam;
         MatchEvents.publicPlayerDataOfAddedPlayerToTeamIsAvailable.Invoke(new PlayerAddedToTeamEventArgs(playerID, TeamName, publicPlayerData));

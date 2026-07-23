@@ -27,6 +27,7 @@ public class PruebasKickBall : MonoBehaviour
     Vector3 initHandPosition;
     void Start()
     {
+        return;
 #if UNITY_EDITOR
         SceneView.duringSceneGui += view =>
         {
@@ -76,18 +77,6 @@ public class PruebasKickBall : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            kick();
-        }
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            ballRig.position = dirPos.position;
-        }
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            prueba();
-        }
         //print(area.PointIsInside(ballRig.position));
         //lineAreaPrueba();
     }

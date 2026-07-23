@@ -17,6 +17,7 @@ public class PassTesting : MonoBehaviour
 #if UNITY_EDITOR
     void Update()
     {
+        return;
         if (nextFrame)
         {
             Time.timeScale = 0;

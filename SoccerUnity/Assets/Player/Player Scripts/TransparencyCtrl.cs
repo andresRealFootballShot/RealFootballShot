@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TransparencyCtrl : MonoBehaviour
+public class TransparencyCtrl : PlayerComponent
 {
     public Material matTransparent;
     public SetupModel setupModel;
@@ -71,5 +71,9 @@ public class TransparencyCtrl : MonoBehaviour
             }
             computer = true;
         }
+    }
+    private void OnDisable()
+    {
+        SetOpaque(modelTransform);
     }
 }

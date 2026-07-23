@@ -171,7 +171,8 @@ public class GoalkeeperCtrl : MonoBehaviour,ILoad
     bool checkIfGoalkeeperArrivesBeforeOthers()
     {
         //List<ChaserData> enemyChaserDataList = ChaserData.getChaserDataOfPublicPlayerDatas(enemyPlayerDataList);
-        
+        if (MatchComponents.firstReachBalPublicPlayerData == null || myPublicPlayerData==null)return false;
+        return MatchComponents.firstReachBalPublicPlayerData.Equals(myPublicPlayerData);
         if(ChaserData.checkFirstChaserDatas(myChaserData, arriveBeforeOthersEnemyPlayerDataList, 0.1f))
         {
             if (arriveBeforeOthersEnemyPlayerDataList.Count > 0)
@@ -503,6 +504,13 @@ public class GoalkeeperCtrl : MonoBehaviour,ILoad
             intercessionBallGoal = plane.ClosestPointOnPlane(intercessionBallGoal);
         }
         return ClampGoalKeeper(intercessionBallGoal);
+    }
+    public void SetStartPosition()
+    {
+        goalKeeperTransform.position = GoalComponents.centerOptimalPosition.position;
+        goalKeeperTransform.rotation = GoalComponents.centerOptimalPosition.rotation;
+
+
     }
 #if UNITY_EDITOR
     void OnDrawGizmos()

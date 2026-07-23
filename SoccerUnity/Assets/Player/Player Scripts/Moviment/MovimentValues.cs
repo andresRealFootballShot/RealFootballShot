@@ -27,12 +27,14 @@ public class MovimentValues : MonoBehaviour
     public float adjustedForwardVelocitySpeed;
 
     public Vector3 TargetPosition { get; set ; }
+    public Vector3 DesiredTargetLookDirection { get => (TargetPosition - PublicPlayerData.position).normalized; }
+    public Vector3 DesiredTargetY0LookDirection { get => new Vector3(DesiredTargetLookDirection.x, 0, DesiredTargetLookDirection.z).normalized; }
     public Vector3 DesiredDirection { get => (TargetPosition - PublicPlayerData.position).normalized; set => TargetPosition = PublicPlayerData.position + value * 1000;}
     public Vector3 DesiredY0Direction { get => new Vector3(DesiredDirection.x,0, DesiredDirection.z).normalized;}
     public Vector3 DesiredVelocity { get => DesiredDirection * ForwardDesiredSpeed; }
     public bool LookTarget { get; set; }
     public bool StopMove { get; set; }
-    public Vector3 DesiredLookDirection { get=> LookTarget ? DesiredY0Direction : DesiredLookDirectionVar.Value;  set => DesiredLookDirectionVar.Value = value; }
+    public Vector3 DesiredLookDirection { get=> LookTarget ? DesiredTargetY0LookDirection : DesiredLookDirectionVar.Value;  set => DesiredLookDirectionVar.Value = value; }
     public Vector3 LookDirection { get => LookDirectionVar.Value; set => LookDirectionVar.Value = value; }
     public Vector3 NormalizedForwardDesiredVelocity { get => DesiredVelocity/ maxForwardSpeed; }
     public Vector3 Clamp01NormalizedForwardDesiredVelocity { get => Vector3.ClampMagnitude(NormalizedForwardDesiredVelocity,1); }

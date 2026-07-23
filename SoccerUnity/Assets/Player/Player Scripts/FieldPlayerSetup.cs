@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class FieldPlayerSetup : PlayerComponent
 {
-    PublicFieldPlayerData myPublicFieldData;
+    public PublicFieldPlayerData myPublicFieldData;
+    public MovimentValues movimentValues;
     void Start()
     {
         //setup();
@@ -12,9 +13,9 @@ public class FieldPlayerSetup : PlayerComponent
     }
     public void setup()
     {
-        MovimentValues movimentValues = MyFunctions.GetComponentInChilds<MovimentValues>(gameObject,true);
+        //MovimentValues movimentValues = MyFunctions.GetComponentInChilds<MovimentValues>(gameObject,true);
         ResistanceController resistanceController = MyFunctions.GetComponentInChilds<ResistanceController>(gameObject, true);
-        myPublicFieldData = MyFunctions.GetComponentInChilds<PublicFieldPlayerData>(gameObject, true);
+        //myPublicFieldData = MyFunctions.GetComponentInChilds<PublicFieldPlayerData>(gameObject, true);
 
         myPublicFieldData.maxSpeedVar = movimentValues.maxSpeed;
         myPublicFieldData.velocityVar = movimentValues.velocityObsolete;

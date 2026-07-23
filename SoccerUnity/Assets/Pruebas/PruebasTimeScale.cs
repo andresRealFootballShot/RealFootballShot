@@ -11,6 +11,7 @@ public class PruebasTimeScale : MonoBehaviour
     static bool nextFrame;
     void Start()
     {
+        return;
         currentScale = 1;
         Time.timeScale = 1f;
 #if UNITY_EDITOR
@@ -27,7 +28,7 @@ public class PruebasTimeScale : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        check();
+        //check();
         
     }
     void check()

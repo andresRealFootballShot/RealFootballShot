@@ -2171,6 +2171,8 @@ GameObject:
   - component: {fileID: 6704183389520453890}
   - component: {fileID: 7617802844254515038}
   - component: {fileID: 8760785097259225321}
+  - component: {fileID: 7200479223268609759}
+  - component: {fileID: 7657801751403196704}
   m_Layer: 0
   m_Name: Hand
   m_TagString: GoalKeeper
@@ -2441,7 +2443,11 @@ MonoBehaviour:
   useAccelerationInChaserDataCalculation: 0
   addToOptimalPoint: 1
   playerComponents: {fileID: 3299650401645545554}
-  IsBot: 1
+  initPuppet: 0
+  canChangeType: 0
+  playerType: {fileID: 7657801751403196704}
+  puppetBehaviour: {fileID: 0}
+  botBehaviour: {fileID: 0}
   components: {fileID: 3299650401645545554}
   values: {fileID: 5279867306633939444}
 --- !u!114 &4290924186599095116
@@ -2486,6 +2492,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   root: {fileID: 0}
   publicPlayerData: {fileID: 3038923665187342042}
+  LookingBallMoviment: {fileID: 0}
   playerEvents: {fileID: 4290924186599095116}
   addPlayerToTeam: {fileID: 1245342403834558881}
   movimentValuesType: ultimate
@@ -2858,6 +2865,39 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   kickPeriod: 0.25
+--- !u!114 &7200479223268609759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5279867306633939452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27d0c91b8bcd99148bdbcf420be930a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  disableAll: 1
+  playerSpeed: 1
+  playerBallDistance: 0
+  ballSpeedDebug: 0
+  stopOffset: 0
+  targetDistance: 0
+  ballBodyDirection: 0
+--- !u!114 &7657801751403196704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5279867306633939452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 242684d2ecaa31b46a5b3c093c74f898, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  info: 
+  value: 0
 --- !u!1 &5279867306647696566
 GameObject:
   m_ObjectHideFlags: 0
@@ -4173,9 +4213,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
---- !u!4 &3638828752471565474 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8879528566716807029, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
+--- !u!137 &3431607352883336201 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 7411341568049137630, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
   m_PrefabInstance: {fileID: 5279867305367245783}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &549468529120331945 stripped
@@ -4183,9 +4223,9 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -3538208763055678594, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
   m_PrefabInstance: {fileID: 5279867305367245783}
   m_PrefabAsset: {fileID: 0}
---- !u!137 &3431607352883336201 stripped
-SkinnedMeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 7411341568049137630, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
+--- !u!4 &3638828752471565474 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8879528566716807029, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
   m_PrefabInstance: {fileID: 5279867305367245783}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &5678865589328704572 stripped

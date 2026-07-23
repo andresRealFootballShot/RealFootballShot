@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerModeCtrl : MonoBehaviour
+public class PlayerModeCtrl : PlayerComponent
 {
     PlayerState playerMode;
     public GameObject eventsGObj;
@@ -83,11 +83,13 @@ public class PlayerModeCtrl : MonoBehaviour
     }
     public void LosePossession()
     {
+        if (!enabled || !gameObject.activeInHierarchy) return;
         playerMode = PlayerState.LookingBall;
         transparency.SetTransparency(componentsPlayer.transModelo);
     }
     void Kick(KickEventArgs args)
     {
+        if (!enabled || !gameObject.activeInHierarchy) return;
         if (args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerIDStr))
         {
             Vector3 kickDirection = args.kickVelocity;

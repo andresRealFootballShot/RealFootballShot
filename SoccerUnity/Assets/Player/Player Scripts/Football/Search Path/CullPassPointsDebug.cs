@@ -61,12 +61,13 @@ public class CullPassPointsDebug : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.T))
+        /*if (Input.GetKeyDown(KeyCode.T))
         {
             startPass();
-        }
+        }*/
         if (updateDebug && (!passStarted))
         {
             GetDebugData();
@@ -415,7 +416,7 @@ public class CullPassPointsDebug : MonoBehaviour
         style.fontSize = 12;
         style.normal.textColor = Color.black;
         string info = "Offside Last Player";
-        Vector3 lastPlayerPos = CullPassPoints.FootballPositionCtrl.GetLastPlayerPosition(MatchComponents.ballPosition, CullPassPoints.teamName_Defense);
+        Vector3 lastPlayerPos = CullPassPoints.FootballPositionCtrl.GetLastPlayerPosition(MatchComponents.ballPosition, CullPassPoints.teamName_Defense,"Default", FootballPositionCtrl.DefensePressureTypeNormalMatch[TypeMatch.typeNormalMatch]);
         Handles.Label(lastPlayerPos + Vector3.up * 1.5f, info, style);
 }
 void DrawReachPlayers(LonelyPointElement2 lonelyPointElement)

@@ -32,6 +32,10 @@ public class MovementCtrl : MovementPlayerComponent
             Destroy(bodyRigidbody);
         }
     }
+    private void OnEnable()
+    {
+        //lookDirection = bodyY0Forward;
+    }
     public void getAdjustedForwardVelocitySpeed(float deltaTime)
     {
         
@@ -184,7 +188,7 @@ public class MovementCtrl : MovementPlayerComponent
         Mathf.Min(angle * Mathf.Deg2Rad, rotSpeed * Mathf.Deg2Rad * dt);
 
         Vector3 newDir = Vector3.RotateTowards(
-            lookDirection,
+            bodyY0Forward,
             targetDir,
             maxRadiansThisFrame,
             0f
@@ -203,7 +207,7 @@ public class MovementCtrl : MovementPlayerComponent
         Velocity = dir * EndForwardSpeed;
         previousPosition = bodyPosition;
     }
-    void ApplyMovement(float dt)
+    public void ApplyMovement(float dt)
     {
         Vector3 dir = phase == MovePhase.Brake ? VelocityDirection : DesiredY0Direction;
         

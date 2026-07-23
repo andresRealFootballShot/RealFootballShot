@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ControllerMoveBody : MonoBehaviour
+public class ControllerMoveBody : PlayerComponent
 {
     public LookingBallMoviment moveFreeBody;
     public FreeCameraMoviment normalMoviment;
@@ -35,7 +35,7 @@ public class ControllerMoveBody : MonoBehaviour
     }
     void Kick(KickEventArgs args)
     {
-        if (args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerIDStr))
+        if (args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerID.ToString()))
         {
 
             Vector3 kickDirection = args.kickVelocity;

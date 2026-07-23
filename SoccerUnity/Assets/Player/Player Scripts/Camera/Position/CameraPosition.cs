@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class CameraPosition : MonoBehaviour
+public class CameraPosition : PlayerComponent
 {
     public ComponentsPlayer componentsPlayer;
     public GameObject eventsGObj;
@@ -60,7 +60,8 @@ public class CameraPosition : MonoBehaviour
     }
     void Kick(KickEventArgs args)
     {
-        if (args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerIDStr))
+        if (!enabled||!gameObject.activeInHierarchy) return;
+        if (args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerID.ToString()))
         {
             Vector3 kickDirection = args.kickVelocity;
             if (playerMode == PlayerState.LookingBall || playerMode == PlayerState.WithPossession)

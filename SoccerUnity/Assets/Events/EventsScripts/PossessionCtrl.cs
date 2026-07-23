@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-public class PossessionCtrl : MonoBehaviour
+public class PossessionCtrl : PlayerComponent
 {
     bool ownerBall;
     private void Start()
@@ -13,7 +13,7 @@ public class PossessionCtrl : MonoBehaviour
     }
     void Kick(KickEventArgs args)
     {
-        if (!args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerID.getStringID()))
+        if (!args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerID.ToString()))
         {
             if (ownerBall)
             {

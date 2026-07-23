@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-public class Kick : MonoBehaviour
+public class Kick : PlayerComponent
 {
     public KickValues kickValues;
     public ComponentsPlayer componentsPlayer;
@@ -50,7 +50,7 @@ public class Kick : MonoBehaviour
             Rigidbody rigBall = componentsPlayer.componentsBall.rigBall;
             rigBall.isKinematic = false;
             Vector3 velocity = Vector3.zero;
-            KickEventArgs args = new KickEventArgs(velocity, Vector3.zero, Vector3.zero, rigBall.position, ComponentsPlayer.myMonoPlayerID.playerIDStr);
+            KickEventArgs args = new KickEventArgs(velocity, Vector3.zero, Vector3.zero, rigBall.position, ComponentsPlayer.myMonoPlayerID.playerID.ToString());
             AddForce(ForceMode.VelocityChange, args);
             MatchEvents.kick.Invoke(args);
         }
@@ -72,7 +72,7 @@ public class Kick : MonoBehaviour
         if (!ballLocked)
         {
             Rigidbody rigidbody = componentsPlayer.componentsBall.rigBall;
-            KickEventArgs args = new KickEventArgs(dir, rigidbody.velocity, rigidbody.angularVelocity, point,ComponentsPlayer.myMonoPlayerID.playerIDStr);
+            KickEventArgs args = new KickEventArgs(dir, rigidbody.velocity, rigidbody.angularVelocity, point, ComponentsPlayer.myMonoPlayerID.playerID.ToString());
             AddForceAtPosition(ForceMode.VelocityChange, args);
         }
     }
@@ -92,7 +92,7 @@ public class Kick : MonoBehaviour
         if (!ballLocked)
         {
             Rigidbody rigidbody = componentsPlayer.componentsBall.rigBall;
-            KickEventArgs args = new KickEventArgs(dir, rigidbody.velocity, rigidbody.angularVelocity, rigidbody.position,ComponentsPlayer.myMonoPlayerID.playerIDStr);
+            KickEventArgs args = new KickEventArgs(dir, rigidbody.velocity, rigidbody.angularVelocity, rigidbody.position, ComponentsPlayer.myMonoPlayerID.playerID.ToString());
             AddForce(ForceMode.VelocityChange, args);
         }
     }

@@ -27,9 +27,9 @@ public class AutomaticConnect : MonoBehaviourPunCallbacks
     }
     public void FindRandomMatch()
     {
-        RoomOptions roomOptions = new RoomOptions() { IsVisible = publicMatch, IsOpen = true, MaxPlayers = TypeMatch.maxPlayersDictionary[typeMatchName] };
+        RoomOptions roomOptions = new RoomOptions() { IsVisible = publicMatch, IsOpen = true, MaxPlayers = TypeMatch.maxFieldPlayersDictionary[typeMatchName] };
         TypeMatch.setup(typeMatchName.ToString(),true);
-        PhotonNetwork.JoinRandomRoom(null, TypeMatch.maxPlayersDictionary[typeMatchName]);
+        PhotonNetwork.JoinRandomRoom(null, TypeMatch.maxFieldPlayersDictionary[typeMatchName]);
         //PhotonNetwork.JoinOrCreateRoom("prueba", roomOptions, TypedLobby.Default, null);
     }
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -41,7 +41,7 @@ public class AutomaticConnect : MonoBehaviourPunCallbacks
     void CreateRoom()
     {
         int randomNumber = Random.Range(0, 1000);
-        RoomOptions roomOptions = new RoomOptions() { IsVisible = publicMatch, IsOpen = true, MaxPlayers = TypeMatch.maxPlayersDictionary[typeMatchName] };
+        RoomOptions roomOptions = new RoomOptions() { IsVisible = publicMatch, IsOpen = true, MaxPlayers = TypeMatch.maxFieldPlayersDictionary[typeMatchName] };
 
         PhotonNetwork.CreateRoom("Random Room " + randomNumber, roomOptions);
     }

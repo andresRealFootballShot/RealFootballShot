@@ -45,7 +45,7 @@ public class CameraRotation : MonoBehaviour
     }
     void Kick(KickEventArgs args)
     {
-        if (args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerIDStr))
+        if (ComponentsPlayer.myMonoPlayerID!=null&&args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerID.ToString()))
         {
             Vector3 kickDirection = args.kickVelocity;
             if (playerMode == PlayerState.LookingBall || playerMode == PlayerState.WithPossession)
@@ -201,6 +201,7 @@ public class CameraRotation : MonoBehaviour
     }
     public void LookAtBall()
     {
+        if(componentsPlayer.transCamera!=null)
         componentsPlayer.transCamera.rotation = Quaternion.Lerp(componentsPlayer.transCamera.rotation, getTargetRotationLookAtBall(), currentSpeedCamera * Time.deltaTime);
     }
     public Quaternion getTargetRotationLookAtBall()

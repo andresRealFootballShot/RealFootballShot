@@ -29,14 +29,14 @@ public class AutomaticChooseFieldPosition : MonoBehaviourPunCallbacks
         ChooseFieldPositionCtrl.typeFieldSelected = ChooseTeamCtrl.teamSelected.getAvailableRandomFieldPosition();
         ChooseModel.ChooseRandomModel();
         //ChooseModel.Choose(ModelName.Name.DefaultMale);
-        MatchComponents.requestFieldPosition.RequestFieldPosition(ComponentsPlayer.myMonoPlayerID.getStringID(),ChooseTeamCtrl.teamSelected.TeamName, ChooseFieldPositionCtrl.typeFieldSelected.ToString());
+        MatchComponents.requestFieldPosition.RequestFieldPosition(MatchComponents.currentPublicPlayerData.playerID,ChooseTeamCtrl.teamSelected.TeamName, ChooseFieldPositionCtrl.typeFieldSelected.ToString());
     }
     public void InstantiatePlayer()
     {
         Team teamOfPlayer;
-        Teams.getTeamFromPlayer(ComponentsPlayer.myMonoPlayerID.getStringID(),out teamOfPlayer);
+        Teams.getTeamFromPlayer(MatchComponents.currentPublicPlayerData.playerID, out teamOfPlayer);
         TypeFieldPosition.Type typeFieldPosition;
-        teamOfPlayer.getTypeFieldPositionOfPlayer(ComponentsPlayer.myMonoPlayerID.getStringID(),out typeFieldPosition);
+        teamOfPlayer.getTypeFieldPositionOfPlayer(MatchComponents.currentPublicPlayerData.playerID, out typeFieldPosition);
         GameObject fieldPositionType = FieldPositionsCtrl.getTypeFieldPosition(teamOfPlayer.choosedLineup.typeLineup, typeFieldPosition);
         FieldPosition fieldPosition = fieldPositionType.GetComponent<FieldPosition>();
         Vector3 initPosition = SideOfFieldCtrl.TransformPointSideOfField(ChooseTeamCtrl.teamSelected.TeamName, fieldPosition.initPosition);

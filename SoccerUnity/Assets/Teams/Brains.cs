@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using TMPro;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using UnityEditor;
 using UnityEngine;
@@ -22,7 +23,7 @@ public class Brains : MonoBehaviour
     public SearchPlayData searchPlayData { get => CullPassPoints.searchPlayData; }
     public List<LonelyPointElement2> firstReachLonelyPoints { get => CullPassPoints.firstReachLonelyPoints; }
     public List<PublicPlayerData> busyPlayers = new List<PublicPlayerData>();
-    LonelyPointElement2 currentFirstLonelyPoint,nextLonelyPoint;
+    LonelyPointElement2 currentFirstLonelyPoint,nextLonelyPoint,attackLonelyPoint;
     public PublicPlayerData passerPublicPlayerData;
     Vector3 ballReachPosition;
     public float minReachBallTime=0.5f;
@@ -60,6 +61,20 @@ public class Brains : MonoBehaviour
         {
             Play();
         }
+
+        //ChangePlayerType();
+    }
+    
+    void ChangePlayerType()
+    {
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+           MatchComponents.currentPublicPlayerData.ChangeOtherPlayerType();
+        }
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            MatchComponents.currentPublicPlayerData.SetNextNoPossesionMode();
+        }
     }
     public void Enable()
     {
@@ -67,7 +82,7 @@ public class Brains : MonoBehaviour
     }
     public void Play()
     {
-        Time.timeScale = timeScale;
+        
         checkReflex();
         UpdateNextLonelyPoint();
         GetTeams();
@@ -126,7 +141,7 @@ public class Brains : MonoBehaviour
         {
             startReflexTime = Time.time;
 
-            if (!MatchComponents.myPublicPlayerData.playerID.Equals(args.playerID))
+            if (MatchComponents.currentPublicPlayerData!=null&&!MatchComponents.currentPublicPlayerData.playerID.Equals(args.playerID))
             {
                 startUserReflexTime = Time.time;
             }
@@ -195,7 +210,7 @@ public class Brains : MonoBehaviour
             if(!attackTeam.firstReachBallPublicPlayerData.IsBot)
                 firstDefenseReachBall.movimentValues.maxForwardSpeed = 5;
             else
-                firstDefenseReachBall.movimentValues.maxForwardSpeed = defenseTeam.firstReachBallTime<1 ? firstDefenseReachBall.movimentValues.defaultMaxForwardSpeed:9 ;
+                firstDefenseReachBall.movimentValues.maxForwardSpeed = defenseTeam.firstReachBallTime<1 ? firstDefenseReachBall.movimentValues.defaultMaxForwardSpeed: firstDefenseReachBall.movimentValues.defaultMaxForwardSpeed;
             firstDefenseReachBall.playerComponents.movementCtrl.SetTargetPosition(ballReachPosition);
         }
         
@@ -214,8 +229,9 @@ public class Brains : MonoBehaviour
         {
             publicPlayerData.movimentValues.maxForwardSpeed = publicPlayerData.movimentValues.defaultMaxForwardSpeed;
             //publicPlayerData.movimentValues.maxSpeedForReachBall = 5;
+            if(Vector3.Distance(publicPlayerData.playerComponents.TargetPosition,publicPlayerData.position)<publicPlayerData.playerComponents.scope)busyPlayers.Remove(publicPlayerData);
             if (busyPlayers.Contains(publicPlayerData)) continue;
-            if (!FootballPositionCtrl.GetFieldPositionDataPosition("Default", "Default Attack", publicPlayerData, MatchComponents.ballPosition, out Vector3 targetPosition)) continue;
+            if (!FootballPositionCtrl.GetFieldPositionDataPosition("Default", FootballPositionCtrl.AttackPressureTypeNormalMatch[TypeMatch.typeNormalMatch], publicPlayerData, MatchComponents.ballPosition, out Vector3 targetPosition)) continue;
             publicPlayerData.SetTargetPosition(targetPosition);
         }
     }
@@ -231,13 +247,13 @@ public class Brains : MonoBehaviour
     void AttackReachBall()
     {
         PublicPlayerData publicPlayerData = passerPublicPlayerData;
-        if (!publicPlayerData.playerID.Equals(previousPlayerKicker) || MatchComponents.myPublicPlayerData.Equals(publicPlayerData))
+        if (!publicPlayerData.playerID.Equals(previousPlayerKicker) || MatchComponents.currentPublicPlayerData !=null&& MatchComponents.currentPublicPlayerData.Equals(publicPlayerData))
         {
             publicPlayerData.movimentValues.maxSpeedForReachBall = 0;
         }
         else
         {
-            publicPlayerData.movimentValues.maxSpeedForReachBall = publicPlayerData.playerComponents.TargetPositionForwardAngle>publicPlayerData.playerComponents.playerSkills.MaxAngleControl?0:10;
+            publicPlayerData.movimentValues.maxSpeedForReachBall = publicPlayerData.playerComponents.TargetPositionForwardAngle>publicPlayerData.playerComponents.playerSkills.MaxAngleControl?0:5;
         }
         if (publicPlayerData.IsBot)
         {
@@ -252,7 +268,7 @@ public class Brains : MonoBehaviour
     {
         if (!CheckGoalKick())
         {
-            foreach(PublicPlayerData publicPlayerData in attackTeam.publicPlayerDatas)
+            foreach(PublicPlayerData publicPlayerData in CullPassPoints.players)
             {
                 if (publicPlayerData.IsBot)
                 {
@@ -267,7 +283,7 @@ public class Brains : MonoBehaviour
                             wait = false;
                             Invoke(nameof(setWaitTrue), delay);
                         }
-                        if ((lonelyPoint.straightReachBall || (lonelyPoint.straightPassData.distanceDefenseReachBall <= lonelyPoint.parabolicPassData.distanceDefenseReachBall && !lonelyPoint.straightReachBall && !lonelyPoint.parabolicReachBall)) && publicPlayerData.Kick(straightPassData))
+                        if ((lonelyPoint.straightReachBall || (lonelyPoint.straightPassData.distanceDefenseReachBall <= lonelyPoint.parabolicPassData.distanceDefenseReachBall+1f )) && publicPlayerData.Kick(straightPassData))
                         {
                             Kick();
                             //currentFirstLonelyPoint = CullPassPoints.firstReachLonelyPoints[passIndex];
@@ -321,8 +337,9 @@ public class Brains : MonoBehaviour
 
         float maxVelocity = Mathf.Lerp(playerSkills.MaxVelocityControl, playerSkills.MinVelocityControl, dir1.magnitude / playerSkills.MaxVelocityDistanceControl);
         maxVelocity = Mathf.Lerp(maxVelocity, playerSkills.MaxVelocityControl, precisionLerp);
-
-        if (passer.IsBot && (angle > playerSkills.MaxAngleControl || MatchComponents.ballSpeed >= maxVelocity || (!passer.BotKick.controlTimeAvailable)) && passer.ReachBall())
+        PassData passData = nextLonelyPoint.GetPassData();
+        //Time.timeScale = 0.2f;
+        if (passer.IsBot && (angle > playerSkills.MaxAngleControl || MatchComponents.ballSpeed >= maxVelocity || !passer.BotKick.controlTimeAvailable) && passer.ReachBall())
         {
             if (!SearchControlPoint(targetPosition, out LonelyPointElement2 LonelyPointElement2)) return false;
             if (!passer.playerID.Equals(previousPlayerKicker))
@@ -332,7 +349,7 @@ public class Brains : MonoBehaviour
                 controlTime = minControlTime + Random.Range(0, randomControlTime);
                 passer.BotKick.controlTime = controlTime;
             }
-            EditorApplication.isPaused = controlPause;
+            //EditorApplication.isPaused = controlPause;
             passer.Kick(LonelyPointElement2.straightPassData);
             Kick();
 
@@ -352,7 +369,7 @@ public class Brains : MonoBehaviour
             DynamicBuffer<LonelyPointElement2> lonelyPointElements2 = entityManager.GetBuffer<LonelyPointElement2>(entity);
             LonelyPointElement2 lonelyPointElement2 = lonelyPointElements2[controlPointIndex.index];
             PassData passData = lonelyPointElement2.GetPassData();
-            if (lonelyPointElement2.weight > weight && passData.distanceDefenseReachBall < -0.5f)
+            if (lonelyPointElement2.weight > weight && (passData.distanceDefenseReachBall < -0.5f&& lonelyPointElement2.weight>0))
             {
                 result = lonelyPointElement2;
                 weight = lonelyPointElement2.weight;
@@ -365,10 +382,19 @@ public class Brains : MonoBehaviour
     {
         Invoke(nameof(ChangedPass), 0.2f);
         busyPlayers.Clear();
+        passerPublicPlayerData.BotKick.startControlTime = Time.time;
+
+        controlTime = minControlTime + Random.Range(0, randomControlTime);
+        passerPublicPlayerData.BotKick.controlTime = controlTime;
+        if (nextLonelyPoint.weight < 0)
+        {
+            print("no lonely points " + nextLonelyPoint.weight);
+            //Time.timeScale = 0;
+        }
     }
     void AttackersGoToLonelyPoint()
     {
-        LonelyPointElement2 lonelyPointElement = currentFirstLonelyPoint;
+        LonelyPointElement2 lonelyPointElement = attackLonelyPoint;
         PublicPlayerData publicPlayerData = CullPassPoints.GetPublicPlayerData(lonelyPointElement.attackReachIndex);
         publicPlayerData = passerPublicPlayerData != publicPlayerData ? publicPlayerData : null;
         if (publicPlayerData != null && !publicPlayerData.IsGoalkeeper && publicPlayerData.IsBot&&reflexAvailable)
@@ -389,8 +415,27 @@ public class Brains : MonoBehaviour
     }
     void UpdateNextLonelyPoint()
     {
-        nextLonelyPoint = CullPassPoints.firstReachLonelyPoints[passIndex];
-        currentFirstLonelyPoint = nextLonelyPoint;
+        int index=0;
+        for (int i = 0; i < CullPassPoints.firstReachLonelyPoints.Count; i++)
+        {
+            LonelyPointElement2 lonelyPointElement = CullPassPoints.firstReachLonelyPoints[i];
+            PublicPlayerData publicPlayerData = CullPassPoints.GetPublicPlayerData(lonelyPointElement.attackReachIndex);
+            if(publicPlayerData != null && passerPublicPlayerData != null)
+            {
+                if (!publicPlayerData.Equals(passerPublicPlayerData))
+                {
+                    index = i;
+                    break;
+                }
+            }
+        }
+        if(passIndex< firstReachLonelyPoints.Count)
+        {
+            nextLonelyPoint = CullPassPoints.firstReachLonelyPoints[passIndex];
+            currentFirstLonelyPoint = nextLonelyPoint;
+            attackLonelyPoint = CullPassPoints.firstReachLonelyPoints[index];
+        }
+        
     }
     public void GetCullPassPointData()
     {
@@ -431,7 +476,7 @@ public class Brains : MonoBehaviour
         LonelyPointElement2 maxWeightLonelyPoint = getMaxWeight(0);
         PassData passData = maxWeightLonelyPoint.GetPassData();
         currentWeight = CullPassPointsJob.EvaluatePosition(ballPosition, left, right, ballPosition, 0, maxFieldDistance,false);
-        if (passerPublicPlayerData.playerComponents.botKick!=null&&(currentWeight > maxWeightLonelyPoint.weight|| currentWeight >=0.6f) && (isLookingToGoal(goalComponents)||true) &&passerPublicPlayerData.ReachBall()&&passerPublicPlayerData.IsBot)
+        if (passerPublicPlayerData.playerComponents.botKick!=null&&(currentWeight > maxWeightLonelyPoint.weight-0.025f|| currentWeight >=0.5f) && (isLookingToGoal(goalComponents)||true) &&passerPublicPlayerData.ReachBall()&&passerPublicPlayerData.IsBot)
         {
             if (CullPassPoints.bestShot.valid)
             {
@@ -530,7 +575,7 @@ public class Brains : MonoBehaviour
             {
                 foreach (PublicPlayerData publicPlayerData in team.outfieldPublicPlayerDatas)
                 {
-                    if (!FootballPositionCtrl.GetFieldPositionDataPosition("Default", "Default Attack", publicPlayerData, MatchComponents.ballPosition, out Vector3 targetPosition)) continue;
+                    if (!FootballPositionCtrl.GetFieldPositionDataPosition("Default", FootballPositionCtrl.AttackPressureTypeNormalMatch[TypeMatch.typeNormalMatch], publicPlayerData, MatchComponents.ballPosition, out Vector3 targetPosition)) continue;
                     if (!team.getTypeFieldPositionOfPlayer(publicPlayerData.playerID, out TypeFieldPosition.Type fieldPositionType)) continue;
                     info = fieldPositionType.ToString();
                     Handles.Label(targetPosition + Vector3.up * 0.5f, info, style);

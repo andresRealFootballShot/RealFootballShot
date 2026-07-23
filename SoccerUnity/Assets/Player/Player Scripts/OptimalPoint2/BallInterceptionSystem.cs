@@ -156,11 +156,7 @@ public class BallInterceptionSystem : MonoBehaviour
     }
     void testKick()
     {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            //testKick2();
-            testMovePlayers2();
-        }
+        
     }
     void setPlayersTarget2()
     {
@@ -253,6 +249,10 @@ public class BallInterceptionSystem : MonoBehaviour
         endPlayerDirection = Vector3.positiveInfinity;
         int indexResult=-1;
         float firstPlayerReachTime = Mathf.Infinity;
+        Team red = Teams.getTeamByName("Red");
+        red.firstReachBallTime = Mathf.Infinity;
+        Team blue = Teams.getTeamByName("Blue");
+        blue.firstReachBallTime = Mathf.Infinity;
         for (int i = 0; i < Teams.allPlayers.Count; i++)
         {
             if (i >= reachableIndices.Length) break;
@@ -263,19 +263,32 @@ public class BallInterceptionSystem : MonoBehaviour
                 float playerReachTime = timeToReach[i];
                 float ballTime = ballTimes[index] == Mathf.Infinity ? playerReachTime : ballTimes[index];
                 bool kickAvailable = Teams.allPlayers[i].playerComponents.botKick != null ?  Teams.allPlayers[i].playerComponents.botKick.kickAvailable : true;
+
+                Teams.getTeamFromPlayer(Teams.allPlayers[i].playerID, out Team team);
+                if (ballTime < team.firstReachBallTime)
+                {
+                    
+                    
+                    team.firstReachBallPublicPlayerData = Teams.allPlayers[i];
+                    team.firstReachBallTime = ballTime;
+                }
                 if (ballTime < ballReachTimeResult)
                 {
                     indexResult = index;
                     ballReachTimeResult = ballTime;
                     ballPositionResult = ballPositions[index];
-                    publicPlayerDataResult = Teams.allPlayers[i];
-                    firstPlayerReachTime = playerReachTime;
                     endSpeed = reachBallSpeeds[i];
                     endPlayerDirection = endPlayerDirections[i];
-                    Teams.getTeamFromPlayer(Teams.allPlayers[i].playerID, out Team team);
-                    team.firstReachBallPublicPlayerData = Teams.allPlayers[i];
-                    team.firstReachBallTime = ballTime;
+                    publicPlayerDataResult = Teams.allPlayers[i];
+                    firstPlayerReachTime = playerReachTime;
                 }
+                Teams.allPlayers[i].playerData.ballReachPosition = ballPositions[index];
+                Teams.allPlayers[i].playerData.ballReachTime = ballTime;
+                Teams.allPlayers[i].playerData.validReachPosition = true;
+            }
+            else
+            {
+                Teams.allPlayers[i].playerData.validReachPosition = false;
             }
         }
     }

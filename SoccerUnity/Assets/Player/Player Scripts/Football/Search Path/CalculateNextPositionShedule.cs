@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
+using System.Linq;
 
 
 
@@ -30,19 +31,19 @@ public class CalculateNextPositionShedule : MonoBehaviour
             this.name = name;
         }
     }
-    public Dictionary<PlayerPositionType, List<TypeFieldPosition.Type>> RightPlayerPosition_TypeFieldPosition = new Dictionary<PlayerPositionType, List<TypeFieldPosition.Type>>() {
-             { PlayerPositionType.Forward, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightForward,} },
-             { PlayerPositionType.CenterBack, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.CentreRightBack,} },
-             { PlayerPositionType.LateralBack, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightOutsideDefense,} },
-             { PlayerPositionType.CenterMidfield, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightCentreMidfield,} },
-             { PlayerPositionType.EdgeMidfield, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightOutsideMidfield,} },
+    public Dictionary<PlayerPositionType, TypeFieldPosition.Type> RightPlayerPosition_TypeFieldPosition = new Dictionary<PlayerPositionType,TypeFieldPosition.Type>() {
+             { PlayerPositionType.Forward, TypeFieldPosition.Type.RightForward },
+             { PlayerPositionType.CenterBack,  TypeFieldPosition.Type.CentreRightBack },
+             { PlayerPositionType.LateralBack, TypeFieldPosition.Type.RightOutsideDefense },
+             { PlayerPositionType.CenterMidfield,TypeFieldPosition.Type.RightCentreMidfield },
+             { PlayerPositionType.EdgeMidfield, TypeFieldPosition.Type.RightOutsideMidfield },
         };
-    public Dictionary<PlayerPositionType, List<TypeFieldPosition.Type>> LeftPlayerPosition_TypeFieldPosition = new Dictionary<PlayerPositionType, List<TypeFieldPosition.Type>>() {
-             { PlayerPositionType.Forward, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.LeftForward } },
-             { PlayerPositionType.CenterBack, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.CentreLeftBack } },
-             { PlayerPositionType.LateralBack, new List<TypeFieldPosition.Type>(){TypeFieldPosition.Type.LeftOutsideDefense } },
-             { PlayerPositionType.CenterMidfield, new List<TypeFieldPosition.Type>(){TypeFieldPosition.Type.LeftCentreMidfield } },
-             { PlayerPositionType.EdgeMidfield, new List<TypeFieldPosition.Type>(){TypeFieldPosition.Type.LeftOutsideMidfield } },
+    public Dictionary<PlayerPositionType, TypeFieldPosition.Type> LeftPlayerPosition_TypeFieldPosition = new Dictionary<PlayerPositionType,TypeFieldPosition.Type>() {
+             { PlayerPositionType.Forward, TypeFieldPosition.Type.LeftForward },
+             { PlayerPositionType.CenterBack,TypeFieldPosition.Type.CentreLeftBack  },
+             { PlayerPositionType.LateralBack,TypeFieldPosition.Type.LeftOutsideDefense  },
+             { PlayerPositionType.CenterMidfield,TypeFieldPosition.Type.LeftCentreMidfield  },
+             { PlayerPositionType.EdgeMidfield, TypeFieldPosition.Type.LeftOutsideMidfield  },
         };
     public FootballPositionCtrl FootballPositionCtrl;
     List<LineupFieldPositionDatas> lineupFieldPositionDatas=new List<LineupFieldPositionDatas>();
@@ -76,9 +77,28 @@ public class CalculateNextPositionShedule : MonoBehaviour
         PressureFieldPositionDatas PressureFieldPositionDatas = LineupFieldPositionDatas.PressureFieldPositionDatas.Find(x => x.name == pressureName);
         return PressureFieldPositionDatas;
     }
+    void createPlayerPositionTypeOrder()
+    {
+        playerPositionTypeOrder.Clear();
+        foreach(TypeFieldPosition.Type type in TypeMatch.fieldPositioinsInTypeMatch[TypeMatch.typeNormalMatch])
+        {
+            if (RightPlayerPosition_TypeFieldPosition.ContainsValue(type))
+            {
+                PlayerPositionType PlayerPositionType = RightPlayerPosition_TypeFieldPosition.First(x => x.Value.Equals(type)).Key;
+                if (!playerPositionTypeOrder.Contains(PlayerPositionType))
+                    playerPositionTypeOrder.Add(PlayerPositionType);
+            }
+            if (LeftPlayerPosition_TypeFieldPosition.ContainsValue(type))
+            {
+                PlayerPositionType PlayerPositionType2 = LeftPlayerPosition_TypeFieldPosition.First(x => x.Value.Equals(type)).Key;
+                if (!playerPositionTypeOrder.Contains(PlayerPositionType2))
+                    playerPositionTypeOrder.Add(PlayerPositionType2);
+            }
+        }
+    }
     public void SheduleJobs( int nodeSize,SearchPlayData searchPlayData,int playerSize,string lineupName,string pressureName)
     {
-
+        createPlayerPositionTypeOrder();
         float fieldLenght = MatchComponents.footballField.fieldLenght;
         float fieldWidth = MatchComponents.footballField.fieldWidth;
         PressureFieldPositionDatas pressureFieldPositionDatas = GetFieldPositionsData(lineupName,pressureName);
@@ -100,7 +120,7 @@ public class CalculateNextPositionShedule : MonoBehaviour
             jobData.playerPositionTypes = pressureFieldPositionDatas.PlayerPositionTypes;
             jobData.normalNextPosition[i] = CalculateNextPositionComponents.normalNextPosition;
             jobData.NextPlayerPositions = pressureFieldPositionDatas.NextPlayerPositions;
-            jobData.playerSize = playerSize;
+            jobData.playerSize = pressureFieldPositionDatas.PlayerPositionTypes.Length;
             
         }
         JobHandle jobHandle = jobData.Schedule(nodeSize, 1);

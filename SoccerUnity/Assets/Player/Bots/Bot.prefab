@@ -633,6 +633,7 @@ MonoBehaviour:
   minSpeedForChangeDirection: 2
   directionRotationSpeed: 360
   maxSpeedForReachBall: 0
+  defaultMaxSpeedForReachBall: 2
   maxAngleForRun: 30
   maxAngleForRun2: 90
   stopOffset: 0
@@ -3039,7 +3040,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   kickPeriod: 0.25
-  startKickTime: -1
 --- !u!114 &7809148508847226821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3147,6 +3147,10 @@ MonoBehaviour:
   addToOptimalPoint: 1
   playerComponents: {fileID: 3747010005541261549}
   IsBot: 1
+  canChangeType: 0
+  playerType: {fileID: 3747010005541261544}
+  puppetBehaviour: {fileID: 0}
+  botBehaviour: {fileID: 3747010005541261554}
   rigidbody: {fileID: 3747010004615711253}
   animator: {fileID: 3747010006063244259}
 --- !u!114 &3747010005541261550
@@ -3176,6 +3180,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a82e3805e7b09464ba98a14e4c08481a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myPublicFieldData: {fileID: 3747010005541261552}
+  movimentValues: {fileID: 3747010004157290951}
 --- !u!114 &3747010005541261544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3302,6 +3308,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6512255020a373d46a7e83d0c690b936, type: 2}
   - {fileID: 11400000, guid: a27bf1e8510ecca4cbf0defda9a54d32, type: 2}
   - {fileID: 11400000, guid: 44cc7f9563278144ab05672cd75be8b3, type: 2}
+  PlayerComponents: {fileID: 3747010005541261549}
 --- !u!1 &3747010005561390836
 GameObject:
   m_ObjectHideFlags: 0

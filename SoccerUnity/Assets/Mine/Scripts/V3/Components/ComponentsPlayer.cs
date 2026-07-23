@@ -12,7 +12,7 @@ public class ComponentsPlayer : MonoBehaviour
     public Animator animatorPlayer;
     public new Camera camera;
     //public PhotonView photonView;
-    public BallComponents componentsBall;
+    public BallComponents componentsBall{ get => MatchComponents.ballComponents; }
     public GameObject behaviourGObj;
     //public GameObject hudGObj;
     public GameObject cameraBehaviourGObj,movimentGObj,kickGObjt,AimGObj,ArrowGObj,TransparencyGObj,PlayerModeCtrlGObj,eventsGObj;
@@ -32,10 +32,10 @@ public class ComponentsPlayer : MonoBehaviour
         {
             DisableAll();
         }*/
-    }
-    private void Start()
-    {
-        
+        camera = Camera.main;
+        transCamera = camera.transform;
+        camera.fieldOfView = 33;
+        //myMonoPlayerID = gameObject.GetComponent<PlayerIDMonoBehaviour>();
     }
     public void SetParentPivot(GameObject gameObject)
     {

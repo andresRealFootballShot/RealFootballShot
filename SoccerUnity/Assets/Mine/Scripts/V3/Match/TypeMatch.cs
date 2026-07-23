@@ -21,6 +21,7 @@ public enum TypeNormalMatch
     OneVSOne,
     TwoVSTwo,
     ThreeVSThree,
+    FourVsFour,
     FiveVSFive,
     TenVSTen
 }
@@ -32,17 +33,29 @@ public class TypeMatch : MonoBehaviour, IOnEventCallback
     { TypeNormalMatch.OneVSOne, "LittleMap" },
     { TypeNormalMatch.TwoVSTwo, "LittleMap" },
     { TypeNormalMatch.ThreeVSThree, "LittleMap" },
+    { TypeNormalMatch.FourVsFour, "LittleMap" },
     { TypeNormalMatch.FiveVSFive, "LittleMap" },
     { TypeNormalMatch.TenVSTen, "LittleMap" }
     };
-    public static Dictionary<TypeNormalMatch, byte> maxPlayersDictionary = new Dictionary<TypeNormalMatch, byte>()
+    public static Dictionary<TypeNormalMatch, byte> maxFieldPlayersDictionary = new Dictionary<TypeNormalMatch, byte>()
     {
     { TypeNormalMatch.OnlyOne, 1 },
     { TypeNormalMatch.OneVSOne, 2 },
     { TypeNormalMatch.TwoVSTwo, 4 },
     { TypeNormalMatch.ThreeVSThree, 6},
+    { TypeNormalMatch.FourVsFour, 8},
     { TypeNormalMatch.FiveVSFive, 10},
     { TypeNormalMatch.TenVSTen, 20}
+    };
+    public static Dictionary<TypeNormalMatch, byte> maxPlayersDictionary = new Dictionary<TypeNormalMatch, byte>()
+    {
+    { TypeNormalMatch.OnlyOne, 3 },
+    { TypeNormalMatch.OneVSOne, 4 },
+    { TypeNormalMatch.TwoVSTwo, 6 },
+    { TypeNormalMatch.ThreeVSThree, 8},
+    { TypeNormalMatch.FourVsFour, 10},
+    { TypeNormalMatch.FiveVSFive, 12},
+    { TypeNormalMatch.TenVSTen, 22}
     };
     public static Dictionary<TypeNormalMatch, byte> numberOfTeams = new Dictionary<TypeNormalMatch, byte>()
     {
@@ -50,17 +63,24 @@ public class TypeMatch : MonoBehaviour, IOnEventCallback
     { TypeNormalMatch.OneVSOne, 2 },
     { TypeNormalMatch.TwoVSTwo, 2 },
     { TypeNormalMatch.ThreeVSThree, 2},
+    { TypeNormalMatch.FourVsFour, 2},
     { TypeNormalMatch.FiveVSFive, 2},
     { TypeNormalMatch.TenVSTen, 2}
     };
     public static Dictionary<TypeNormalMatch, SizeFootballFieldID> sizeFootballFieldDictionary = new Dictionary<TypeNormalMatch, SizeFootballFieldID>()
     {
-        { TypeNormalMatch.OnlyOne, SizeFootballFieldID.ElevenVSEleven },
+    { TypeNormalMatch.OnlyOne, SizeFootballFieldID.ElevenVSEleven },
     { TypeNormalMatch.OneVSOne, SizeFootballFieldID.ElevenVSEleven },
     { TypeNormalMatch.TwoVSTwo, SizeFootballFieldID.ElevenVSEleven },
-    { TypeNormalMatch.ThreeVSThree, SizeFootballFieldID.FiveVSFive},
-    { TypeNormalMatch.FiveVSFive, SizeFootballFieldID.SevenVSSeven},
+    { TypeNormalMatch.ThreeVSThree, SizeFootballFieldID.ElevenVSEleven},
+    { TypeNormalMatch.FourVsFour, SizeFootballFieldID.ElevenVSEleven},
+    { TypeNormalMatch.FiveVSFive, SizeFootballFieldID.ElevenVSEleven},
     { TypeNormalMatch.TenVSTen, SizeFootballFieldID.ElevenVSEleven}
+    };
+    public static Dictionary<TypeNormalMatch, List<TypeFieldPosition.Type>> fieldPositioinsInTypeMatch = new Dictionary<TypeNormalMatch, List<TypeFieldPosition.Type>>()
+    {
+    { TypeNormalMatch.TenVSTen, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightForward, TypeFieldPosition.Type.LeftForward, TypeFieldPosition.Type.LeftCentreMidfield, TypeFieldPosition.Type.RightCentreMidfield, TypeFieldPosition.Type.LeftOutsideMidfield, TypeFieldPosition.Type.RightOutsideMidfield, TypeFieldPosition.Type.LeftOutsideDefense, TypeFieldPosition.Type.RightOutsideDefense, TypeFieldPosition.Type.CentreLeftBack, TypeFieldPosition.Type.CentreRightBack, TypeFieldPosition.Type.GoalKeeper } },
+        { TypeNormalMatch.FourVsFour, new List<TypeFieldPosition.Type>(){ TypeFieldPosition.Type.RightForward, TypeFieldPosition.Type.LeftForward, TypeFieldPosition.Type.CentreLeftBack, TypeFieldPosition.Type.CentreRightBack, TypeFieldPosition.Type.GoalKeeper } }
     };
     public static string getNameScene(string typeMatchString)
     {
@@ -70,12 +90,12 @@ public class TypeMatch : MonoBehaviour, IOnEventCallback
     public static byte getMaxPlayers(string typeMatchString)
     {
         TypeNormalMatch typeMatch = parseString(typeMatchString);
-        return maxPlayersDictionary[typeMatch];
+        return maxFieldPlayersDictionary[typeMatch];
     }
     public static int getGlobalMaxPlayersWithGoalkeepers()
     {
         TypeNormalMatch typeMatch = typeNormalMatch;
-        int maxPlayers = maxPlayersDictionary[typeMatch];
+        int maxPlayers = maxFieldPlayersDictionary[typeMatch];
         int teamsSize = numberOfTeams[typeMatch];
         //print("a " + maxPlayers + " " + teamsSize+ " "+ typeNormalMatch);
         return maxPlayers + teamsSize;
@@ -84,7 +104,7 @@ public class TypeMatch : MonoBehaviour, IOnEventCallback
     {
         TypeNormalMatch typeMatch = typeNormalMatch;
         int teamsSize = numberOfTeams[typeMatch];
-        int maxPlayers = (maxPlayersDictionary[typeMatch] / teamsSize)+1;
+        int maxPlayers = (maxFieldPlayersDictionary[typeMatch] / teamsSize)+1;
         //print("a " + maxPlayers + " " + teamsSize+ " "+ typeNormalMatch);
         return maxPlayers;
     }
@@ -94,10 +114,14 @@ public class TypeMatch : MonoBehaviour, IOnEventCallback
         int teamsSize = numberOfTeams[typeMatch];
         return teamsSize;
     }
+    [SerializeField]
+    TypeNormalMatch NormalMatchType;
     public static SceneModeID sceneMode;
     public static TypeMatchID typeMatch { get; set; }
     public static TypeNormalMatch typeNormalMatch { get; set; }
+    public static int maxFieldPlayers { get; set; }
     public static int maxPlayers { get; set; }
+    public static int maxTeamPlayers { get; set; }
     public static SizeFootballFieldID SizeFootballField { get => sizeFootballField; set => setSizeFootballField(value); }
 
     public static bool isPublic;
@@ -113,6 +137,10 @@ public class TypeMatch : MonoBehaviour, IOnEventCallback
                 return "LittleMap";
         }
         return "";
+    }
+    void Start()
+    {
+        setup(NormalMatchType, false);
     }
     public void OnEnable()
     {
@@ -133,10 +161,25 @@ public class TypeMatch : MonoBehaviour, IOnEventCallback
     {
         typeMatch = TypeMatchID.NormalMatch;
         typeNormalMatch = parseString(typeMatchString);
+        maxFieldPlayers = maxFieldPlayersDictionary[typeNormalMatch];
         maxPlayers = maxPlayersDictionary[typeNormalMatch];
+        maxTeamPlayers = maxPlayersDictionary[typeNormalMatch]/ numberOfTeams[typeNormalMatch];
         TypeMatch.isPublic = isPublic;
         //SizeFootballField = sizeFootballField;
         SizeFootballField = sizeFootballFieldDictionary[typeNormalMatch];
+        MatchEvents.typeMatchSetuped.Invoke();
+    }
+    public static void setup(TypeNormalMatch TypeNormalMatch, bool isPublic)
+    {
+        typeMatch = TypeMatchID.NormalMatch;
+        typeNormalMatch = TypeNormalMatch;
+        maxFieldPlayers = maxFieldPlayersDictionary[typeNormalMatch];
+        maxPlayers = maxPlayersDictionary[typeNormalMatch];
+        maxTeamPlayers = maxPlayersDictionary[typeNormalMatch] / numberOfTeams[typeNormalMatch];
+        TypeMatch.isPublic = isPublic;
+        //SizeFootballField = sizeFootballField;
+        SizeFootballField = sizeFootballFieldDictionary[typeNormalMatch];
+        MatchEvents.typeMatchSetuped.Invoke();
     }
     static void setSizeFootballField(SizeFootballFieldID sizeFootballField)
     {

@@ -1,0 +1,34 @@
+{
+    "name": "Controls",
+    "maps": [
+        {
+            "name": "Player",
+            "id": "712dbaf8-1f3e-489d-9ded-d9600b120087",
+            "actions": [
+                {
+                    "name": "MatchMode",
+                    "type": "Button",
+                    "id": "c838b625-c98e-463e-b1e8-e3409593ef03",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "f862cc88-20d6-476d-9f1a-59a3e13b6621",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MatchMode",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
