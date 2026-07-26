@@ -50,10 +50,15 @@ public class Brains : MonoBehaviour
     public float updateNextLonelyPointPeriod = 0.25f;
     bool updateNextLonelyPoint { get => Time.time - startNextLonelyPointTime >= controlTime; }
     public bool controlPause;
-
+    public string attackPressure{ get; set; }
+    public string defensePressure{ get; set; }
+    MatchState matchState { get => MatchComponents.MatchState; set => MatchComponents.MatchState=value; }
     void Start()
     {
         MatchEvents.kick.AddListener(kick);
+        MatchComponents.Brains = this;
+        attackPressure = FootballPositionCtrl.StartAttackPressureTypeNormalMatch[TypeMatch.typeNormalMatch];
+        defensePressure = FootballPositionCtrl.StartDefensePressureTypeNormalMatch[TypeMatch.typeNormalMatch];
     }
     void Update()
     {
@@ -61,20 +66,7 @@ public class Brains : MonoBehaviour
         {
             Play();
         }
-
-        //ChangePlayerType();
-    }
-    
-    void ChangePlayerType()
-    {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-           MatchComponents.currentPublicPlayerData.ChangeOtherPlayerType();
-        }
-        if (Input.GetKeyDown(KeyCode.Y))
-        {
-            MatchComponents.currentPublicPlayerData.SetNextNoPossesionMode();
-        }
+        
     }
     public void Enable()
     {
@@ -106,12 +98,20 @@ public class Brains : MonoBehaviour
     }
     void GetTeams()
     {
-        if(attackTeam!= CullPassPoints.attackTeam)
+        if (MatchComponents.RulesData.inGame)
         {
-            busyPlayers.Clear();
+            if (attackTeam != CullPassPoints.attackTeam)
+            {
+                busyPlayers.Clear();
+            }
+            attackTeam = CullPassPoints.attackTeam;
+            defenseTeam = CullPassPoints.defenseTeam;
         }
-        attackTeam = CullPassPoints.attackTeam;
-        defenseTeam = CullPassPoints.defenseTeam;
+        else
+        {
+            attackTeam = MatchComponents.RulesData.possessionTeam;
+            defenseTeam = MatchComponents.RulesData.noPossessionTeam;
+        }
     }
     void checkFirstReachBall()
     {
@@ -179,7 +179,10 @@ public class Brains : MonoBehaviour
             if (reflexAvailable){
                 if (firstDefenseReachBall == null || !firstDefenseReachBall.Equals(publicPlayerData))
                     publicPlayerData.movimentValues.maxForwardSpeed = publicPlayerData.movimentValues.defaultMaxForwardSpeed;
-                Vector3 defensePos = GetPlayerTargetPosition(publicPlayerData, node);
+
+                if (!FootballPositionCtrl.GetFieldPositionDataPosition("Default", attackPressure, publicPlayerData, MatchComponents.ballPosition, out Vector3 targetPosition)) continue;
+                
+                Vector3 defensePos = targetPosition;
                 Vector3 playerPos = publicPlayerData.bodyTransform.position;
                 MovementCtrl movementCtrl = publicPlayerData.playerComponents.movementCtrl;
                 Vector3 ballPosition = MatchComponents.ballPosition;
@@ -193,6 +196,8 @@ public class Brains : MonoBehaviour
 
                     movementCtrl.SetStopped_LookTarget(ballPosition);
                 }
+
+                
             }
             
 
@@ -201,6 +206,7 @@ public class Brains : MonoBehaviour
     }
     void DefenseGoBallReachPosition()
     {
+        if (matchState == MatchState.Corner) return;
         Team defenseTeam = this.defenseTeam;
         firstDefenseReachBall = defenseTeam.firstReachBallPublicPlayerData;
         if (firstDefenseReachBall == null|| firstDefenseReachBall.IsGoalkeeper) return;
@@ -231,7 +237,7 @@ public class Brains : MonoBehaviour
             //publicPlayerData.movimentValues.maxSpeedForReachBall = 5;
             if(Vector3.Distance(publicPlayerData.playerComponents.TargetPosition,publicPlayerData.position)<publicPlayerData.playerComponents.scope)busyPlayers.Remove(publicPlayerData);
             if (busyPlayers.Contains(publicPlayerData)) continue;
-            if (!FootballPositionCtrl.GetFieldPositionDataPosition("Default", FootballPositionCtrl.AttackPressureTypeNormalMatch[TypeMatch.typeNormalMatch], publicPlayerData, MatchComponents.ballPosition, out Vector3 targetPosition)) continue;
+            if (!FootballPositionCtrl.GetFieldPositionDataPosition("Default", attackPressure, publicPlayerData, MatchComponents.ballPosition, out Vector3 targetPosition)) continue;
             publicPlayerData.SetTargetPosition(targetPosition);
         }
     }
@@ -255,7 +261,7 @@ public class Brains : MonoBehaviour
         {
             publicPlayerData.movimentValues.maxSpeedForReachBall = publicPlayerData.playerComponents.TargetPositionForwardAngle>publicPlayerData.playerComponents.playerSkills.MaxAngleControl?0:5;
         }
-        if (publicPlayerData.IsBot)
+        if (publicPlayerData.IsBot&&MatchComponents.currentPublicPlayerData.playerMode!=PlayerState.WithPossession)
         {
             publicPlayerData.playerComponents.scope = publicPlayerData.playerComponents.movementCtrl != null ? publicPlayerData.playerComponents.movementCtrl.defaultScope : 0;
             
@@ -266,7 +272,7 @@ public class Brains : MonoBehaviour
     }
     void Passer()
     {
-        if (!CheckGoalKick())
+        if (MatchComponents.enabledRules&&!CheckGoalKick())
         {
             foreach(PublicPlayerData publicPlayerData in CullPassPoints.players)
             {
@@ -307,10 +313,7 @@ public class Brains : MonoBehaviour
 
                                 //EditorApplication.isPaused = true;
                             }
-#if UNITY_EDITOR
 
-                            //EditorApplication.isPaused = true;
-#endif
                         }
                     }
 
@@ -318,6 +321,55 @@ public class Brains : MonoBehaviour
             }
             
         }
+    }
+   void ParabolicPass()
+    {
+        foreach (PublicPlayerData publicPlayerData in CullPassPoints.players)
+        {
+            if (publicPlayerData.IsBot)
+            {
+                LonelyPointElement2 lonelyPoint = currentFirstLonelyPoint;
+                
+                    //publicPlayerData.movimentValues.maxSpeedForReachBall = 5;
+                    PassData straightPassData = lonelyPoint.straightPassData;
+                    if (publicPlayerData.playerComponents.BodyBallXZDistance <= publicPlayerData.playerComponents.ballScope + 0.25f && wait && publicPlayerData.kickAvailable)
+                    {
+                        //EditorApplication.isPaused = true;
+                        wait = false;
+                        Invoke(nameof(setWaitTrue), delay);
+                    }
+                    if ((lonelyPoint.straightReachBall || (lonelyPoint.straightPassData.distanceDefenseReachBall <= lonelyPoint.parabolicPassData.distanceDefenseReachBall + 1f)) && publicPlayerData.Kick(straightPassData))
+                    {
+                        Kick();
+                        //currentFirstLonelyPoint = CullPassPoints.firstReachLonelyPoints[passIndex];
+                        //EditorApplication.isPaused = true;
+                        //Time.timeScale = timeScale;
+                        break;
+                    }
+                    else
+                    {
+                        if (lonelyPoint.parabolicReachBall || (lonelyPoint.straightPassData.distanceDefenseReachBall > lonelyPoint.parabolicPassData.distanceDefenseReachBall && !lonelyPoint.straightReachBall && !lonelyPoint.parabolicReachBall))
+                        {
+                            PassData parabolicPassData = lonelyPoint.parabolicPassData;
+                            if (publicPlayerData.Kick(parabolicPassData))
+                            {
+                                Kick();
+                                //EditorApplication.isPaused = true;
+                                //Time.timeScale = timeScale;
+                                //currentFirstLonelyPoint = CullPassPoints.firstReachLonelyPoints[passIndex];
+                                break;
+                            }
+
+                            //EditorApplication.isPaused = true;
+                        }
+
+                    }
+                
+
+            }
+        }
+
+
     }
     bool CheckBallControl()
     {
@@ -390,6 +442,11 @@ public class Brains : MonoBehaviour
         {
             print("no lonely points " + nextLonelyPoint.weight);
             //Time.timeScale = 0;
+        }
+        if (MatchComponents.MatchState == MatchState.Corner)
+        {
+            MatchComponents.MatchState = MatchState.InGame;
+            MatchComponents.enabledRules = true;
         }
     }
     void AttackersGoToLonelyPoint()
@@ -475,8 +532,8 @@ public class Brains : MonoBehaviour
         
         LonelyPointElement2 maxWeightLonelyPoint = getMaxWeight(0);
         PassData passData = maxWeightLonelyPoint.GetPassData();
-        currentWeight = CullPassPointsJob.EvaluatePosition(ballPosition, left, right, ballPosition, 0, maxFieldDistance,false);
-        if (passerPublicPlayerData.playerComponents.botKick!=null&&(currentWeight > maxWeightLonelyPoint.weight-0.025f|| currentWeight >=0.5f) && (isLookingToGoal(goalComponents)||true) &&passerPublicPlayerData.ReachBall()&&passerPublicPlayerData.IsBot)
+        currentWeight = CullPassPointsJob.EvaluatePosition(ballPosition, left, right, ballPosition, 0, maxFieldDistance,false,false);
+        if (passerPublicPlayerData.playerComponents.botKick!=null&&(currentWeight > maxWeightLonelyPoint.weight -0.025f|| currentWeight >=0.5f) && (isLookingToGoal(goalComponents)||true) &&passerPublicPlayerData.ReachBall()&&passerPublicPlayerData.IsBot)
         {
             if (CullPassPoints.bestShot.valid)
             {

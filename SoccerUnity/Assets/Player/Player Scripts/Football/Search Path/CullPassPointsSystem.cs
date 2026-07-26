@@ -90,6 +90,7 @@ public class CullPassPointsSystem : SystemBase
             //if(CullPassPoints.debugTestLonelyPoints)
             SearchPlayData.getSortedNodes(ref Snodes, 1);
             CullPassPoints.CalculateFirstReachPlayerToBall(Snodes);
+                CullPassPoints.SetIsCorner();
             if (CullPassPoints.debugTestLonelyPoints)
             {
                CullPassPoints.PlaceTestLonelyPoint();
@@ -237,8 +238,6 @@ public class CullPassPointsSystem : SystemBase
     }
     void CalculateLonelyPoints()
     {
-
-
         var searchLonelyPointsJob = new SearchLonelyPointsJob();
         searchLonelyPointsJob.pointsHandle = this.GetBufferTypeHandle<PointElement>(true);
         searchLonelyPointsJob.edgesHandle = this.GetBufferTypeHandle<EdgeElement>(false);

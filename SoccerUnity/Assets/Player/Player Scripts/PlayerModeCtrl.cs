@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerModeCtrl : PlayerComponent
 {
-    PlayerState playerMode;
+    PlayerState playerMode { get => playerData.playerMode; set => playerData.playerMode = value; }
     public GameObject eventsGObj;
     public ComponentsKeys keys;
     public ComponentsPlayer componentsPlayer;
@@ -19,7 +19,7 @@ public class PlayerModeCtrl : PlayerComponent
     void Start()
     {
         MatchEvents.kick.AddListener(Kick);
-        playerMode = PlayerState.LookingBall;
+        
         MatchEvents.losePossession.AddListener(LosePossession);
     }
 

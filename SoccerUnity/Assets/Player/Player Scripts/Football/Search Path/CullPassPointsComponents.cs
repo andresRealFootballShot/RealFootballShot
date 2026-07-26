@@ -17,6 +17,7 @@ namespace CullPositionPoint
 {
     public struct PassData
     {
+        public float weight;
         public float ballReachTime;
         public int defenseReachIndex;
         public float defenseReachTime;
@@ -25,6 +26,7 @@ namespace CullPositionPoint
         public Vector3 passVelocity;
         public void Clear()
         {
+            weight = Mathf.NegativeInfinity;
             ballReachTime = -1;
             defenseReachIndex = -1;
             defenseReachTime = -1;
@@ -42,7 +44,9 @@ namespace CullPositionPoint
         public Vector2 position;
         public int index;
         public bool straightReachBall, parabolicReachBall;
-        public float weight;
+        public float weight { get => GetPassData().weight; }
+        public float straightWeight { get => straightPassData.weight; set => straightPassData.weight = value; }
+        public float parabolicWeight { get => parabolicPassData.weight; set => parabolicPassData.weight = value; }
         public int order;
         public int attackReachIndex;
         public float attackReachTime;
@@ -53,12 +57,14 @@ namespace CullPositionPoint
             this.index = index;
             straightReachBall = false;
             parabolicReachBall = false;
-            weight = -Mathf.Infinity;
+            
             order = -1;
             straightPassData = new PassData();
             parabolicPassData = new PassData();
             attackReachIndex = -1;
             attackReachTime = -1;
+            straightWeight = -Mathf.Infinity;
+            parabolicWeight = -Mathf.Infinity;
         }
         public LonelyPointElement2(Vector3 position, int index)
         {
@@ -66,12 +72,13 @@ namespace CullPositionPoint
             this.index = index;
             straightReachBall = false;
             parabolicReachBall = false;
-            weight = -Mathf.Infinity;
             order = -1;
             straightPassData = new PassData();
             parabolicPassData = new PassData();
             attackReachIndex = -1;
             attackReachTime = -1;
+
+            straightWeight = -Mathf.Infinity;
         }
         public LonelyPointElement2(LonelyPointElement lonelyPointElement)
         {
@@ -79,12 +86,13 @@ namespace CullPositionPoint
             this.index = lonelyPointElement.index;
             straightReachBall = false;
             parabolicReachBall = false;
-            weight = -Mathf.Infinity;
+            
             order = -1;
             straightPassData = new PassData();
             parabolicPassData = new PassData();
             attackReachIndex = -1;
             attackReachTime = -1;
+            straightWeight = -Mathf.Infinity;
         }
         public LonelyPointElement2(Point point,int index)
         {
@@ -92,19 +100,20 @@ namespace CullPositionPoint
             this.index = index;
             straightReachBall = false;
             parabolicReachBall = false;
-            weight = -Mathf.Infinity;
+            
             order = -1;
             straightPassData = new PassData();
             parabolicPassData = new PassData();
             attackReachIndex = -1;
             attackReachTime = -1;
+            straightWeight = -Mathf.Infinity;
         }
         public void Clear()
         {
             position = Vector2.positiveInfinity;
             straightReachBall = false;
             parabolicReachBall = false;
-            weight = -Mathf.Infinity;
+            straightWeight = -Mathf.Infinity;
             order = -1;
             straightPassData.Clear();
             parabolicPassData.Clear();
@@ -142,6 +151,7 @@ namespace CullPositionPoint
         public Vector2 midfield, defenseGoalPosition;
         public float defenseTargetOffside;
         public int passerIndex,userIndex;
+        public bool isCorner;
     }
     public struct PlayerPositionElement : IBufferElementData
     {

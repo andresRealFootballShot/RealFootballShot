@@ -6,6 +6,7 @@ public class MatchEvents : MonoBehaviour,IClearBeforeLoadScene
     public static int staticLoadLevel = 0;
     public int loadLevel { get => staticLoadLevel; set => staticLoadLevel = value; }
     public static MyEvent<FieldPositionEventArgs> fieldPositionsChanged = new MyEvent<FieldPositionEventArgs>(nameof(fieldPositionsChanged));
+    public static MyEvent<FieldPositionEventArgs> matchStateChanged = new MyEvent<FieldPositionEventArgs>(nameof(matchStateChanged));
     public static MyEvent<PlayerAddedToTeamEventArgs> playerAddedToTeam = new MyEvent<PlayerAddedToTeamEventArgs>(nameof(playerAddedToTeam));
     public static MyEvent<PlayerAddedToTeamEventArgs> publicPlayerDataOfAddedPlayerToTeamIsAvailable = new MyEvent<PlayerAddedToTeamEventArgs>(nameof(publicPlayerDataOfAddedPlayerToTeamIsAvailable));
     public static MyEvent publicPlayerDataOfFieldPositionsAreAvailable = new MyEvent(nameof(publicPlayerDataOfFieldPositionsAreAvailable));

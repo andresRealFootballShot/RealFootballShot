@@ -11,11 +11,12 @@ public class TeamSetup : MonoBehaviour {
     public PlaytimeCtrl PlaytimeCtrl;
     public Lineup.TypeLineup typeLineup;
     public bool startPositionTest;
-
+    public TypeFieldPosition.Type kickoffTypeFielPosition= TypeFieldPosition.Type.RightForward;
+    public bool isMyTeam;
     void Start()
     {
+        SetMyTeam();
         SideOfFieldCtrl.setTeamSide(team.TeamName, sideOfFieldID);
-
         team.setLineup(typeLineup);
         createPlayers();
     }
@@ -34,6 +35,14 @@ public class TeamSetup : MonoBehaviour {
             PublicPlayerData.playerIDMono.LocalLoad(0);
             PublicPlayerData.fieldPositionType = typeFieldPosition;
             playerGObj.SetActive(true);
+
+            if (typeFieldPosition == MatchComponents.ModeCtrl.startFieldPositionType&& isMyTeam)
+            {
+                MatchComponents.currentPublicPlayerData = PublicPlayerData;
+                MatchComponents.ModeCtrl.changePlayerType(PublicPlayerData, PlayerTypeID.Puppet);
+
+            }
+
             StartPosition(PublicPlayerData);
             List<Kick> kicks = MyFunctions.GetComponentsInChilds<Kick>(playerGObj, true,false);
             foreach (Kick script in kicks)
@@ -71,11 +80,25 @@ public class TeamSetup : MonoBehaviour {
             {
                 if (FootballPositionCtrl.GetFieldPositionDataPosition("Default", team.startPressure, publicPlayerData, MatchComponents.ballPosition, out Vector3 position))
                 {
-                    publicPlayerData.position = position;
-                    Vector3 dir = MatchComponents.ballPosition - publicPlayerData.position;
-                    dir.y = 0;
+                    publicPlayerData.rigidbody.velocity = Vector3.zero;
+                    if (publicPlayerData.fieldPositionType.Equals(kickoffTypeFielPosition)&& team.startAttack)
+                    {
+                        publicPlayerData.position = MatchComponents.ballPosition+publicPlayerData.SideOfField.forwardTransform.TransformDirection(new Vector3(0.3f,0,0.3f));
+                        if(publicPlayerData.IsPuppet)
+                            publicPlayerData.playerData.playerMode = PlayerState.WithPossession;
+                        Vector3 dir = MatchComponents.ballPosition - publicPlayerData.position;
+                        dir.y = 0;
 
-                    publicPlayerData.bodyTransform.rotation = Quaternion.LookRotation(dir, publicPlayerData.bodyTransform.up);
+                        publicPlayerData.bodyTransform.rotation = Quaternion.LookRotation(dir, publicPlayerData.bodyTransform.up);
+                    }
+                    else
+                    {
+                        publicPlayerData.position = position;
+                        Vector3 dir = MatchComponents.ballPosition - publicPlayerData.position;
+                        dir.y = 0;
+
+                        publicPlayerData.bodyTransform.rotation = Quaternion.LookRotation(dir, publicPlayerData.bodyTransform.up);
+                    }
                 }
             }
         }
@@ -105,6 +128,12 @@ public class TeamSetup : MonoBehaviour {
 
         }
     }
+    public void SetMyTeam()
+    {
+        if(isMyTeam)
+         MatchComponents.myTeam = team;
+
+    }
     public void StartPosition(PublicPlayerData publicPlayerData)
     {
         if (startPositionTest)
@@ -115,12 +144,26 @@ public class TeamSetup : MonoBehaviour {
         {
             if (FootballPositionCtrl.GetFieldPositionDataPosition("Default", team.startPressure, publicPlayerData, MatchComponents.ballPosition, out Vector3 position))
             {
-                publicPlayerData.position = position;
-                publicPlayerData.playerComponents.rigidbody.velocity = Vector3.zero;
-                Vector3 dir = MatchComponents.ballPosition - publicPlayerData.position;
-                dir.y = 0;
+                publicPlayerData.rigidbody.velocity = Vector3.zero;
+                if (publicPlayerData.fieldPositionType.Equals(kickoffTypeFielPosition) && team.startAttack)
+                {
+                    publicPlayerData.position = MatchComponents.ballPosition + publicPlayerData.SideOfField.forwardTransform.TransformDirection(new Vector3(0.5f, 0, 0.5f));
+                    Vector3 dir = MatchComponents.ballPosition - publicPlayerData.position;
+                    dir.y = 0;
 
-                publicPlayerData.bodyTransform.rotation = Quaternion.LookRotation(dir, publicPlayerData.bodyTransform.up);
+
+                    if (publicPlayerData.IsPuppet)
+                        publicPlayerData.playerData.playerMode = PlayerState.WithPossession;
+                    publicPlayerData.bodyTransform.rotation = Quaternion.LookRotation(dir, publicPlayerData.bodyTransform.up);
+                }
+                else
+                {
+                    publicPlayerData.position = position;
+                    Vector3 dir = MatchComponents.ballPosition - publicPlayerData.position;
+                    dir.y = 0;
+
+                    publicPlayerData.bodyTransform.rotation = Quaternion.LookRotation(dir, publicPlayerData.bodyTransform.up);
+                }
             }
         }
         

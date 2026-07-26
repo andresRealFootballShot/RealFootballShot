@@ -105,7 +105,7 @@ public class GoalkeeperCtrl : MonoBehaviour,ILoad
         //Calculo calculateDirCenterPositionCalculo = new Calculo(calculateDirCenterPosition);
         //calculateDirCenterPositionCalculo.addListener(_theMatchIsOnState);
         //myBehaviour.addCalculo(calculateDirCenterPositionCalculo);
-        bool theMatchIsOn = MatchData.matchState == MatchState.WarmUp || MatchData.isStarted;
+        bool theMatchIsOn = MatchData.matchState == MatchStateObsolete.WarmUp || MatchData.isStarted;
         myBehaviour.addState(_theMatchIsOnState, theMatchIsOn);
         myBehaviour.addState(_theMatchIsStoppedState,!theMatchIsOn);
         addGoalkeeperToGoalkeeperList();
@@ -172,7 +172,8 @@ public class GoalkeeperCtrl : MonoBehaviour,ILoad
     {
         //List<ChaserData> enemyChaserDataList = ChaserData.getChaserDataOfPublicPlayerDatas(enemyPlayerDataList);
         if (MatchComponents.firstReachBalPublicPlayerData == null || myPublicPlayerData==null)return false;
-        return MatchComponents.firstReachBalPublicPlayerData.Equals(myPublicPlayerData);
+        bool check = MatchComponents.currentPublicPlayerData.playerData.playerMode == PlayerState.WithPossession && myPublicPlayerData.team.Equals(MatchComponents.currentPublicPlayerData.team);
+        return MatchComponents.firstReachBalPublicPlayerData.Equals(myPublicPlayerData)&&!check;
         if(ChaserData.checkFirstChaserDatas(myChaserData, arriveBeforeOthersEnemyPlayerDataList, 0.1f))
         {
             if (arriveBeforeOthersEnemyPlayerDataList.Count > 0)

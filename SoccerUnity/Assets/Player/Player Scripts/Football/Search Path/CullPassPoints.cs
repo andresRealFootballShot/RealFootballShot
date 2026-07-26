@@ -93,9 +93,11 @@ public class CullPassPoints : MonoBehaviour
         }
     }
     public List<ControlPointIndex> controlPointIndices=new List<ControlPointIndex>();
+    public string defensePressure;
     private void Awake()
     {
         MatchComponents.CullPassPoints = this;
+        
     }
     void Start()
     {
@@ -131,6 +133,8 @@ public class CullPassPoints : MonoBehaviour
         createEntities();
         //searchPlayData.SetCullEntities(cullPassPointsParams.entitySizePerNode);
         MatchEvents.footballFieldLoaded.AddListenerConsiderInvoked(footballFieldLoaded);
+
+        defensePressure = FootballPositionCtrl.DefensePressureTypeNormalMatch[TypeMatch.typeNormalMatch];
         defenseTeam = Teams.getTeamByName(teamName_Defense);
         attackTeam = Teams.getTeamByName(teamName_Attacker);
     }
@@ -177,6 +181,17 @@ public class CullPassPoints : MonoBehaviour
             entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
         }
         
+    }
+    public void SetIsCorner()
+    {
+        foreach (var entity in entities)
+        {
+            CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
+            CullPassPointsComponent.isCorner = MatchComponents.MatchState==MatchState.Corner;
+
+            entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
+        }
+
     }
     void SetTeamAttacker(string attackTeamName)
     {
@@ -524,7 +539,7 @@ public class CullPassPoints : MonoBehaviour
                     playerPositionElement.decceleration = publicPlayerData.playerComponents.movementValues.forwardDeceleration;
                     playerPositionElement.maxSpeedRotation = publicPlayerData.playerComponents.movementValues.rotationSpeed;
                     playerPositionElement.maxSpeed = publicPlayerData.playerComponents.MaxSpeed;
-                    playerPositionElement.timePrecision = publicPlayerData.IsBot ? 0.2f : 0.5f;
+                    playerPositionElement.timePrecision = publicPlayerData.IsBot ? 0.05f : 0.2f;
                     if (!publicPlayerData.IsBot)
                     {
                         CullPassPointsComponent.userIndex = j;
@@ -1030,7 +1045,7 @@ public class CullPassPoints : MonoBehaviour
             
             int k = teamIsAttacker ? teamAttack_start : teamDefense_start;
             //clearAuxNextPositionPublicPlayerDatas();
-            FootballPositionCtrl.getPressureFieldPositions(out PressureFieldPositionDatas pressureFieldPositionDatas, "Default", FootballPositionCtrl.AttackPressureTypeNormalMatch[TypeMatch.typeNormalMatch]);
+            FootballPositionCtrl.getPressureFieldPositions(out PressureFieldPositionDatas pressureFieldPositionDatas, "Default", FootballPositionCtrl.DefensePressureTypeNormalMatch[TypeMatch.typeNormalMatch]);
             for (int j = 0; j < calculateNextPositionShedule.playerPositionTypeOrder.Count; j++)
             {
                 Vector2 normalNextPosition = nextPositionData.NextPositionData.Get(j), normalNextPosition2 = nextPositionData.symetricNextPositionData.Get(j);

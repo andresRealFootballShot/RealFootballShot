@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum MatchState
+public enum MatchStateObsolete
 {
     WaitingForWarmUp,
     WarmUp,
@@ -13,8 +13,8 @@ public enum MatchState
 public class MatchData : MonoBehaviour,IClearBeforeLoadScene
 {
     public static bool isStarted;
-    static Variable<MatchState> matchStateVar = new Variable<MatchState>();
-    public static MatchState matchState { get=> matchStateVar.Value; set => setMatchState(value); }
+    static Variable<MatchStateObsolete> matchStateVar = new Variable<MatchStateObsolete>();
+    public static MatchStateObsolete matchState { get=> matchStateVar.Value; set => setMatchState(value); }
     public static string teamNameOfServe="";
     public static int currentPart;
     static emptyDelegate changeStateListeners;
@@ -94,7 +94,7 @@ public class MatchData : MonoBehaviour,IClearBeforeLoadScene
         currentPart = (int)data[index++];
         string _lastPlayerIDPossession = (string)data[index++];
         setReferee(referee,ComponentsPlayer.myMonoPlayerID.playerID.onlineActor.ToString());
-        matchState = MyFunctions.parseEnum<MatchState>(matchStateStr);
+        matchState = MyFunctions.parseEnum<MatchStateObsolete>(matchStateStr);
         lastPlayerIDPossession = _lastPlayerIDPossession;
     }
     public void Clear()
@@ -104,7 +104,7 @@ public class MatchData : MonoBehaviour,IClearBeforeLoadScene
         lastPlayerIDPossession = "";
         currentPart = 0;
         myActor = 0;
-        matchStateVar = new Variable<MatchState>();
+        matchStateVar = new Variable<MatchStateObsolete>();
         changeStateListeners = null;
     }
     public static void addChangeStateListener(emptyDelegate listener)
@@ -117,29 +117,29 @@ public class MatchData : MonoBehaviour,IClearBeforeLoadScene
         MyFunctions.RemoveListener(changeStateListeners, listener);
         //matchStateVar.addObserverAndExecuteIfValueNotIsNull(observer);
     }
-    static void setMatchState(MatchState value)
+    static void setMatchState(MatchStateObsolete value)
     {
-        MatchState previousState = matchStateVar.Value;
+        MatchStateObsolete previousState = matchStateVar.Value;
         //matchStateVar.Value = value;
         
         switch (value)
         {
-            case MatchState.WaitingForWarmUp:
+            case MatchStateObsolete.WaitingForWarmUp:
                 MatchEvents.waitingWarmUp.Invoke();
                 break;
-            case MatchState.WarmUp:
+            case MatchStateObsolete.WarmUp:
                 MatchEvents.warmUp.Invoke();
                 break;
-            case MatchState.Running:
-                if(previousState == MatchState.WarmUp || previousState == MatchState.WaitingForWarmUp)
+            case MatchStateObsolete.Running:
+                if(previousState == MatchStateObsolete.WarmUp || previousState == MatchStateObsolete.WaitingForWarmUp)
                 {
                     MatchEvents.startMatch.Invoke();
                 }
                 break;
-            case MatchState.Stoped:
+            case MatchStateObsolete.Stoped:
                 MatchEvents.stopMatch.Invoke();
                 break;
-            case MatchState.Ended:
+            case MatchStateObsolete.Ended:
                 MatchEvents.endMatch.Invoke();
                 break;
         }
@@ -169,35 +169,35 @@ public class MatchData : MonoBehaviour,IClearBeforeLoadScene
     }
     void waitingWarmUpEvent()
     {
-        matchStateVar.Value = MatchState.WaitingForWarmUp;
+        matchStateVar.Value = MatchStateObsolete.WaitingForWarmUp;
         isStarted = false;
         changeStateListeners?.Invoke();
     }
     void warmUpEvent()
     {
-        matchStateVar.Value = MatchState.WarmUp;
+        matchStateVar.Value = MatchStateObsolete.WarmUp;
         isStarted = false;
         changeStateListeners?.Invoke();
     }
     void startMatchEvent()
     {
-        matchStateVar.Value = MatchState.Running;
+        matchStateVar.Value = MatchStateObsolete.Running;
         isStarted = true;
         changeStateListeners?.Invoke();
     }
     void continueMatchEvent()
     {
-        matchStateVar.Value = MatchState.Running;
+        matchStateVar.Value = MatchStateObsolete.Running;
         changeStateListeners?.Invoke();
     }
     void stopMatchEvent()
     {
-        matchStateVar.Value = MatchState.Stoped;
+        matchStateVar.Value = MatchStateObsolete.Stoped;
         changeStateListeners?.Invoke();
     }
     void endMatchEvent()
     {
-        matchStateVar.Value = MatchState.Ended;
+        matchStateVar.Value = MatchStateObsolete.Ended;
         changeStateListeners?.Invoke();
     }
 }

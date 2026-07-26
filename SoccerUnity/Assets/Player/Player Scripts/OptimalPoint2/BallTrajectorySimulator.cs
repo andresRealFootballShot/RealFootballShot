@@ -44,6 +44,10 @@ public class BallTrajectorySimulator : MonoBehaviour
 
         while (time <= simulationTime)
         {
+            positions.Add(pos);
+            times.Add(time);
+            outOfFieldCounter = 0;
+            /*
             if (pos.x >= fieldMin.x && pos.x <= fieldMax.x &&
                 pos.z >= fieldMin.y && pos.z <= fieldMax.y)
             {
@@ -56,8 +60,8 @@ public class BallTrajectorySimulator : MonoBehaviour
                 outOfFieldCounter++;
                 if (outOfFieldCounter > maxOutCount)
                     break;
-            }
-            
+            }*/
+
             if (vel.magnitude < 0.01f&&pos.y<= groundLevel&& times.Count>0)
             {
                 times[times.Count - 1] = Mathf.Infinity;

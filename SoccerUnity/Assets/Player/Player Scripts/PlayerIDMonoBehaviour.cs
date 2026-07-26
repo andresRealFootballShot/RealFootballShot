@@ -138,7 +138,7 @@ public class PlayerID
     }
     public override string ToString()
     {
-        return typePlayer.ToString() + " " + onlineActor + " " + localActor;
+        return typePlayer.ToString() + separator + onlineActor + separator + localActor;
     }
 }
 public class PlayerIDMonoBehaviour : MonoBehaviour

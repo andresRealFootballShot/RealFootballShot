@@ -42,8 +42,10 @@ public class AddPlayerToTeam : PlayerComponent
         {
             //print("addGoalkeeperToTeam " + team.TeamName + " " + playerComponents.publicPlayerData.playerID);
             playerComponents.playerEvents.addTeamEvent.Invoke(team);
+            publicPlayerData.team = team;
             SoccerPlayerComponent.myTeam = team;
             SoccerPlayerComponent.rivalTeam = Teams.getRivalTeam(team.TeamName);
+            publicPlayerData.rivalTeam = Teams.getRivalTeam(team.TeamName);
             team.teamSetup.StartPosition(publicPlayerData);
         }
     }
@@ -58,6 +60,8 @@ public class AddPlayerToTeam : PlayerComponent
                 playerComponents.playerEvents.addTeamEvent.Invoke(team);
                 SoccerPlayerComponent.myTeam = team;
                 SoccerPlayerComponent.rivalTeam = Teams.getRivalTeam(team.TeamName);
+                publicPlayerData.team = team;
+                publicPlayerData.rivalTeam = Teams.getRivalTeam(team.TeamName);
                 team.teamSetup.StartPosition(publicPlayerData);
             }
         }

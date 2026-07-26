@@ -21,22 +21,43 @@ public class FootballPositionCtrlEditor : Editor
         var t = (target as FootballPositionCtrl);
         t.Load();
     }
-   
+   void GeneratePressurePopup(LineupFieldPositionDatas lineupFieldPositionDatas)
+    {
+
+        var t = (target as FootballPositionCtrl);
+        List<string> nombres = new List<string>();
+        foreach(PressureFieldPositionDatas pressureFieldPositionDatas in lineupFieldPositionDatas.PressureFieldPositionDatasList)
+        {
+            nombres.Add(pressureFieldPositionDatas.name);
+        }
+        EditorGUI.BeginChangeCheck();
+        t.pressureSelected = EditorGUILayout.Popup(
+            "Pressure",
+             t.pressureSelected,
+            nombres.ToArray()
+        );
+        t.pressureName = nombres[t.pressureSelected];
+        if (EditorGUI.EndChangeCheck())
+        {
+            SceneView.RepaintAll();
+        }
+    }
     public override void OnInspectorGUI()
     {
 
         var t = (target as FootballPositionCtrl);
         base.DrawDefaultInspector();
         if (!t.debug) return;
+        LineupFieldPositionDatas lineupFieldPositionDatas;
 
+        if (!t.getCurrentLineup(out lineupFieldPositionDatas)) return;
         serializedObject.Update();
         t.playerPositionType = (PlayerPositionType)EditorGUILayout.EnumPopup("PlayerPosition", t.playerPositionType);
         t.lineupName = EditorGUILayout.TextField("Lineup Name", t.lineupName);
-        t.pressureName = EditorGUILayout.TextField("Pressure Name", t.pressureName);
+        GeneratePressurePopup(lineupFieldPositionDatas);
+        //t.pressureName = EditorGUILayout.TextField("Pressure Name", t.pressureName);
         t.playerSize = EditorGUILayout.IntField("Player Size", t.playerSize);
-        LineupFieldPositionDatas lineupFieldPositionDatas;
-
-        if(!t.getCurrentLineup(out lineupFieldPositionDatas)) return;
+        
 
         PressureFieldPositionDatas pressureFieldPositionDatas;
         if (!t.getCurrentPressureFieldPositions(out pressureFieldPositionDatas)) return;

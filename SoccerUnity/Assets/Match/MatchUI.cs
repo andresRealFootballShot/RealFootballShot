@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MatchUI : MonoBehaviour
 {
-    public MatchCtrl matchCtrl;
+    public Chronometer matchCtrl;
     public Canvas canvas;
     public TextMeshProUGUI time;
 

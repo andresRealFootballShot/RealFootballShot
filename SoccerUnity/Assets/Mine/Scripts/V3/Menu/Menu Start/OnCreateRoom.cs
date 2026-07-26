@@ -36,7 +36,7 @@ public class OnCreateRoom : MonoBehaviourPunCallbacks
             */
 
             
-            MatchData.matchState = MatchState.WaitingForWarmUp;
+            MatchData.matchState = MatchStateObsolete.WaitingForWarmUp;
             //LoadScene.notifyClearBeforeLoadScene();
             PhotonNetwork.LoadLevel("Scenes/" + TypeMatch.getNameScene(typeMatchString));
         }

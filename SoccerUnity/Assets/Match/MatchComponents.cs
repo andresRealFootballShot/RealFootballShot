@@ -25,11 +25,16 @@ public class MatchComponents : MonoBehaviour
     public static MatchRulesSettings rulesSettings { get =>rulesComponents.settings; }
     public static GameSounds gameSounds;
     public static CullPassPoints CullPassPoints;
+    public static Brains Brains;
     public static PublicPlayerData currentPublicPlayerData;
     public static Team myTeam { get; set; }
     public static Team currentReachBallTeam { get=>Teams.getTeamFromPlayer(firstReachBalPublicPlayerData.playerID); }
     public static PublicPlayerData firstReachBalPublicPlayerData { get=>CullPassPoints.firstPublicPlayerData; }
     
-    public static ModeCtrl MatchCtrl;
-    public static UserMode MatchMode{ get => MatchCtrl.matchMode; set => MatchCtrl.matchMode = value; }
+    public static ModeCtrl ModeCtrl;
+    public static UserMode UserMode{ get => ModeCtrl.UserMode; set => ModeCtrl.UserMode = value; }
+    
+    public static RulesData RulesData;
+    public static MatchState MatchState{ get => RulesData.matchState; set => RulesData.matchState = value; }
+    public static bool enabledRules { get=> RulesData.enabledRules; set=> RulesData.enabledRules = value; }
 }

@@ -21,6 +21,7 @@ public class PublicPlayerData : MonoBehaviour
     public float speed { get { return playerData.Speed; }}
     public float resistance { get { return resistanceVar.Value; } set { resistanceVar.Value = value; } }
     public float bodyRadio { get { return playerData.bodyRadio; } set { playerData.bodyRadio = value; } }
+    public Rigidbody rigidbody { get { return playerComponents.rigidbody; } set { playerComponents.rigidbody = value; } }
     public Vector3 position { get { return bodyTransform.position; } set { bodyTransform.position = value; } }
     public Transform modelTransform { get { return playerComponents.modelTransform; } set { playerComponents.modelTransform = value; } }
     public Vector3 InitPosition { get { return initPosition.Value; } set { initPosition.Value = value; } }
@@ -45,12 +46,14 @@ public class PublicPlayerData : MonoBehaviour
     public bool addToOptimalPoint=true;
     public MovimentValues movimentValues { get => playerComponents.movementValues; }
     public PlayerData playerData { get => playerComponents.playerData; }
+    public PlayerState playerMode{ get => playerData.playerMode; set => playerData.playerMode = value; }
     public PlayerComponents playerComponents;
     public virtual bool IsGoalkeeper { get => false; }
     public bool initPuppet;
     public bool IsBot{ get => playerType.Value==PlayerTypeID.Bot; }
     public bool IsPuppet{ get => playerType.Value==PlayerTypeID.Puppet; }
     public Team team { get; set; }
+    public SideOfField SideOfField { get=>team.SideOfField;}
     public Team rivalTeam { get; set; }
     public bool canChangeType = true;
     public PlayerType playerType;

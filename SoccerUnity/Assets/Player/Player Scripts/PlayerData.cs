@@ -23,6 +23,7 @@ public class PlayerData
     private float _ballReachTime;
     public float ballReachTime { get=>validReachPosition? _ballReachTime:Mathf.Infinity; set=> _ballReachTime=value; }
     public NoPossessionMode noPossessionMode { get; set; }
+    public PlayerState playerMode = PlayerState.LookingBall;
     public NoPossessionMode GetNextNoPossessionMode()
     {
         switch (noPossessionMode)

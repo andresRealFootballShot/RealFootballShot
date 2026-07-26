@@ -7,6 +7,7 @@ public class PlayerComponent : MonoBehaviour
 {
     public virtual PlayerComponents playerComponents { get; set; }
     public PlayerData playerData { get => playerComponents.playerData; }
+    public PlayerState playerMode{ get => playerData.playerMode; set => playerData.playerMode = value; }
     public ComponentsPlayer ComponentsPlayer { get => playerComponents.ComponentsPlayer; }
     protected MovimentValues movementValues { get => playerComponents.movementValues; }
     public PublicPlayerData publicPlayerData { get => playerComponents.publicPlayerData; }

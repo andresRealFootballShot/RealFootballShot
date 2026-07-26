@@ -30,13 +30,13 @@ public class SetupRules : MonoBehaviour
         RulesEvents.nextPart.Invoke();
         switch (MatchData.matchState)
         {
-            case MatchState.WaitingForWarmUp:
+            case MatchStateObsolete.WaitingForWarmUp:
                 WaitingForWarmUpSetup();
                 break;
-            case MatchState.WarmUp:
+            case MatchStateObsolete.WarmUp:
                 WarmUpSetup();
                 break;
-            case MatchState.Running:
+            case MatchStateObsolete.Running:
                 RunningSetup();
                 break;
         }
@@ -44,7 +44,7 @@ public class SetupRules : MonoBehaviour
     void refereeWasAssigned()
     {
         
-        if (MatchData.ImReferee && MatchData.matchState == MatchState.Running)
+        if (MatchData.ImReferee && MatchData.matchState == MatchStateObsolete.Running)
         {
             DebugsList.rules.print("SetupRules.refereeWasAssigned() ImReferee", debugColor, debug);
             RulesCtrl.Enable();

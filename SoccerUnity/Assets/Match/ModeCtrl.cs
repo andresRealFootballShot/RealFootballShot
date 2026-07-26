@@ -9,7 +9,7 @@ public enum UserMode
 }
 public class ModeCtrl : MonoBehaviour
 {
-    public UserMode matchMode;
+    public UserMode UserMode;
     public TypeFieldPosition.Type startFieldPositionType;
     TypeFieldPosition.Type currentFieldPositionType;
     float startChangePlayerTime;
@@ -19,17 +19,15 @@ public class ModeCtrl : MonoBehaviour
     bool changeDefensePlayerAvailable { get => Time.time - startChangePlayerTime > defenseChangePlayerPeriod; }
     public string startAttackTeam = "Red";
     public Team team1, team2;
-    public bool startMyTeam;
-    public string startMyTeamName="Red";
     void Start()
     {
-        MatchComponents.MatchCtrl = this;
+        MatchComponents.ModeCtrl = this;
         
 
             
         currentFieldPositionType = startFieldPositionType;
 
-        if (startMyTeam) SetMyTeam(startMyTeamName);
+        //if (startMyTeam) SetMyTeam(startMyTeamName);
     }
     void Setup()
     {
@@ -47,7 +45,7 @@ public class ModeCtrl : MonoBehaviour
     }
     void MatchModeCtrl()
     {
-        switch (MatchComponents.MatchMode)
+        switch (MatchComponents.UserMode)
         {
             case UserMode.OnePlayer:
                 OnePlayerMode();
@@ -91,11 +89,7 @@ public class ModeCtrl : MonoBehaviour
             MatchComponents.currentPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Freelance;
         }
     }
-    public void SetMyTeam(string myTeam)
-    {
-        MatchComponents.myTeam = Teams.getTeamByName(myTeam);
-        
-    }
+    
     void AllTeamMode()
     {
         if (MatchComponents.currentPublicPlayerData == null)
@@ -136,7 +130,7 @@ public class ModeCtrl : MonoBehaviour
         startChangePlayerTime=Time.time;
         currentFieldPositionType = firstPublicPlayerData.fieldPositionType;
     }
-    void changePlayerType(PublicPlayerData publicPlayerData, PlayerTypeID playerTypeID)
+    public void changePlayerType(PublicPlayerData publicPlayerData, PlayerTypeID playerTypeID)
     {
         if (publicPlayerData==null||publicPlayerData.IsGoalkeeper||publicPlayerData.playerType.Value == playerTypeID) return;
         publicPlayerData.ChangePlayerType(playerTypeID);

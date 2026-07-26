@@ -137,7 +137,7 @@ public class FootballPositionCtrl : MonoBehaviour
     [HideInInspector] public PlayerPositionType playerPositionType;
     [HideInInspector] public string lineupName = "Default";
     [HideInInspector] public string pressureName = "Default";
-
+    [HideInInspector] public int pressureSelected;
     public SideOfField sideOfField2;
     public string lineupName2 = "Default";
     public string pressureName2 = "Default";
@@ -170,6 +170,9 @@ public class FootballPositionCtrl : MonoBehaviour
     public static Dictionary<TypeNormalMatch, string> StartDefensePressureTypeNormalMatch = new Dictionary<TypeNormalMatch, string>() {
              { TypeNormalMatch.FourVsFour,"Start Defense FourVsFour"},
              { TypeNormalMatch.TenVSTen,"Start Defense"}
+        };
+    public static Dictionary<TypeNormalMatch, string> CornerPressureTypeNormalMatch = new Dictionary<TypeNormalMatch, string>() {
+             { TypeNormalMatch.FourVsFour,"Corner FourVsFour"},
         };
     /* void Start()
     {
@@ -538,8 +541,8 @@ public class FootballPositionCtrl : MonoBehaviour
     public bool getCurrentLineup(out LineupFieldPositionDatas lineupFieldPositionData)
     {
         lineupFieldPositionData = null;
-        LineupFieldPositionDatas LineupFieldPositionDatas = LineupFieldPositionList.LineupFieldPositionDatas.Find(x => x.name.Equals(lineupName));
-        return LineupFieldPositionDatas != null;
+        lineupFieldPositionData = LineupFieldPositionList.LineupFieldPositionDatas.Find(x => x.name.Equals(lineupName));
+        return lineupFieldPositionData != null;
     }
     public bool getLineup(out LineupFieldPositionDatas lineupFieldPositionData, string lineupName)
     {

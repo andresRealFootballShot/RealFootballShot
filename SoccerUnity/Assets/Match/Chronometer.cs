@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using static Photon.Pun.UtilityScripts.PunTeams;
 
-public class MatchCtrl : MonoBehaviour
+public class Chronometer : Rules
 {
+    
+    public new MatchState matchState{ get=> MatchComponents.MatchState; set => MatchComponents.MatchState=value; }
     public string startAttackTeam = "Red";
     public int partsSize = 2;
     [Header("Time")]
@@ -18,14 +20,13 @@ public class MatchCtrl : MonoBehaviour
     float totalSeconds{ get => minutes * 60 + seconds; }
     float partTime { get => (float)totalSeconds / partsSize; }
     int currentPart=1;
-    public float currentMatchTime { get; set; }
+   
     public float normalizedTime { get=>currentMatchTime/(minutes*60+seconds); }
-    public int currentMatchMinutes { get; set; }
-    public int currentMatchSeconds { get; set; }
-    public int restMatchMinutes { get=>minutes-currentMatchMinutes;}
-    public int restMatchSeconds { get => seconds - currentMatchSeconds; }
-    bool inGame;
-    bool endGame;
+    public int currentMatchMinutes { get=>MatchComponents.RulesData.currentMatchMinutes; }
+    public int currentMatchSeconds { get => MatchComponents.RulesData.currentMatchSeconds; }
+    public int restMatchMinutes { get=> MatchComponents.RulesData.restMatchMinutes; }
+    public int restMatchSeconds { get => MatchComponents.RulesData.restMatchSeconds; }
+    
     void Start()
     {
         foreach(Team team in Teams.teamsList)
@@ -36,6 +37,7 @@ public class MatchCtrl : MonoBehaviour
         StartPart();
         
     }
+   
     void StartMatch()
     {
         inGame = true;
@@ -53,8 +55,6 @@ public class MatchCtrl : MonoBehaviour
         {
 
             currentMatchTime = Mathf.Clamp(currentMatchTime + Time.deltaTime, 0, totalSeconds);
-            currentMatchMinutes = currentMatchMinutes / 60;
-            currentMatchSeconds = Mathf.FloorToInt(currentMatchTime % 60);
         }
     }
     void checkEndPart()
@@ -77,17 +77,20 @@ public class MatchCtrl : MonoBehaviour
             audioSource.clip = pitidoLargo;
             audioSource.volume = volume;
             audioSource.Play();
-            inGame = false;
-            endGame = true;
+            
+            matchState = MatchState.EndGame;
         }
     }
+  
     void changeSideOfField()
     {
         startAttackTeam = startAttackTeam.Equals("Red") ? "Blue" : "Red";
         foreach (Team team in Teams.teamsList)
         {
+            
             team.startAttack = startAttackTeam.Equals(team.TeamName);
             SideOfFieldID sideOfFieldID = team.SideOfField.Value == SideOfFieldID.One ? SideOfFieldID.Two : SideOfFieldID.One;
+            SideOfFieldCtrl.setTeamSide(team.TeamName, sideOfFieldID);
             team.setSideOfField(sideOfFieldID);
             team.SideOfField.goalComponents.goalkeeper = team.getGoalkeeperPublicPlayerData().gameObject;
             PublicGoalkeeperData publicGoalkeeperData = team.getGoalkeeperPublicPlayerData() as PublicGoalkeeperData;
