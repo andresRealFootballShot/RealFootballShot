@@ -28,7 +28,7 @@ public class SetupRules : MonoBehaviour
     void matchDataIsLoaded()
     {
         RulesEvents.nextPart.Invoke();
-        switch (MatchData.matchState)
+        switch (MatchDataObsolete2.matchState)
         {
             case MatchStateObsolete.WaitingForWarmUp:
                 WaitingForWarmUpSetup();
@@ -44,7 +44,7 @@ public class SetupRules : MonoBehaviour
     void refereeWasAssigned()
     {
         
-        if (MatchData.ImReferee && MatchData.matchState == MatchStateObsolete.Running)
+        if (MatchDataObsolete2.ImReferee && MatchDataObsolete2.matchState == MatchStateObsolete.Running)
         {
             DebugsList.rules.print("SetupRules.refereeWasAssigned() ImReferee", debugColor, debug);
             RulesCtrl.Enable();
@@ -58,7 +58,7 @@ public class SetupRules : MonoBehaviour
     void RunningSetup()
     {
         DebugsList.rules.print("RunningSetup", debugColor, debug);
-        if (MatchData.currentPart == 0)
+        if (MatchDataObsolete2.currentPart == 0)
         {
         }
     }

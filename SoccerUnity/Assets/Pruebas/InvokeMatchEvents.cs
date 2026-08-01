@@ -90,8 +90,8 @@ public class InvokeMatchEvents : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.V))
         {
             //MatchData.lastPlayerIDPossession = ComponentsPlayer.myMonoPlayerID.playerIDStr;
-            MatchData.lastPlayerIDPossession = "";
-            MatchData.lastTeamPossession = Teams.MyTeam.TeamName;
+            MatchDataObsolete2.lastPlayerIDPossession = "";
+            MatchDataObsolete2.lastTeamPossession = Teams.MyTeam.TeamName;
             Vector3 velocity = ComponentsPlayer.currentComponentsPlayer.transBody.position- MatchComponents.ballRigidbody.position;
             velocity.Normalize();
             velocity *= 10;
@@ -104,7 +104,7 @@ public class InvokeMatchEvents : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.V))
         {
             goalkeeper.SetActive(false);
-            MatchData.lastTeamPossession = "Blue";
+            MatchDataObsolete2.lastTeamPossession = "Blue";
             MatchComponents.ballComponents.rigBall.velocity = positionGoal.forward*30;
             MatchComponents.ballComponents.rigBall.angularVelocity = Vector3.zero;
             MatchComponents.ballComponents.position = positionGoal.position + Vector3.up * MatchComponents.ballComponents.radio;

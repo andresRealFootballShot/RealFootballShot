@@ -626,13 +626,13 @@ LonelyPointElement2 GetDebugLonelyPoint(int index)
      style.normal.textColor = color;
         //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " defenseIndex=" + TestResultComponent.defenseLonelyPointReachIndex + " defenseReachLonelyPosTime=" + TestResultComponent.defenseLonelyPointReachTime + " closestDistanceDefenseBall=" + TestResultComponent.closestDistanceDefenseBall;
         //string text = "straightReachBall=" + lonelyPointElement.straightReachBall + " parabolicReachBall=" + lonelyPointElement.parabolicReachBall + " i="+lonelyPointElement.index;
-        float value = lonelyPointElement.straightWeight * 100;
+        float value = lonelyPointElement.weight * 100;
         string text = "i=" + lonelyPointElement.index + " weight="+ value;
      //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
 
 
      Handles.Label(pos + Vector3.up * 0.5f, text, style);
-     Color c = Color.Lerp(Color.green, Color.red, lonelyPointElement.straightWeight);
+     Color c = Color.Lerp(Color.green, Color.red, lonelyPointElement.weight);
      style.normal.textColor = c;
      
      lonelyPointElement.GetPassData(debugStraightPass, out PassData passData);

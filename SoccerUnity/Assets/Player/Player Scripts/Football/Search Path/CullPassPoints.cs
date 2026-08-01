@@ -187,8 +187,10 @@ public class CullPassPoints : MonoBehaviour
         foreach (var entity in entities)
         {
             CullPassPointsComponent CullPassPointsComponent = entityManager.GetComponentData<CullPassPointsComponent>(entity);
-            CullPassPointsComponent.isCorner = MatchComponents.MatchState==MatchState.Corner;
 
+            bool centerBall = attackTeam.CanCenterKick();
+            CullPassPointsComponent.isCorner = centerBall;
+            MatchComponents.MatchData.centerBall = centerBall;
             entityManager.SetComponentData<CullPassPointsComponent>(entity, CullPassPointsComponent);
         }
 
@@ -539,7 +541,7 @@ public class CullPassPoints : MonoBehaviour
                     playerPositionElement.decceleration = publicPlayerData.playerComponents.movementValues.forwardDeceleration;
                     playerPositionElement.maxSpeedRotation = publicPlayerData.playerComponents.movementValues.rotationSpeed;
                     playerPositionElement.maxSpeed = publicPlayerData.playerComponents.MaxSpeed;
-                    playerPositionElement.timePrecision = publicPlayerData.IsBot ? 0.05f : 0.2f;
+                    playerPositionElement.timePrecision = publicPlayerData.IsBot ? 0.05f : 0.4f;
                     if (!publicPlayerData.IsBot)
                     {
                         CullPassPointsComponent.userIndex = j;
@@ -767,9 +769,9 @@ public class CullPassPoints : MonoBehaviour
             lonelyPointCount = 0;
 
         }
-        int points = 4;
+        int points = 6;
         float lenght=4;
-        float angle2 = 90;
+        float angle2 = 180;
         float angle = angle2 / (points - 1);
         for(int i = 0;i< points; i++)
         {

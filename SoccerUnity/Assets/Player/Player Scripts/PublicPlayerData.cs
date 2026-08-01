@@ -18,6 +18,7 @@ public class PublicPlayerData : MonoBehaviour
     public BotKick BotKick { get {return playerComponents.botKick; }  }
     public BotControl BotControl { get {return playerComponents.BotControl; }  }
     public Vector3 velocity { get { return playerData.Velocity; } set { playerData.Velocity = value; } }
+    public float EndForwardSpeed { get => playerComponents.movementValues.adjustedForwardVelocitySpeed; set => playerComponents.movementValues.adjustedForwardVelocitySpeed = value; }
     public float speed { get { return playerData.Speed; }}
     public float resistance { get { return resistanceVar.Value; } set { resistanceVar.Value = value; } }
     public float bodyRadio { get { return playerData.bodyRadio; } set { playerData.bodyRadio = value; } }
@@ -27,6 +28,8 @@ public class PublicPlayerData : MonoBehaviour
     public Vector3 InitPosition { get { return initPosition.Value; } set { initPosition.Value = value; } }
     public Quaternion InitRotation { get { return initRotation.Value; } set { initRotation.Value = value; } }
     public NoPossessionMode NoPossessionMode { get { return playerData.noPossessionMode; } set { playerData.noPossessionMode = value; } }
+    public float ballReachTime { get=>playerData.ballReachTime; set=> playerData.ballReachTime=value; }
+    public Vector3 ballReachPosition { get => playerData.ballReachPosition; set => playerData.ballReachPosition = value; }
     public SoccerPlayerData SoccerPlayerData { get { return playerComponents.soccerPlayerData; }}
     //public float maximumJumpHeight { get; set; }
     public SortedList<float, Area> maximumJumpHeights { get; set; } = new SortedList<float, Area>();
@@ -142,9 +145,9 @@ public class PublicPlayerData : MonoBehaviour
     }
     public bool ReachBall()
     {
-
         return playerComponents.botKick.ReachBall();
     }
+
     public void SetTargetPosition(Vector3 targetPosition)
     {
         playerComponents.ForwardDesiredSpeed = movimentValues.maxForwardSpeed;

@@ -2,9 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GoalData : MonoBehaviour
+public class GoalData
 {
     public SideOfFieldID sideOfFieldID;
+    
     public string playerID;
     public string teamName;
     public Team team;

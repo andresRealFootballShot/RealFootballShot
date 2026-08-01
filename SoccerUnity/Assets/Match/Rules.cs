@@ -5,12 +5,13 @@ using UnityEngine;
 
 public class Rules : MonoBehaviour
 {
-    protected bool enabledRules { get => MatchComponents.enabledRules; set => MatchComponents.enabledRules = value; }
-    protected float currentMatchTime { get => MatchComponents.RulesData.currentMatchTime; set => MatchComponents.RulesData.currentMatchTime = value; }
-    protected bool inGame { get => MatchComponents.RulesData.inGame; set => MatchComponents.RulesData.inGame = value; }
-    protected bool endGame { get => MatchComponents.RulesData.endGame; set => MatchComponents.RulesData.endGame = value; }
-    protected CornerComponents currentCorner { get => MatchComponents.RulesData.currentCorner; set => MatchComponents.RulesData.currentCorner = value; }
-    protected MatchState matchState { get => MatchComponents.RulesData.matchState; set => MatchComponents.RulesData.matchState = value; }
+    protected bool enabledRules { get => MatchComponents.enabledRules; }
+    protected MatchData MatchData { get => MatchComponents.MatchData; }
+    protected MatchCtrl MatchCtrl { get => MatchComponents.MatchCtrl; }
+    protected float currentMatchTime { get => MatchComponents.MatchData.currentMatchTime; set => MatchComponents.MatchData.currentMatchTime = value; }
+    protected bool inGame { get => MatchComponents.MatchData.inGame; set => MatchComponents.MatchData.inGame = value; }
+    protected bool endGame { get => MatchComponents.MatchData.endMatch; set => MatchComponents.MatchData.endMatch = value; }
+    protected CornerComponents currentCorner { get => MatchComponents.MatchData.currentCorner; set => MatchComponents.MatchData.currentCorner = value; }
     
     void Start()
     {
@@ -49,9 +50,14 @@ public class Rules : MonoBehaviour
         MatchComponents.ballPosition = currentCorner.cornerPoint.position;
         MatchComponents.ballRigidbody.velocity = Vector3.zero;
         MatchComponents.ballRigidbody.angularVelocity = Vector3.zero;
+        foreach(Team team in Teams.teamsList)
+        {
+            team.StartPressurePosition();
+        }
+
     }
     protected void StartCorner()
     {
-        MatchComponents.enabledRules = true;
+        MatchCtrl.EnableGame();
     }
 }

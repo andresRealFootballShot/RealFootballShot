@@ -114,7 +114,7 @@ public class PlayerComponents : PlayerComponent
             playerData.bodyRadio = capsuleCollider.radius;
         }
     }
-    void setupHeight()
+    protected void setupHeight()
     {
         CapsuleCollider capsuleCollider = rigidbody.GetComponent<CapsuleCollider>();
         if (capsuleCollider != null)

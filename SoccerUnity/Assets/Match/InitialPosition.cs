@@ -19,7 +19,7 @@ public class InitialPosition
             publicPlayerData.bodyTransform.rotation = publicPlayerData.InitRotation;
             DebugsList.rules.print("InitialPosition.SetAllInitPosition() " + publicPlayerData.name);
         }
-        if (MatchData.ImResponsibleForTheBall)
+        if (MatchDataObsolete2.ImResponsibleForTheBall)
         {
             DebugsList.rules.print("InitialPosition.SetAllInitPosition() ImResponsibleForTheBall");
             Vector3 midFieldPosition = SizeFootballFieldCtrl.getMidField().position;

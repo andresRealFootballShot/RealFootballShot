@@ -6,43 +6,33 @@ using static Photon.Pun.UtilityScripts.PunTeams;
 public class Chronometer : Rules
 {
     
-    public new MatchState matchState{ get=> MatchComponents.MatchState; set => MatchComponents.MatchState=value; }
-    public string startAttackTeam = "Red";
+    
     public int partsSize = 2;
     [Header("Time")]
     [Space(5)]
     public int minutes=5;
     public int seconds = 0;
-    [Space(5)]
-    public AudioSource audioSource;
-    public AudioClip pitido,pitidoLargo;
-    public float volume=0.1f;
+   
     float totalSeconds{ get => minutes * 60 + seconds; }
     float partTime { get => (float)totalSeconds / partsSize; }
     int currentPart=1;
    
     public float normalizedTime { get=>currentMatchTime/(minutes*60+seconds); }
-    public int currentMatchMinutes { get=>MatchComponents.RulesData.currentMatchMinutes; }
-    public int currentMatchSeconds { get => MatchComponents.RulesData.currentMatchSeconds; }
-    public int restMatchMinutes { get=> MatchComponents.RulesData.restMatchMinutes; }
-    public int restMatchSeconds { get => MatchComponents.RulesData.restMatchSeconds; }
+    public int currentMatchMinutes { get=>MatchComponents.MatchData.currentMatchMinutes; }
+    public int currentMatchSeconds { get => MatchComponents.MatchData.currentMatchSeconds; }
+    public int restMatchMinutes { get=> MatchComponents.MatchData.restMatchMinutes; }
+    public int restMatchSeconds { get => MatchComponents.MatchData.restMatchSeconds; }
     
+    public MatchCtrl matchSetup;
     void Start()
     {
-        foreach(Team team in Teams.teamsList)
-        {
-            team.startAttack = startAttackTeam.Equals(team.TeamName);
-        }
-        StartMatch();
-        StartPart();
+        
+        
+        
         
     }
+    
    
-    void StartMatch()
-    {
-        inGame = true;
-        endGame = false;
-    }
     void Update()
     {
         updateMatchTime();
@@ -62,11 +52,12 @@ public class Chronometer : Rules
         if (currentMatchTime>=partTime*currentPart&&inGame)
         {
             currentPart++;
-            StartPart();
             if (currentPart > 0)
             {
-                changeSideOfField();
+                MatchComponents.MatchCtrl.changeSideOfField();
             }
+            MatchComponents.MatchCtrl.StartContinueMatch();
+            
         }
     }
     void checkEndMatch()
@@ -74,42 +65,9 @@ public class Chronometer : Rules
         if (currentMatchTime >= totalSeconds&& !endGame)
         {
 
-            audioSource.clip = pitidoLargo;
-            audioSource.volume = volume;
-            audioSource.Play();
-            
-            matchState = MatchState.EndGame;
+            MatchComponents.MatchCtrl.EndMatch();
         }
     }
   
-    void changeSideOfField()
-    {
-        startAttackTeam = startAttackTeam.Equals("Red") ? "Blue" : "Red";
-        foreach (Team team in Teams.teamsList)
-        {
-            
-            team.startAttack = startAttackTeam.Equals(team.TeamName);
-            SideOfFieldID sideOfFieldID = team.SideOfField.Value == SideOfFieldID.One ? SideOfFieldID.Two : SideOfFieldID.One;
-            SideOfFieldCtrl.setTeamSide(team.TeamName, sideOfFieldID);
-            team.setSideOfField(sideOfFieldID);
-            team.SideOfField.goalComponents.goalkeeper = team.getGoalkeeperPublicPlayerData().gameObject;
-            PublicGoalkeeperData publicGoalkeeperData = team.getGoalkeeperPublicPlayerData() as PublicGoalkeeperData;
-            publicGoalkeeperData.components.goalkeeperCtrl.setSideOfField(team.SideOfField);
-            publicGoalkeeperData.components.goalkeeperCtrl.SetStartPosition();
-        }
-    }
-    void StartPart()
-    {
-       
-        foreach (Team team in Teams.teamsList)
-        {
-            team.teamSetup.StartPosition();
-        }
-        MatchComponents.ballPosition = MatchComponents.footballField.center;
-        MatchComponents.ballVelocity = Vector3.zero;
-        MatchComponents.ballAngularVelocity = Vector3.zero;
-        audioSource.clip = pitido;
-        audioSource.volume = volume;
-        audioSource.Play();
-    }
+ 
 }

@@ -43,7 +43,8 @@ namespace CullPositionPoint
     {
         public Vector2 position;
         public int index;
-        public bool straightReachBall, parabolicReachBall;
+        public bool straightReachBall{ get => straightWeight > 0; }
+        public bool parabolicReachBall{ get => parabolicWeight > 0; }
         public float weight { get => GetPassData().weight; }
         public float straightWeight { get => straightPassData.weight; set => straightPassData.weight = value; }
         public float parabolicWeight { get => parabolicPassData.weight; set => parabolicPassData.weight = value; }
@@ -55,8 +56,6 @@ namespace CullPositionPoint
         {
             this.position = position;
             this.index = index;
-            straightReachBall = false;
-            parabolicReachBall = false;
             
             order = -1;
             straightPassData = new PassData();
@@ -70,8 +69,6 @@ namespace CullPositionPoint
         {
             this.position = new Vector2(position.x,position.z);
             this.index = index;
-            straightReachBall = false;
-            parabolicReachBall = false;
             order = -1;
             straightPassData = new PassData();
             parabolicPassData = new PassData();
@@ -84,8 +81,6 @@ namespace CullPositionPoint
         {
             this.position = lonelyPointElement.position;
             this.index = lonelyPointElement.index;
-            straightReachBall = false;
-            parabolicReachBall = false;
             
             order = -1;
             straightPassData = new PassData();
@@ -98,8 +93,6 @@ namespace CullPositionPoint
         {
             this.position = point.position;
             this.index = index;
-            straightReachBall = false;
-            parabolicReachBall = false;
             
             order = -1;
             straightPassData = new PassData();
@@ -111,8 +104,6 @@ namespace CullPositionPoint
         public void Clear()
         {
             position = Vector2.positiveInfinity;
-            straightReachBall = false;
-            parabolicReachBall = false;
             straightWeight = -Mathf.Infinity;
             order = -1;
             straightPassData.Clear();

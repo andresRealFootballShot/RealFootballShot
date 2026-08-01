@@ -29,14 +29,14 @@ public class RPCGetMatchData : MonoBehaviourPunCallbacks
     void RequestData(PhotonMessageInfo info)
     {
         DebugsList.testing.print("RequestData " + info.Sender.NickName, debugColor, debug);
-        object[] data = MatchData.getData();
+        object[] data = MatchDataObsolete2.getData();
         photonView.RPC(nameof(SendMatchData), info.Sender, data as object);
     }
     [PunRPC]
     void SendMatchData(object[] data, PhotonMessageInfo info)
     {
         DebugsList.testing.print("SendData " + info.Sender.NickName, debugColor, debug);
-        MatchData.setData(data);
+        MatchDataObsolete2.setData(data);
         MatchEvents.matchDataIsLoaded.Invoke();
     }
 }

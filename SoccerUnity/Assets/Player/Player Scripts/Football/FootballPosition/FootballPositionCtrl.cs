@@ -436,7 +436,7 @@ public class FootballPositionCtrl : MonoBehaviour
     public Vector2 getNormalizedPosition(FieldPositionsData.HorizontalPositionType horizontalPositionType, Vector3 position, SideOfField sideOfField)
     {
         float verticalBallDistance = sideOfField.backPlane.GetDistanceToPoint(position) / fieldLenght;
-        verticalBallDistance = Mathf.Clamp01(verticalBallDistance);
+        //verticalBallDistance = Mathf.Clamp01(verticalBallDistance);
         float horizontalBallDistance;
         if (horizontalPositionType.Equals(FieldPositionsData.HorizontalPositionType.Right))
         {
@@ -447,14 +447,14 @@ public class FootballPositionCtrl : MonoBehaviour
         {
             horizontalBallDistance = sideOfField.leftPlane.GetDistanceToPoint(position) / fieldWidth;
         }
-        horizontalBallDistance = Mathf.Clamp01(horizontalBallDistance);
+        //horizontalBallDistance = Mathf.Clamp01(horizontalBallDistance);
 
         return new Vector2(horizontalBallDistance, verticalBallDistance);
     }
     public Vector2 getNormalizedPosition(FieldPositionsData.HorizontalPositionType horizontalPositionType, Vector3 position)
     {
         float verticalBallDistance = mySideOfField.backPlane.GetDistanceToPoint(position)/fieldLenght;
-        verticalBallDistance = Mathf.Clamp01(verticalBallDistance);
+        //verticalBallDistance = Mathf.Clamp01(verticalBallDistance);
         float horizontalBallDistance;
         if (horizontalPositionType.Equals(FieldPositionsData.HorizontalPositionType.Right)){
 
@@ -464,7 +464,7 @@ public class FootballPositionCtrl : MonoBehaviour
         {
             horizontalBallDistance = mySideOfField.leftPlane.GetDistanceToPoint(position) / fieldWidth;
         }
-        horizontalBallDistance = Mathf.Clamp01(horizontalBallDistance);
+        //horizontalBallDistance = Mathf.Clamp01(horizontalBallDistance);
 
         return new Vector2(horizontalBallDistance, verticalBallDistance);
     }

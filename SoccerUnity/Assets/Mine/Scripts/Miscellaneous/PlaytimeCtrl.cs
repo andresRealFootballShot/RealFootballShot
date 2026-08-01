@@ -40,8 +40,8 @@ public class PlaytimeCtrl : MonoBehaviour
         CheckBallIsInFullArea.SetState(false);
         MatchEvents.footballFieldLoaded.AddListenerConsiderInvoked(()=>CheckBallIsInFullArea.SetState(true));
         //CheckBallIsInFullArea.PointExitEvent.AddListenerConsiderInvoked(() => Invoke(nameof(Intro), 1));
-        MatchData.myActor = 0;
-        MatchData.setReferee("0","0");
+        MatchDataObsolete2.myActor = 0;
+        MatchDataObsolete2.setReferee("0","0");
         setResponsibles();
         
         if (enableFindRandomMatch)
@@ -57,8 +57,8 @@ public class PlaytimeCtrl : MonoBehaviour
     }
     void setResponsibles()
     {
-            MatchData.setResponsibleForTheBall(MatchData.myActor);
-            MatchData.setResponsibleForTheBall(MatchData.myActor);
+            MatchDataObsolete2.setResponsibleForTheBall(MatchDataObsolete2.myActor);
+            MatchDataObsolete2.setResponsibleForTheBall(MatchDataObsolete2.myActor);
     }
     void setupFieldPositionMenu()
     {

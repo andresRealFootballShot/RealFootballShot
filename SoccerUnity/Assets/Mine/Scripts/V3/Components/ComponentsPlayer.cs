@@ -34,7 +34,7 @@ public class ComponentsPlayer : MonoBehaviour
         }*/
         camera = Camera.main;
         transCamera = camera.transform;
-        camera.fieldOfView = 33;
+        //camera.fieldOfView = 33;
         //myMonoPlayerID = gameObject.GetComponent<PlayerIDMonoBehaviour>();
     }
     public void SetParentPivot(GameObject gameObject)

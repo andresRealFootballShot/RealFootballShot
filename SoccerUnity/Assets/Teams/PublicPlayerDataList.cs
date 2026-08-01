@@ -52,7 +52,7 @@ public class PublicPlayerDataList : MonoBehaviour,ILoad,IClearBeforeLoadScene
             fieldPlayers.Add(publicPlayerData.playerIDMono.getStringID(), publicPlayerData);
             all.Add(publicPlayerData.playerIDMono.getStringID(), publicPlayerData);
             MatchEvents.addedPublicPlayerDataToList.Invoke(publicPlayerData);
-            if(publicPlayerData.playerIDMono.playerID.onlineActor == MatchData.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
+            if(publicPlayerData.playerIDMono.playerID.onlineActor == MatchDataObsolete2.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
             {
                 myPublicPlayerDatas.Add(publicPlayerData.playerID, publicPlayerData);
             }
@@ -65,7 +65,7 @@ public class PublicPlayerDataList : MonoBehaviour,ILoad,IClearBeforeLoadScene
             fieldPlayers.Add(publicPlayerData.playerIDMono.getStringID(), publicPlayerData);
             all.Add(publicPlayerData.playerIDMono.getStringID(), publicPlayerData);
             MatchEvents.addedPublicPlayerDataToList.Invoke(publicPlayerData);
-            if (publicPlayerData.playerIDMono.playerID.onlineActor == MatchData.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
+            if (publicPlayerData.playerIDMono.playerID.onlineActor == MatchDataObsolete2.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
             {
                 myPublicPlayerDatas.Add(publicPlayerData.playerID, publicPlayerData);
             }
@@ -79,7 +79,7 @@ public class PublicPlayerDataList : MonoBehaviour,ILoad,IClearBeforeLoadScene
             goalkeepers.Add(publicPlayerData.playerIDMono.getStringID(), publicPlayerData);
             all.Add(publicPlayerData.playerIDMono.getStringID(), publicPlayerData);
             MatchEvents.addedPublicPlayerDataToList.Invoke(publicPlayerData);
-            if (publicPlayerData.playerIDMono.playerID.onlineActor == MatchData.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
+            if (publicPlayerData.playerIDMono.playerID.onlineActor == MatchDataObsolete2.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
             {
                 myPublicPlayerDatas.Add(publicPlayerData.playerID, publicPlayerData);
             }
@@ -92,7 +92,7 @@ public class PublicPlayerDataList : MonoBehaviour,ILoad,IClearBeforeLoadScene
         {
             all.Add(publicPlayerData.playerIDMono.getStringID(), publicPlayerData);
             MatchEvents.addedPublicPlayerDataToList.Invoke(publicPlayerData);
-            if (publicPlayerData.playerIDMono.playerID.onlineActor == MatchData.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
+            if (publicPlayerData.playerIDMono.playerID.onlineActor == MatchDataObsolete2.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
             {
                 myPublicPlayerDatas.Add(publicPlayerData.playerID, publicPlayerData);
             }
@@ -113,7 +113,7 @@ public class PublicPlayerDataList : MonoBehaviour,ILoad,IClearBeforeLoadScene
         {
             all.Add(publicPlayerData.playerIDMono.getStringID(), publicPlayerData);
             MatchEvents.addedPublicPlayerDataToList.Invoke(publicPlayerData);
-            if (publicPlayerData.playerIDMono.playerID.onlineActor == MatchData.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
+            if (publicPlayerData.playerIDMono.playerID.onlineActor == MatchDataObsolete2.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
             {
                 myPublicPlayerDatas.Add(publicPlayerData.playerID, publicPlayerData);
             }
@@ -132,7 +132,7 @@ public class PublicPlayerDataList : MonoBehaviour,ILoad,IClearBeforeLoadScene
         {
             myPublicPlayerDatas.Add(publicPlayerData.playerIDMono.getStringID(), publicPlayerData);
             MatchEvents.addedPublicPlayerDataToList.Invoke(publicPlayerData);
-            if (publicPlayerData.playerIDMono.playerID.onlineActor == MatchData.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
+            if (publicPlayerData.playerIDMono.playerID.onlineActor == MatchDataObsolete2.myActor && !myPublicPlayerDatas.ContainsKey(publicPlayerData.playerID))
             {
                 myPublicPlayerDatas.Add(publicPlayerData.playerID, publicPlayerData);
             }

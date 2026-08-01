@@ -242,7 +242,7 @@ public class SceneSetup : MonoBehaviour
         {
             componentsPlayer.camera = Camera.main;
             componentsPlayer.transCamera = camera.transform;
-            componentsPlayer.camera.fieldOfView = 33;
+            //componentsPlayer.camera.fieldOfView = 33;
         }
     }
     void normalMatchCameraSetup()

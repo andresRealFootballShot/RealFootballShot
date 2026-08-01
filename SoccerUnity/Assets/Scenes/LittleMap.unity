@@ -3725,7 +3725,7 @@ MonoBehaviour:
         - playerPositionType: 0
           points:
           - enabled: 1
-            info: Forward 0
+            info: Point 0
             point: {x: 0.49693924, y: 0.49853733}
             value: {x: 0.36555603, y: 0.47728756}
             radio: 0
@@ -3845,7 +3845,15 @@ MonoBehaviour:
       - name: Start Attack FourVsFour
         FieldPositionDatas:
         - playerPositionType: 0
-          points: []
+          points:
+          - enabled: 1
+            info: Forward 0
+            point: {x: 0.5025264, y: 0.4982884}
+            value: {x: 0.4666717, y: 0.48060137}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
           selectedPoint:
             enabled: 1
             info: Value 21
@@ -3856,7 +3864,15 @@ MonoBehaviour:
             useRadio: 1
             snap: 1
         - playerPositionType: 3
-          points: []
+          points:
+          - enabled: 1
+            info: CenterBack 0
+            point: {x: 0.5025264, y: 0.4982884}
+            value: {x: 0.40365866, y: 0.4022396}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
           selectedPoint:
             enabled: 0
             info: 
@@ -3871,7 +3887,15 @@ MonoBehaviour:
       - name: Start Defense FourVsFour
         FieldPositionDatas:
         - playerPositionType: 0
-          points: []
+          points:
+          - enabled: 1
+            info: Forward 0
+            point: {x: 0.49826127, y: 0.49969053}
+            value: {x: 0.39940917, y: 0.43035448}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
           selectedPoint:
             enabled: 1
             info: Value 21
@@ -3882,7 +3906,15 @@ MonoBehaviour:
             useRadio: 1
             snap: 1
         - playerPositionType: 3
-          points: []
+          points:
+          - enabled: 1
+            info: CenterBack 0
+            point: {x: 0.49826127, y: 0.49969053}
+            value: {x: 0.37582028, y: 0.33230525}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
           selectedPoint:
             enabled: 0
             info: 
@@ -3899,7 +3931,7 @@ MonoBehaviour:
         - playerPositionType: 0
           points:
           - enabled: 1
-            info: Forward 0
+            info: Point 0
             point: {x: 0.49177775, y: 0.49914464}
             value: {x: 0.36874297, y: 0.5502542}
             radio: 0
@@ -3907,7 +3939,7 @@ MonoBehaviour:
             useRadio: 0
             snap: 0
           - enabled: 1
-            info: Point 1
+            info: Forward 1
             point: {x: 0.47928548, y: 0.005849462}
             value: {x: 0.34342265, y: 0.098406546}
             radio: 0
@@ -4069,7 +4101,7 @@ MonoBehaviour:
         - playerPositionType: 0
           points:
           - enabled: 1
-            info: Point 0
+            info: Forward 0
             point: {x: 0.49177775, y: 0.49914464}
             value: {x: 0.36874297, y: 0.5502542}
             radio: 0
@@ -4133,7 +4165,7 @@ MonoBehaviour:
             useRadio: 0
             snap: 0
           - enabled: 1
-            info: Forward 8
+            info: Point 8
             point: {x: 0.98484415, y: 0.009057986}
             value: {x: 0.53446645, y: 0.17522573}
             radio: 0
@@ -4234,11 +4266,101 @@ MonoBehaviour:
             snap: 0
         offsideLines: []
         offsideStops: []
+      - name: Corner FourVsFour
+        FieldPositionDatas:
+        - playerPositionType: 0
+          points:
+          - enabled: 1
+            info: Forward 0
+            point: {x: 0.9945099, y: 0.99632126}
+            value: {x: 0.45166144, y: 0.97434527}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
+          - enabled: 1
+            info: Point 1
+            point: {x: 0.0026176006, y: 1}
+            value: {x: -0.003134342, y: 1.0076461}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
+          - enabled: 1
+            info: Point 2
+            point: {x: 0.0041556633, y: 0}
+            value: {x: 0.43671224, y: 0.08796245}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
+          - enabled: 1
+            info: Point 3
+            point: {x: 0.99672174, y: 0.003567811}
+            value: {x: 0.44406015, y: 0.085838206}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
+          selectedPoint:
+            enabled: 1
+            info: Value 21
+            point: {x: 0.3171301, y: 0.15624967}
+            value: {x: 0.28885666, y: 0.14029355}
+            radio: 0.020154933
+            weight: 0
+            useRadio: 1
+            snap: 1
+        - playerPositionType: 3
+          points:
+          - enabled: 1
+            info: CenterBack 0
+            point: {x: 0.9945099, y: 0.99632126}
+            value: {x: 0.45260197, y: 0.93930304}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
+          - enabled: 1
+            info: CenterBack 1
+            point: {x: 0.0026176006, y: 1}
+            value: {x: 0.4436501, y: 0.93828875}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
+          - enabled: 1
+            info: CenterBack 2
+            point: {x: 0.0041556633, y: 0}
+            value: {x: 0.43784308, y: 0.028140105}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
+          - enabled: 1
+            info: CenterBack 3
+            point: {x: 0.99672174, y: 0.003567811}
+            value: {x: 0.44227096, y: 0.04146354}
+            radio: 0
+            weight: 1
+            useRadio: 0
+            snap: 0
+          selectedPoint:
+            enabled: 0
+            info: 
+            point: {x: 0, y: 0}
+            value: {x: 0, y: 0}
+            radio: 0
+            weight: 0
+            useRadio: 0
+            snap: 0
+        offsideLines: []
+        offsideStops: []
   teams: {fileID: 6909758110175449624}
   buttonSize: 0.5
-  newPointPosition: {x: 0.9115567, y: 0.96889955}
+  newPointPosition: {x: 0.4567543, y: 0.57758164}
   horizontalPositionType: 0
-  normailizedBallPosition: {x: 0.51007783, y: 0.49068603}
+  normailizedBallPosition: {x: 0.9882896, y: 0.99083245}
   selectedFieldPositionParameters:
     playerPositionType: 0
     points:
@@ -4430,8 +4552,8 @@ MonoBehaviour:
     snap: 0
   playerPositionType: 0
   lineupName: Default
-  pressureName: Default Attack FourVsFour
-  pressureSelected: 6
+  pressureName: Corner FourVsFour
+  pressureSelected: 8
   sideOfField2: {fileID: 832117063}
   lineupName2: Default
   pressureName2: Default FourVsFour
@@ -18727,7 +18849,6 @@ Transform:
   m_Children:
   - {fileID: 855125350}
   - {fileID: 2100947860}
-  - {fileID: 1493501887}
   m_Father: {fileID: 326678486}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -21870,7 +21991,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 887035761}
-  - component: {fileID: 887035762}
   m_Layer: 0
   m_Name: Goal
   m_TagString: Untagged
@@ -21892,19 +22012,6 @@ Transform:
   m_Father: {fileID: 2100947860}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &887035762
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 887035760}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9609b662b2852e8468e49811d891356c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  goalAnimation: {fileID: 5033566014653574420}
 --- !u!1 &888280346
 GameObject:
   m_ObjectHideFlags: 0
@@ -23447,14 +23554,6 @@ PrefabInstance:
     - target: {fileID: 2564757764645997611, guid: 3d3da407de0ff834b914c70c08e36d36, type: 3}
       propertyPath: m_LocalPosition.y
       value: 1.339
-      objectReference: {fileID: 0}
-    - target: {fileID: 3038923665187342042, guid: 3d3da407de0ff834b914c70c08e36d36, type: 3}
-      propertyPath: addToOptimalPoint
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3038923665187342042, guid: 3d3da407de0ff834b914c70c08e36d36, type: 3}
-      propertyPath: useAccelerationInChaserDataCalculation
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3431607352883336201, guid: 3d3da407de0ff834b914c70c08e36d36, type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -28749,7 +28848,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 70
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -34512,7 +34611,7 @@ Transform:
   - {fileID: 5033566014653574409}
   - {fileID: 5033566015664712152}
   - {fileID: 1547410031}
-  m_Father: {fileID: 771840791}
+  m_Father: {fileID: 1618603017}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1498269755
@@ -37081,6 +37180,10 @@ GameObject:
   - component: {fileID: 1618603018}
   - component: {fileID: 1618603021}
   - component: {fileID: 1618603022}
+  - component: {fileID: 1618603023}
+  - component: {fileID: 1618603024}
+  - component: {fileID: 1618603025}
+  - component: {fileID: 1618603026}
   m_Layer: 0
   m_Name: Match
   m_TagString: Untagged
@@ -37100,6 +37203,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5033566014633641261}
+  - {fileID: 1802656480}
+  - {fileID: 1493501887}
   m_Father: {fileID: 958583058}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -37226,14 +37331,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6c615974276cef4795124b8c47494d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startAttackTeam: Red
   partsSize: 2
-  minutes: 1
+  minutes: 5
   seconds: 0
-  audioSource: {fileID: 1618603018}
-  pitido: {fileID: 8300000, guid: 50138f625bff61e46bea5b8bc5909f55, type: 3}
-  pitidoLargo: {fileID: 8300000, guid: 210f87705e7509544a672af56f015cae, type: 3}
-  volume: 0.05
+  matchSetup: {fileID: 1618603023}
 --- !u!114 &1618603021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37257,11 +37358,85 @@ MonoBehaviour:
   m_GameObject: {fileID: 1618603016}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dbfc8c873cf043942987fb4664020a82, type: 3}
+  m_Script: {fileID: 11500000, guid: 18808ed2d322cc64e87311027cc14b34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   minutes: 1
   seconds: 0
+--- !u!114 &1618603023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1618603016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c33a76c72d3f78b4cbd34f9502f7de80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startAttackTeam: Red
+  audioSource: {fileID: 1618603018}
+  pitido: {fileID: 8300000, guid: 50138f625bff61e46bea5b8bc5909f55, type: 3}
+  pitidoLargo: {fileID: 8300000, guid: 210f87705e7509544a672af56f015cae, type: 3}
+  MatchRulesSettings: {fileID: 1618603026}
+  volume: 0.1
+  startTime: 2
+--- !u!114 &1618603024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1618603016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1794d8e3f1343814cb377ff7eb6f9918, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ballPosition: {fileID: 1802656480}
+  timeScale: 0.5
+--- !u!114 &1618603025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1618603016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9609b662b2852e8468e49811d891356c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  goalAnimation: {fileID: 5033566014653574420}
+--- !u!114 &1618603026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1618603016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2779b4cc9a706cc4b8c7d0a7835108a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _settingsType: 0
+  timeWaitToStart: 3
+  timeWaitToStartNextPart: 3
+  timeWaitToShowEndMenu: 3
+  forceKickOff: 5
+  partMinutes: 4
+  partSeconds: 0
+  speedTimer: 1
+  lockTimerInStopMatch: 0
+  TimeWaitToSetBallData: 2
+  distanceCircularWall: 9
+  MessageKickWait: 10
+  inactivityWait: 10
+  goalAnimationDuration: 3
+  SidelineBallYPosition: 1.7
+  offsideDistanceBallPlayer: 3
 --- !u!1001 &1622171979
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -41709,6 +41884,36 @@ MonoBehaviour:
   selectionColor: {r: 1, g: 0, b: 0.948586, a: 1}
   size: 0.15
   active: 0
+--- !u!1 &1802656479
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1802656480}
+  m_Layer: 0
+  m_Name: StartTestBallPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1802656480
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1802656479}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 17.72, y: 0, z: 237.72}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1618603017}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1804111836
 GameObject:
   m_ObjectHideFlags: 0
@@ -44429,6 +44634,7 @@ MonoBehaviour:
   randomControlTime: 2
   updateNextLonelyPointPeriod: 0.25
   controlPause: 0
+  dontDefense: 0
 --- !u!114 &1875775252
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -89153,6 +89359,10 @@ MonoBehaviour:
   teamHUD: {fileID: 6909758110085026569}
   firstReachBallPublicPlayerData: {fileID: 0}
   teamSetup: {fileID: 6909758110085026571}
+  startPositionTest: 0
+  startPositionTestParent: {fileID: 6909758110085026567}
+  FootballPositionCtrl: {fileID: 58440509}
+  kickoffTypeFielPosition: 11
 --- !u!4 &6909758110085026567
 Transform:
   m_ObjectHideFlags: 0
@@ -89227,13 +89437,9 @@ MonoBehaviour:
   team: {fileID: 6909758110085026566}
   sideOfFieldID: 0
   parent: {fileID: 6909758110085026567}
-  startPositionTestParent: {fileID: 6909758110085026567}
   playerPrefab: {fileID: 5752883377703355627, guid: e3284c16d2bb3cf45b86960b74e3f948, type: 3}
-  FootballPositionCtrl: {fileID: 58440509}
   PlaytimeCtrl: {fileID: 0}
   typeLineup: 0
-  startPositionTest: 0
-  kickoffTypeFielPosition: 11
   isMyTeam: 1
 --- !u!114 &6909758110175449624
 MonoBehaviour:
@@ -89361,6 +89567,10 @@ MonoBehaviour:
   teamHUD: {fileID: 6909758110309341065}
   firstReachBallPublicPlayerData: {fileID: 0}
   teamSetup: {fileID: 6909758110309341067}
+  startPositionTest: 0
+  startPositionTestParent: {fileID: 6909758110309341063}
+  FootballPositionCtrl: {fileID: 58440509}
+  kickoffTypeFielPosition: 11
 --- !u!4 &6909758110309341063
 Transform:
   m_ObjectHideFlags: 0
@@ -89435,13 +89645,9 @@ MonoBehaviour:
   team: {fileID: 6909758110309341062}
   sideOfFieldID: 1
   parent: {fileID: 6909758110309341063}
-  startPositionTestParent: {fileID: 6909758110309341063}
   playerPrefab: {fileID: 5752883377703355627, guid: e3284c16d2bb3cf45b86960b74e3f948, type: 3}
-  FootballPositionCtrl: {fileID: 58440509}
   PlaytimeCtrl: {fileID: 0}
   typeLineup: 0
-  startPositionTest: 0
-  kickoffTypeFielPosition: 11
   isMyTeam: 0
 --- !u!114 &6915331677693098523
 MonoBehaviour:

@@ -38,10 +38,6 @@ public class ModeCtrl : MonoBehaviour
     void Update()
     {
         MatchModeCtrl();
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            Time.timeScale = Time.timeScale==1? 0:1;
-        }
     }
     void MatchModeCtrl()
     {

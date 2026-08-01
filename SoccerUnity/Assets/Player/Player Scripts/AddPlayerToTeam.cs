@@ -46,7 +46,7 @@ public class AddPlayerToTeam : PlayerComponent
             SoccerPlayerComponent.myTeam = team;
             SoccerPlayerComponent.rivalTeam = Teams.getRivalTeam(team.TeamName);
             publicPlayerData.rivalTeam = Teams.getRivalTeam(team.TeamName);
-            team.teamSetup.StartPosition(publicPlayerData);
+            team.StartPressurePosition(publicPlayerData);
         }
     }
     public void AddToTeam(string teamName, TypeFieldPosition.Type typeFieldPosition)
@@ -62,7 +62,7 @@ public class AddPlayerToTeam : PlayerComponent
                 SoccerPlayerComponent.rivalTeam = Teams.getRivalTeam(team.TeamName);
                 publicPlayerData.team = team;
                 publicPlayerData.rivalTeam = Teams.getRivalTeam(team.TeamName);
-                team.teamSetup.StartPosition(publicPlayerData);
+                team.StartPressurePosition(publicPlayerData);
             }
         }
     }
@@ -80,7 +80,7 @@ public class AddPlayerToTeam : PlayerComponent
                     SoccerPlayerComponent.myTeam = team;
                     SoccerPlayerComponent.rivalTeam = Teams.getRivalTeam(team.TeamName);
                 }
-                team.teamSetup.StartPosition(publicPlayerData);
+                team.StartPressurePosition(publicPlayerData);
             }
         }
     }

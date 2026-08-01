@@ -11,6 +11,8 @@ public class GoalkeeperComponents : PlayerComponents
     void Start()
     {
         base.setPlayerComponents();
+        playerData.bodyRadio = 0.25f;
+        playerData.height = 1.7f;
         setupMovimentValues();
     }
 }

@@ -48,7 +48,7 @@ public class LoadOnlineMatchCtrl : MonoBehaviourPunCallbacks
         {
             item.LocalLoad(PhotonNetwork.LocalPlayer.ActorNumber);
         }
-        MatchData.myActor = PhotonNetwork.LocalPlayer.ActorNumber;
+        MatchDataObsolete2.myActor = PhotonNetwork.LocalPlayer.ActorNumber;
         MatchEvents.myPlayerIDLoaded.Invoke();
         instantiateBall.Instantiate();
         instantiateMasterClientRPCs();
@@ -67,19 +67,19 @@ public class LoadOnlineMatchCtrl : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            MatchData.setResponsibleForTheBall(PhotonNetwork.LocalPlayer.ActorNumber);
-            MatchData.setResponsibleForTheGoalkeepers(PhotonNetwork.LocalPlayer.ActorNumber);
+            MatchDataObsolete2.setResponsibleForTheBall(PhotonNetwork.LocalPlayer.ActorNumber);
+            MatchDataObsolete2.setResponsibleForTheGoalkeepers(PhotonNetwork.LocalPlayer.ActorNumber);
         }
     }
     void setupReferee()
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            MatchData.setReferee(PhotonNetwork.LocalPlayer.ActorNumber.ToString(), PhotonNetwork.LocalPlayer.ActorNumber.ToString());
+            MatchDataObsolete2.setReferee(PhotonNetwork.LocalPlayer.ActorNumber.ToString(), PhotonNetwork.LocalPlayer.ActorNumber.ToString());
         }
         else
         {
-            MatchData.setReferee("",PhotonNetwork.LocalPlayer.ActorNumber.ToString());
+            MatchDataObsolete2.setReferee("",PhotonNetwork.LocalPlayer.ActorNumber.ToString());
         }
     }
     public void onlineMatchIsLoaded()

@@ -45,7 +45,7 @@ public class OffsideCtrl : MonoBehaviour
     void check()
     {
         Vector3 ballPosition = MatchComponents.ballTransform.position;
-        string lastPlayerIDPossession = RulesData.lastPlayerIDPossession;
+        string lastPlayerIDPossession = MatchDataObsolete2.lastPlayerIDPossession;
         //DebugsList.rules.print("OffsideCtrl.check()");
         
         foreach (var publicPlayerData in PublicPlayerDataList.all.Values)
@@ -55,7 +55,7 @@ public class OffsideCtrl : MonoBehaviour
             {
                 Team team;
                 Teams.getTeamFromPlayer(publicPlayerData.playerID, out team);
-                if (!publicPlayerData.playerID.Equals(lastPlayerIDPossession) && team.TeamName.Equals(RulesData.lastTeamPossession))
+                if (!publicPlayerData.playerID.Equals(lastPlayerIDPossession) && team.TeamName.Equals(MatchDataObsolete2.lastTeamPossession))
                 {
                     Team rivalTeam = Teams.getRivalTeamOfPlayer(publicPlayerData.playerID);
                     SideOfField sideOfField;

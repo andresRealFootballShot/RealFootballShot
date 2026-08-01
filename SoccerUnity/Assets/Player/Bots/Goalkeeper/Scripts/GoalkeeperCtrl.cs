@@ -105,7 +105,7 @@ public class GoalkeeperCtrl : MonoBehaviour,ILoad
         //Calculo calculateDirCenterPositionCalculo = new Calculo(calculateDirCenterPosition);
         //calculateDirCenterPositionCalculo.addListener(_theMatchIsOnState);
         //myBehaviour.addCalculo(calculateDirCenterPositionCalculo);
-        bool theMatchIsOn = MatchData.matchState == MatchStateObsolete.WarmUp || MatchData.isStarted;
+        bool theMatchIsOn = MatchDataObsolete2.matchState == MatchStateObsolete.WarmUp || MatchDataObsolete2.isStarted;
         myBehaviour.addState(_theMatchIsOnState, theMatchIsOn);
         myBehaviour.addState(_theMatchIsStoppedState,!theMatchIsOn);
         addGoalkeeperToGoalkeeperList();

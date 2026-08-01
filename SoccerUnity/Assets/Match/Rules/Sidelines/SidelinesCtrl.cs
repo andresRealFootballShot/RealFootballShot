@@ -46,7 +46,7 @@ public class SidelinesCtrl : MonoBehaviour
                 
                 Vector3 passVelocity = pass.getRandomPassVelocity(sideline.transform.forward);
                 closestPoint += sideline.transform.forward * MatchComponents.ballRadio;
-                SidelineEventArgs args = new SidelineEventArgs(closestPoint, passVelocity,MatchData.lastTeamPossession);
+                SidelineEventArgs args = new SidelineEventArgs(closestPoint, passVelocity,MatchDataObsolete2.lastTeamPossession);
                 DebugsList.rules.print("SidelinesCtrl.notify()");
                 RulesEvents.notifySideline.Invoke(args);
             }

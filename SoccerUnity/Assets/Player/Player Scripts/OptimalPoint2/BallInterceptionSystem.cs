@@ -250,9 +250,9 @@ public class BallInterceptionSystem : MonoBehaviour
         int indexResult=-1;
         float firstPlayerReachTime = Mathf.Infinity;
         Team red = Teams.getTeamByName("Red");
-        red.firstReachBallTime = Mathf.Infinity;
+        red.firstReachBallPublicPlayerData = null;
         Team blue = Teams.getTeamByName("Blue");
-        blue.firstReachBallTime = Mathf.Infinity;
+        blue.firstReachBallPublicPlayerData = null;
         for (int i = 0; i < Teams.allPlayers.Count; i++)
         {
             if (i >= reachableIndices.Length) break;
@@ -265,12 +265,9 @@ public class BallInterceptionSystem : MonoBehaviour
                 bool kickAvailable = Teams.allPlayers[i].playerComponents.botKick != null ?  Teams.allPlayers[i].playerComponents.botKick.kickAvailable : true;
 
                 Teams.getTeamFromPlayer(Teams.allPlayers[i].playerID, out Team team);
-                if (ballTime < team.firstReachBallTime)
+                if (team.firstReachBallPublicPlayerData==null||ballTime < team.firstReachBallTime)
                 {
-                    
-                    
                     team.firstReachBallPublicPlayerData = Teams.allPlayers[i];
-                    team.firstReachBallTime = ballTime;
                 }
                 if (ballTime < ballReachTimeResult)
                 {

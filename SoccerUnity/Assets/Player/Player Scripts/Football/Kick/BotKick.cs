@@ -61,6 +61,6 @@ public class BotKick : PlayerComponent
     public bool ReachBall()
     {
         //return ballBodyAngle < 80 && BodyBallXZDistance < scope && ballPosition.y <= bodyHeight + ballRadio && kickAvailable;
-        return BodyBallXZDistance < ballScope && ballPosition.y <= bodyHeight + ballRadio && kickAvailable;
+        return BodyBallXZDistance < ballScope && ballPosition.y <= bodyPosition.y+ bodyHeight + ballRadio && kickAvailable;
     }
 }

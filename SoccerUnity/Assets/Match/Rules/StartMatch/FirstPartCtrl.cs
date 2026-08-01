@@ -15,13 +15,13 @@ public class FirstPartCtrl : MonoBehaviour
     }
     public void Enable()
     {
-        if (MatchData.currentPart == 0)
+        if (MatchDataObsolete2.currentPart == 0)
         {
             MatchEvents.publicPlayerDataOfAddedPlayerToTeamIsAvailable.AddListenerConsiderInvoked(checkStartFirstPart);
             RulesEvents.startPart.AddListenerConsiderInvoked(execute);
             MatchComponents.timer.endCountdown.AddListener(endCountDown);
         }
-        else if(MatchData.currentPart == 1)
+        else if(MatchDataObsolete2.currentPart == 1)
         {
             RulesEvents.startPart.RemoveListener(execute);
             MatchComponents.timer.endCountdown.RemoveListener(endCountDown);
@@ -48,7 +48,7 @@ public class FirstPartCtrl : MonoBehaviour
     }
     void endAnimationEvent()
     {
-        MatchData.currentPart++;
+        MatchDataObsolete2.currentPart++;
         RulesEvents.nextPart.Invoke();
     }
     void DisableExecute()
@@ -60,12 +60,12 @@ public class FirstPartCtrl : MonoBehaviour
         DebugsList.rules.print("StartMatch Executor", debugColor, debug);
         InitialPosition.SetAllInitPosition();
         startPartAnimation.endAnimation += endAnimation;
-        MatchData.teamNameOfServe = Teams.getRandomTeam();
+        MatchDataObsolete2.teamNameOfServe = Teams.getRandomTeam();
         partCtrl.execute();
     }
     void endAnimation()
     {
-        MatchEvents.startMatch.Invoke();
+        MatchEvents.initialMatch.Invoke();
         DisableExecute();
         RulesCtrl.Enable();
     }

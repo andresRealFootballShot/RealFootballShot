@@ -10,7 +10,7 @@ public enum MatchStateObsolete
     Stoped,
     Ended
 }
-public class MatchData : MonoBehaviour,IClearBeforeLoadScene
+public class MatchDataObsolete2 : MonoBehaviour,IClearBeforeLoadScene
 {
     public static bool isStarted;
     static Variable<MatchStateObsolete> matchStateVar = new Variable<MatchStateObsolete>();
@@ -133,7 +133,7 @@ public class MatchData : MonoBehaviour,IClearBeforeLoadScene
             case MatchStateObsolete.Running:
                 if(previousState == MatchStateObsolete.WarmUp || previousState == MatchStateObsolete.WaitingForWarmUp)
                 {
-                    MatchEvents.startMatch.Invoke();
+                    MatchEvents.initialMatch.Invoke();
                 }
                 break;
             case MatchStateObsolete.Stoped:
@@ -146,7 +146,7 @@ public class MatchData : MonoBehaviour,IClearBeforeLoadScene
     }
     private void LoadListeners()
     {
-        MatchEvents.startMatch.AddListener(startMatchEvent);
+        MatchEvents.initialMatch.AddListener(startMatchEvent);
         MatchEvents.waitingWarmUp.AddListenerConsiderInvoked(waitingWarmUpEvent);
         MatchEvents.warmUp.AddListenerConsiderInvoked(warmUpEvent);
         MatchEvents.continueMatch.AddListener(continueMatchEvent);

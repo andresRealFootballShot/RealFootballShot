@@ -16,13 +16,13 @@ public class SecondPartCtrl : MonoBehaviour
     }
     public void Enable()
     {
-        if (MatchData.currentPart == 1)
+        if (MatchDataObsolete2.currentPart == 1)
         {
             RulesEvents.startPart.AddListener(execute);
             MatchComponents.timer.endCountdown.AddListener(endCountDown);
             notifyStartPart();
         }
-        else if(MatchData.currentPart > 1)
+        else if(MatchDataObsolete2.currentPart > 1)
         {
             RulesEvents.startPart.RemoveListener(execute);
             MatchComponents.timer.endCountdown.RemoveListener(endCountDown);
@@ -65,7 +65,7 @@ public class SecondPartCtrl : MonoBehaviour
         }
         MatchEvents.continueMatch.Invoke();
         startPartAnimation.endAnimation += endAnimation;
-        MatchData.teamNameOfServe = Teams.teamsList.Find(x=>x.TeamName!=MatchData.teamNameOfServe).TeamName;
+        MatchDataObsolete2.teamNameOfServe = Teams.teamsList.Find(x=>x.TeamName!=MatchDataObsolete2.teamNameOfServe).TeamName;
         partCtrl.execute();
     }
     void endAnimation()

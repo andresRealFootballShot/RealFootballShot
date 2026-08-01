@@ -605,6 +605,7 @@ GameObject:
   - component: {fileID: 3703687561346784179}
   - component: {fileID: 638102457606132325}
   - component: {fileID: 8355790516783993129}
+  - component: {fileID: 7036544642832159158}
   m_Layer: 0
   m_Name: post1.002
   m_TagString: Untagged
@@ -675,6 +676,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &7036544642832159158
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4970736895934237532}
+  m_Material: {fileID: 13400000, guid: 9f93f63d068b08c459038c40fce897d8, type: 2}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -1702729278478386736, guid: 8de67ec7af5983e48a79ee0836738811, type: 3}
 --- !u!1 &5009324977426238810
 GameObject:
   m_ObjectHideFlags: 0
@@ -2435,8 +2450,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ed97eec0a26d4749a43f218f0344ac6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fieldPositionType: 0
   playerIDMono: {fileID: 2510816687886981403}
-  bodyTransform: {fileID: 5678865589328704572}
+  bodyTransform: {fileID: 5279867306633939451}
   collisionEvent: {fileID: 0}
   setupModel: {fileID: 3017726479446831362}
   nickNameHUDCtrl: {fileID: 0}
@@ -2476,6 +2492,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerComponents: {fileID: 3299650401645545554}
   addAwake: 1
+  addSideOfField: 0
+  sideOfFieldID: 0
   teamName: Blue
   fieldPositionType: 13
 --- !u!114 &3299650401645545554
@@ -2501,6 +2519,7 @@ MonoBehaviour:
   soccerPlayerData: {fileID: 6244234487330640569}
   animator: {fileID: 0}
   wallRayCast: {fileID: 0}
+  modelTransform: {fileID: 0}
   rigidbody: {fileID: 0}
   resistanceCtrl: {fileID: 0}
   resistanceParameters: {fileID: 0}
@@ -2514,6 +2533,7 @@ MonoBehaviour:
   BotControl: {fileID: 0}
   myTeam: {fileID: 0}
   rivalTeam: {fileID: 0}
+  ComponentsPlayer: {fileID: 0}
   goalkeeperEvents: {fileID: 4290924186599095116}
   goalkeeperCtrl: {fileID: 5279867306633939449}
   goalkeeperValues: {fileID: 5279867306633939444}
@@ -4213,9 +4233,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
---- !u!137 &3431607352883336201 stripped
-SkinnedMeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 7411341568049137630, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
+--- !u!1 &5009324978325171846 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
+  m_PrefabInstance: {fileID: 5279867305367245783}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5678865589328704572 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
   m_PrefabInstance: {fileID: 5279867305367245783}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &549468529120331945 stripped
@@ -4228,14 +4253,9 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8879528566716807029, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
   m_PrefabInstance: {fileID: 5279867305367245783}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &5678865589328704572 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
-  m_PrefabInstance: {fileID: 5279867305367245783}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &5009324978325171846 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
+--- !u!137 &3431607352883336201 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 7411341568049137630, guid: 3dad65d8f85935a4c81a13a672fb22d6, type: 3}
   m_PrefabInstance: {fileID: 5279867305367245783}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &3017726479446831362

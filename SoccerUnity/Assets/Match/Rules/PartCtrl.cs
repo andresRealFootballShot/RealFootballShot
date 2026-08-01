@@ -40,7 +40,7 @@ public class PartCtrl : MonoBehaviour
     {
         ComponentsPlayer.currentComponentsPlayer.EnableAll();
         MatchComponents.timer.startProcess();
-        MatchComponents.kickOff.startProcess(MatchData.teamNameOfServe);
-        MatchComponents.kickOff.notifyTeamServe(MatchData.teamNameOfServe);
+        MatchComponents.kickOff.startProcess(MatchDataObsolete2.teamNameOfServe);
+        MatchComponents.kickOff.notifyTeamServe(MatchDataObsolete2.teamNameOfServe);
     }
 }

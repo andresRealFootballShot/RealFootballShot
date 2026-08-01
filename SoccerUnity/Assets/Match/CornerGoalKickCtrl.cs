@@ -47,7 +47,7 @@ public class CornerGoalKickCtrl : MonoBehaviour
                         MatchEvents.stopMatch.Invoke();
                         Vector3 cornerVelocity = cornerKickPass.getRandomPassVelocity(corner.cornerPoint.forward);
                         Vector3 goalKickVelocity = goalKickPass.getRandomPassVelocity(sideOfField.goalKickPoint.forward);
-                        CornerEventArgs args = new CornerEventArgs(sideOfField,corner,MatchData.lastPlayerIDPossession, cornerVelocity, goalKickVelocity);
+                        CornerEventArgs args = new CornerEventArgs(sideOfField,corner,MatchDataObsolete2.lastPlayerIDPossession, cornerVelocity, goalKickVelocity);
                         RulesEvents.notifyCorner.Invoke(args);
                     }
                 }

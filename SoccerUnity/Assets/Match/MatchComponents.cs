@@ -34,7 +34,7 @@ public class MatchComponents : MonoBehaviour
     public static ModeCtrl ModeCtrl;
     public static UserMode UserMode{ get => ModeCtrl.UserMode; set => ModeCtrl.UserMode = value; }
     
-    public static RulesData RulesData;
-    public static MatchState MatchState{ get => RulesData.matchState; set => RulesData.matchState = value; }
-    public static bool enabledRules { get=> RulesData.enabledRules; set=> RulesData.enabledRules = value; }
+    public static MatchData MatchData;
+    public static MatchCtrl MatchCtrl { get; set; }
+    public static bool enabledRules { get=> MatchData.enabledRules;}
 }

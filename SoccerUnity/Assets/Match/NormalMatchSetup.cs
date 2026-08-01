@@ -28,11 +28,11 @@ public class NormalMatchSetup : MonoBehaviour, ILoad
         MatchComponents.timer.Load();
         MatchComponents.timer.pauseProcess();
         CheckBallIsInFullArea.SetState(false);
-        MatchData.addChangeStateListener(setupCheckBallIsInFullArea);
+        MatchDataObsolete2.addChangeStateListener(setupCheckBallIsInFullArea);
     }
     void setupCheckBallIsInFullArea()
     {
-        if (!MatchData.isStarted)
+        if (!MatchDataObsolete2.isStarted)
         {
             CheckBallIsInFullArea.PointExitEvent.AddListener(invokeSetAllInitPosition);
             CheckBallIsInFullArea.SetState(true);

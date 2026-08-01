@@ -10,7 +10,7 @@ public class RulesCtrl : MonoBehaviour
     void Awake()
     {
         staticRulesCheckers = rulesCheckers;
-        MatchEvents.startMatch.AddListener(Enable);
+        MatchEvents.initialMatch.AddListener(Enable);
         MatchEvents.continueMatch.AddListener(Enable);
         MatchEvents.endPart.AddListener(Disable);
         MatchEvents.stopMatch.AddListener(Disable);
@@ -19,7 +19,7 @@ public class RulesCtrl : MonoBehaviour
 
     public static void Enable()
     {
-        if (MatchData.ImReferee)
+        if (MatchDataObsolete2.ImReferee)
         {
             //staticRulesCheckers.SetActive(true);
             checkersEnabled = true;

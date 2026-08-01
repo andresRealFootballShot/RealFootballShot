@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.UI.GridLayoutGroup;
 
-public class NormalRules : Rules
+public class Corner : Rules
 {
-    public float cornerPlaceCountdown = 2, cornerKickCountdown;
+    public float cornerPlaceCountdown = 2, cornerKickCountdown=1;
     void Start()
     {
-        enabledRules = true;
+       
     }
 
     // Update is called once per frame
@@ -19,9 +19,12 @@ public class NormalRules : Rules
             if (CheckCorner(out CornerComponents corner))
             {
                 currentCorner = corner;
+                MatchCtrl.Corner();
+                
                 Invoke(nameof(CornerPlaceBall), cornerPlaceCountdown);
-                enabledRules = false;
-                matchState = MatchState.Corner;
+                Invoke(nameof(StartCorner), cornerPlaceCountdown+ cornerKickCountdown);
+               
+               
             }
 
             
@@ -29,5 +32,5 @@ public class NormalRules : Rules
     }
     
 
-    
+   
 }

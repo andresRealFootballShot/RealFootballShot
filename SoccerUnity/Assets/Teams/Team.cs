@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using DOTS_ChaserDataCalculation;
 using System.Linq;
+using static Photon.Pun.UtilityScripts.PunTeams;
 
 public class Team : MonoBehaviour
 {
@@ -21,7 +22,7 @@ public class Team : MonoBehaviour
     public List<Transform> spawnsTransform;
     public Transform posStartBall;
     public int actorPosStartMatch=0;
-    public MatchDataObsolete matchData;
+    public MatchData matchData{ get => MatchComponents.MatchData; }
     public bool IsMine { get => isMine(); }
     public Animation goalMineAnim, goalOtherAnim;
     List<GoalData> _goals = new List<GoalData>();
@@ -41,10 +42,16 @@ public class Team : MonoBehaviour
     public SideOfField RivalSideOfField { get; set; }
     public Vector3 goalPosition { get => MyFunctions.setY0ToVector3( SideOfField.goalComponents.transform.position); }
     public PublicPlayerData firstReachBallPublicPlayerData;
-    public float firstReachBallTime { get; set; }
+    public float firstReachBallTime { get=> firstReachBallPublicPlayerData.ballReachTime; }
+    public Vector3 firstBallReachPosition { get=> firstReachBallPublicPlayerData.ballReachPosition; }
     public TeamSetup teamSetup;
     public bool startAttack { get; set; }
     public string startPressure { get => startAttack ? "Start Attack" : "Start Defense"; }
+    public string pressure { get; set; }
+    public bool startPositionTest;
+    public Transform startPositionTestParent;
+    public FootballPositionCtrl FootballPositionCtrl;
+    public TypeFieldPosition.Type kickoffTypeFielPosition = TypeFieldPosition.Type.RightForward;
     public void Load()
     {
         nameTeamVar.Value = initName;
@@ -56,8 +63,111 @@ public class Team : MonoBehaviour
         {
             goalAddedEvent.AddListener(teamHUD.goalAdded);
         }
+        MatchEvents.matchStateChanged.AddListener(matchStateChanged);
     }
-   bool isMine()
+    void matchStateChanged()
+    {
+        if (matchData.inCorner)
+        {
+
+            pressure = FootballPositionCtrl.CornerPressureTypeNormalMatch[TypeMatch.typeNormalMatch];
+        }
+        else if (matchData.initialMatch)
+        {
+            pressure = startAttack ? FootballPositionCtrl.StartAttackPressureTypeNormalMatch[TypeMatch.typeNormalMatch] : FootballPositionCtrl.StartDefensePressureTypeNormalMatch[TypeMatch.typeNormalMatch];
+        }
+
+        
+    }
+    public void StartPressurePosition(PublicPlayerData publicPlayerData)
+    {
+        if (startPositionTest)
+        {
+            StartPositionTest(publicPlayerData);
+        }
+        else
+        {
+            startPosition(publicPlayerData);
+        }
+
+    }
+    public void StartPressurePosition()
+    {
+        if (startPositionTest)
+        {
+            StartPositionTest();
+        }
+        else
+        {
+            foreach (PublicPlayerData publicPlayerData in outfieldPublicPlayerDatas)
+            {
+                startPosition(publicPlayerData);
+            }
+        }
+    }
+    void StartPositionTest()
+    {
+        Transform[] transforms = startPositionTestParent.GetComponentsInChildren<Transform>();
+        for (int i = 0; i < outfieldPublicPlayerDatas.Count; i++)
+        {
+            PublicPlayerData publicPlayerData = outfieldPublicPlayerDatas[i];
+            if (!publicPlayerData.IsGoalkeeper)
+                publicPlayerData.position = transforms[i].position;
+
+        }
+    }
+    void StartPositionTest(PublicPlayerData publicPlayerData)
+    {
+        TypeFieldPosition[] TypeFieldPositions = startPositionTestParent.GetComponentsInChildren<TypeFieldPosition>();
+        for (int i = 0; i < TypeFieldPositions.Length; i++)
+        {
+            TypeFieldPosition typeFieldPosition = TypeFieldPositions[i];
+            if (typeFieldPosition.Value == publicPlayerData.fieldPositionType)
+            {
+                if (!publicPlayerData.IsGoalkeeper)
+                    publicPlayerData.position = typeFieldPosition.transform.position;
+            }
+
+        }
+    }
+    void startPosition(PublicPlayerData publicPlayerData)
+    {
+        
+        if (FootballPositionCtrl.GetFieldPositionDataPosition("Default", pressure, publicPlayerData, MatchComponents.ballPosition, out Vector3 position))
+        {
+            publicPlayerData.rigidbody.velocity = Vector3.zero;
+            if (publicPlayerData.fieldPositionType.Equals(kickoffTypeFielPosition) && startAttack && matchData.initialMatch)
+            {
+
+                publicPlayerData.position = MatchComponents.footballField.center + publicPlayerData.SideOfField.forwardTransform.TransformDirection(new Vector3(0.5f, 0, 0));
+                
+                Vector3 dir = MatchComponents.ballPosition - publicPlayerData.position;
+                dir.y = 0;
+
+                publicPlayerData.bodyTransform.rotation = Quaternion.LookRotation(dir, publicPlayerData.bodyTransform.up);
+            }
+            else
+            {
+                publicPlayerData.position = position;
+                publicPlayerData.EndForwardSpeed = 0;
+                Vector3 dir = MatchComponents.ballPosition - publicPlayerData.position;
+                dir.y = 0;
+
+                publicPlayerData.bodyTransform.rotation = Quaternion.LookRotation(dir, publicPlayerData.bodyTransform.up);
+            }
+        }
+    }
+    public void Attack()
+    {
+        pressure = FootballPositionCtrl.AttackPressureTypeNormalMatch[TypeMatch.typeNormalMatch];
+        MatchComponents.MatchData.attackTeam = this;
+    }
+    public void Defense()
+    {
+        pressure = FootballPositionCtrl.DefensePressureTypeNormalMatch[TypeMatch.typeNormalMatch];
+        MatchComponents.MatchData.defenseTeam = this;
+    }
+    bool isMine()
     {
         return fieldPositionOfPlayers.ContainsValue(ComponentsPlayer.myMonoPlayerID.playerIDStr);
     }
@@ -377,6 +487,20 @@ public class Team : MonoBehaviour
         {
             return false;
         }
+    }
+    public bool CanCenterKick()
+    {
+        foreach(CornerComponents cornerComponents in RivalSideOfField.corners)
+        {
+            Vector3 ballPos = MatchComponents.ballPosition;
+            ballPos.y = 0;
+            float distance = Vector3.Distance(cornerComponents.cornerPoint.position, ballPos);
+            if(distance < RivalSideOfField.sideOfFieldWidth * 0.3f)
+            {
+                return true;
+            }
+        }
+        return false;
     }
     public void addGoal(int actor)
     {

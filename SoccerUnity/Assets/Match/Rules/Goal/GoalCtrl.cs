@@ -11,6 +11,7 @@ public class GoalCtrl : MonoBehaviour
         enabled = false;
         MatchEvents.footballFieldLoaded.AddListenerConsiderInvoked(footballFieldIsLoadedEvent);
         goalAnimation.EndEvent.AddListener(endGoalAnimation);
+        MatchEvents.goal.AddListenerConsiderInvoked(execute);
         //MatchEvents.endPart.AddListenerConsiderInvoked(endPart);
     }
     void footballFieldIsLoadedEvent()
@@ -19,7 +20,7 @@ public class GoalCtrl : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if (RulesCtrl.checkersEnabled)
+        if (MatchComponents.enabledRules)
         {
             check();
         }
@@ -30,34 +31,32 @@ public class GoalCtrl : MonoBehaviour
         {
             if (sideOfField.goalComponents.goalChecker.check())
             {
-                MatchEvents.stopMatch.Invoke();
-                GoalData args = new GoalData(sideOfField.Value,MatchData.lastPlayerIDPossession,MatchData.lastTeamPossession);
-                RulesEvents.notifyGoal.Invoke(args);
+                
+               
+                GoalData args = new GoalData(sideOfField.Value,MatchComponents.MatchData.posssessionPlayer.playerID, MatchComponents.MatchData.possessionTeam.TeamName);
+                MatchComponents.MatchCtrl.Goal(args);
             }
         }
     }
     public void execute(GoalData args)
     {
         //DebugsList.rules.print("GoalCtrl.execute() player "+args.playerID+ " team "+args.teamName);
-        MatchEvents.stopMatch.Invoke();
+        
         string victimTeamName;
         SideOfFieldCtrl.getTeamOfSideOfField(args.sideOfFieldID, out victimTeamName);
-        
+        MatchComponents.MatchData.startAttackTeamName = victimTeamName;
         Teams.getRivalTeam(victimTeamName).addGoal(args);
-        MatchComponents.kickOff.teamName = victimTeamName;
+        //MatchComponents.kickOff.teamName = victimTeamName;
         goalAnimation.Play(args);
     }
     void endGoalAnimation()
     {
-        InitialPosition.SetAllInitPosition();
-        ComponentsPlayer.currentComponentsPlayer.EnableOnlyCamera();
+        //ComponentsPlayer.currentComponentsPlayer.EnableOnlyCamera();
         Invoke(nameof(continueMatch), 1);
     }
     void continueMatch()
     {
-        MatchComponents.rulesComponents.whistleAnimation.Play();
-        MatchComponents.kickOff.startProcess();
-        ComponentsPlayer.currentComponentsPlayer.EnableAll();
-        MatchEvents.continueMatch.Invoke();
+        
+        MatchComponents.MatchCtrl.StartContinueMatch();
     }
 }

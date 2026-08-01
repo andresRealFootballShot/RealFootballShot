@@ -12,7 +12,7 @@ public class OnlineKickOff :MonoBehaviourPunCallbacks, IKickOff
     }
     public void startProcess(string teamName)
     {
-        if (MatchData.ImReferee)
+        if (MatchDataObsolete2.ImReferee)
         {
             
             Team team = Teams.getTeamByName(teamName);
@@ -36,7 +36,7 @@ public class OnlineKickOff :MonoBehaviourPunCallbacks, IKickOff
     }
     public void notifyTeamServe(string teamName)
     {
-        if (MatchData.ImReferee)
+        if (MatchDataObsolete2.ImReferee)
         {
             int index;
             Teams.getIndexOfTeam(teamName, out index);
@@ -49,7 +49,7 @@ public class OnlineKickOff :MonoBehaviourPunCallbacks, IKickOff
     {
         Team team;
         Teams.getTeamByIndex(teamIndex, out team);
-        MatchData.teamNameOfServe = team.TeamName;
+        MatchDataObsolete2.teamNameOfServe = team.TeamName;
 
         //DebugsList.testing.print("receiveTeamServe=" + team.TeamName);
     }
