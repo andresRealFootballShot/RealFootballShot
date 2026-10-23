@@ -15,6 +15,7 @@ public class FreeCameraMoviment : Moviment
         
         getInputAxes();
         Moviment(Time.deltaTime);
+        movementValues.RestartAccelerations();
         //Animator(Time.deltaTime);
     }
     // Update is called once per frame
@@ -73,7 +74,7 @@ public class FreeCameraMoviment : Moviment
         speedRotation2 = movimentValues.speedRotationCurve.Evaluate((1 - angleWithDirection / 180));
         //verticalRig = speedRotation2*vertical * (movimentValues.MaxForwardRunSpeed + movimentValues.MaxForwardSprintSpeed * sprintAxes);
         verticalRig = vertical * (playerComponents.getRunSpeed() + sprintAxes* playerComponents.getSprintSpeed());
-
+        
         ForwardDesiredSpeed = verticalRig;
         //TargetPosition = ballPosition;
         playerComponents.movementCtrl.rotation(deltaTime);
@@ -96,7 +97,7 @@ public class FreeCameraMoviment : Moviment
 
         verticalAxes = Input.GetAxis("Vertical");
         horizontalAxes = Input.GetAxis("Horizontal");
-        sprintAxes = resistanceController.resistanceVar.Value * Input.GetAxis("Fire1");
+        sprintAxes = resistanceController.resistanceVar.Value * sprint.sprint;
     }
     private void Animator(float deltaTime)
     {

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class BotKick : PlayerComponent
 {
-    public float kickPeriod = 0.25f;
+    public float kickPeriod { get; set; } = 0.5f;
     public bool kickAvailable{ get => Time.time - startKickTime >= kickPeriod; }
     public float startKickTime{ get; set; }
     public float controlTime { get; set; }
@@ -61,6 +61,11 @@ public class BotKick : PlayerComponent
     public bool ReachBall()
     {
         //return ballBodyAngle < 80 && BodyBallXZDistance < scope && ballPosition.y <= bodyHeight + ballRadio && kickAvailable;
-        return BodyBallXZDistance < ballScope && ballPosition.y <= bodyPosition.y+ bodyHeight + ballRadio && kickAvailable;
+        return BodyBallXZDistance < ballScope && ballBodyAngle<45 && ballPosition.y <= bodyPosition.y+ bodyHeight + ballRadio && kickAvailable;
+    }
+    public bool ReachClearBall()
+    {
+        //return ballBodyAngle < 80 && BodyBallXZDistance < scope && ballPosition.y <= bodyHeight + ballRadio && kickAvailable;
+        return BodyBallXZDistance < ballScope && ballPosition.y <= bodyPosition.y + bodyHeight + ballRadio && kickAvailable;
     }
 }

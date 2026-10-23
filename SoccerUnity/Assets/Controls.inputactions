@@ -6,9 +6,90 @@
             "id": "712dbaf8-1f3e-489d-9ded-d9600b120087",
             "actions": [
                 {
-                    "name": "MatchMode",
+                    "name": "ConductionKick",
                     "type": "Button",
-                    "id": "c838b625-c98e-463e-b1e8-e3409593ef03",
+                    "id": "c926fbe6-3333-42d0-8823-43e4e204a8b0",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ShotKick",
+                    "type": "Button",
+                    "id": "5fc67281-da57-469a-bf53-5a27c7d509e4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PassKick",
+                    "type": "Button",
+                    "id": "89c31211-c64a-477e-8447-02cde8a59288",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Kick",
+                    "type": "Button",
+                    "id": "2160b219-5a3c-479a-8b98-c84585d67c83",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Sprint",
+                    "type": "Button",
+                    "id": "4e2e18f7-740d-46ea-8e4e-31f81d57ed15",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ManagedKickMove",
+                    "type": "Value",
+                    "id": "c9bdd821-14d9-4755-a8b4-c119a7e547ba",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "ManagedKickStart",
+                    "type": "Button",
+                    "id": "ccf79ea3-9ed0-41a6-bd50-7ba74d71185d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "AimKick",
+                    "type": "Value",
+                    "id": "605bd70d-d08d-4f28-bb03-7774e0901a29",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LoadKick",
+                    "type": "Button",
+                    "id": "118b8c59-9829-4a4d-a3a4-3b62c67b9bb8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LookAround",
+                    "type": "Button",
+                    "id": "02711208-e0cc-41d5-a0bd-b37bbecca5bd",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -18,12 +99,100 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "f862cc88-20d6-476d-9f1a-59a3e13b6621",
-                    "path": "",
+                    "id": "67cd38ff-72eb-4ab7-840e-10ef1dd23751",
+                    "path": "<Keyboard>/v",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MatchMode",
+                    "action": "ShotKick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ea20160d-1250-4eff-b0b3-cbbd9b3ab3fb",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Kick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f01e2992-4f51-4a18-8a08-9e44dbfb13bb",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Sprint",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fee5ae3f-60a8-4b69-ab41-4ccfadace7fa",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PassKick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b16c7527-02a0-407f-ae99-0c0ebfb52452",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ManagedKickMove",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "875a8f1e-ec0b-420d-8507-0f14e2f324f6",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ManagedKickStart",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3f8828a1-20a7-487d-a26b-003352eb3b20",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AimKick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2dc179e9-a1d4-4f7a-9c96-9966e938af4a",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LoadKick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "be1a46bd-07da-442e-9423-c4bab6a2aba4",
+                    "path": "<Keyboard>/capsLock",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LookAround",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

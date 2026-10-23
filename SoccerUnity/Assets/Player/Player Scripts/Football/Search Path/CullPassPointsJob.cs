@@ -15,7 +15,7 @@ using static FieldTriangleSpace.FieldOfTrianglesCreator;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using Unity.Mathematics;
-//[BurstCompile]
+[BurstCompile]
 public struct CullPassPointsJob : IJobEntityBatch
 {
     public BufferTypeHandle<LonelyPointElement2> lonelyPointsHandle;
@@ -723,7 +723,7 @@ public struct CullPassPointsJob : IJobEntityBatch
             float totalTime;
             bool isGolkeeper = i == indexStart;
             float maxSpeed = isGolkeeper ? PlayerGenericParams.goalkeeperMaxSpeed : playerPositionElement.maxSpeed;
-            if (Vector2.Dot(forward, forward2) <= 0 && Vector2.Dot(forward, dir) <= 0||true)
+            if (Vector2.Dot(forward, forward2) <= 0 && Vector2.Dot(forward, dir) <= 0)
             {
                 totalTime = GetTimeToReachPosition2(ref playerPositionElement, playerPositionElement.position, targetPosition, maxSpeed, playerPositionElement.maxSpeedForReachBall, playerPositionElement.currentSpeed, ref PlayerGenericParams, isGolkeeper, playerPositionElement.scope, ballPosition, lonelyPosition);
             }else if (Vector2.Dot(forward, dir) <= 0)

@@ -83,6 +83,7 @@ public class MatchCtrl : MonoBehaviour
         MatchData.enabledRules = true;
         MatchData.inCorner = false;
         MatchData.inGoal = false;
+        MatchData.initialMatch = false;
         MatchEvents.continueMatch.Invoke();
         MatchEvents.matchStateChanged.Invoke();
     }
@@ -90,9 +91,14 @@ public class MatchCtrl : MonoBehaviour
     {
         if (MatchData.inGame)
         {
+
             MatchData.posssessionPlayer = args.kickerPublicPlayerData;
-            MatchData.possessionTeam = args.kickerTeam;
-            MatchData.noPossessionTeam = Teams.getRivalTeam(MatchData.possessionTeam.TeamName);
+            if (args.kickerTeam!= MatchData.possessionTeam)
+            {
+                MatchData.possessionTeam = args.kickerTeam;
+                MatchData.noPossessionTeam = Teams.getRivalTeam(MatchData.possessionTeam.TeamName);
+                MatchEvents.changeTeamPossession.Invoke();
+            }
 
         }else if (MatchData.initialMatch && MatchData.startAttackTeam.ContainsPlayer(args.playerID))
         {

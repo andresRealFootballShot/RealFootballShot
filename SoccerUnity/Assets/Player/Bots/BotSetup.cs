@@ -49,6 +49,7 @@ public class BotSetup : MonoBehaviour
         normalState.addUpdateFunction(movementCtrl.rotation);
         normalState.addUpdateFunction(movementCtrl.getAdjustedForwardVelocitySpeed);*/
         normalState.addUpdateFunction(movementCtrl.BotMove);
+        normalState.addFixedUpdateFunctions(movementCtrl.ApplyMovement);
         normalState.addUpdateFunction(movementCtrl.animator);
         
         if (ballDriving)

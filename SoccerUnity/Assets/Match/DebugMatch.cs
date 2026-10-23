@@ -29,10 +29,10 @@ public class DebugMatch : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Y))
         {
             MatchComponents.Brains.dontDefense = !MatchComponents.Brains.dontDefense;
-            MatchComponents.ballComponents.position = ballPosition.position;
+            /*MatchComponents.ballComponents.position = ballPosition.position;
             MatchComponents.ballVelocity = Vector3.zero;
             MatchComponents.ballAngularVelocity = Vector3.zero;
-
+            */
         }
     }
 }

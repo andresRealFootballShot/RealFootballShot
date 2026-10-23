@@ -23,7 +23,11 @@ public class CullPassPointsDebug : MonoBehaviour
     public int debugNode = 0;
     public int debugLonelyPointIndex = 0;
     public bool debugPlayerIndex;
+    [Header("LonelyPoint Text")]
+    [Space(5)]
     public bool debugText;
+    public bool debugDistanceDefenseReachBall;
+    [Space(5)]
     public int lonelyPointIndexPassTest;
     public int searchNodeDebug;
     public bool debugBall;
@@ -628,6 +632,8 @@ LonelyPointElement2 GetDebugLonelyPoint(int index)
         //string text = "straightReachBall=" + lonelyPointElement.straightReachBall + " parabolicReachBall=" + lonelyPointElement.parabolicReachBall + " i="+lonelyPointElement.index;
         float value = lonelyPointElement.weight * 100;
         string text = "i=" + lonelyPointElement.index + " weight="+ value;
+        if (debugDistanceDefenseReachBall)
+            text += " defenseDistance=" + lonelyPointElement.distanceDefenseReachBall;
      //string text = "ballReachPosTime=" + TestResultComponent.ballReachTargetPositionTime + " maximumControlSpeedReached=" + TestResultComponent.GetV0DOTSResult1.maximumControlSpeedReached + " maxKickForceReached=" + TestResultComponent.GetV0DOTSResult1.maxKickForceReached + " parabolicReachBall=" + TestResultComponent.parabolicReachBall + " straightReachBall=" + TestResultComponent.straightReachBall;
 
 

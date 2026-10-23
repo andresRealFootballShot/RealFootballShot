@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ControllerDistance : MonoBehaviour
+public class ControllerDistance : PlayerComponent
 {
     //public float maxDistance,minDistance,heightBody=1.75f;
     //public float maxDistance { get => componentsPlayer.playerComponents.scope; }
@@ -19,11 +19,12 @@ public class ControllerDistance : MonoBehaviour
     }
     public bool isClose()
     {
-        
+        if (playerComponents == null) return false;
         Vector3 bodyPos = componentsPlayer.transBody.position;
         Vector3 ballPos = componentsPlayer.componentsBall.transCenterBall.position;
-        float d = Vector3.Distance(ballPos, new Vector3(bodyPos.x, Mathf.Clamp(ballPos.y, bodyPos.y, bodyPos.y + heightBody), bodyPos.z));
-        if ( d<= maxDistance)
+        float d = playerMode==PlayerState.Free? BodyBallXZDistance: BodyBallXZDistance;
+        float scope = playerMode == PlayerState.Free ? 0.25f : 1f;
+        if ( d<= ballScope+ scope)
             return true;
         else
             return false;

@@ -10,7 +10,7 @@ public class ControllerMoveBody : PlayerComponent
     public GameObject eventsGObj;
     public ComponentsKeys keys;
     public ComponentsPlayer componentsPlayer;
-    public PlayerState playerMode;
+    public new PlayerState playerMode { get => playerData.playerMode; set => playerData.playerMode = value; }
     public EmptyEvent2 losePossessionEvent;
     public float distanceMaxPossession;
     public Sprint sprintState;
@@ -101,24 +101,7 @@ public class ControllerMoveBody : PlayerComponent
             {
                 playerMode = PlayerState.Free;
             }
-            switch (playerMode)
-            {
-                case PlayerState.Free:
-                    normalMoviment.EnableScript();
-                    moveFreeBody.DisableScript();
-                    movimentWithPossession.DisableScript();
-                    break;
-                case PlayerState.LookingBall:
-                    normalMoviment.DisableScript();
-                    moveFreeBody.EnableScript();
-                    movimentWithPossession.DisableScript();
-                    break;
-                case PlayerState.WithPossession:
-                    normalMoviment.DisableScript();
-                    moveFreeBody.DisableScript();
-                    movimentWithPossession.EnableScript();
-                    break;
-            }
+            
         }
         if (Input.GetKeyDown(ComponentsKeys.keyLookingBall) || false && Input.GetKeyDown(ComponentsKeys.joyRotateAround))
         {
@@ -130,24 +113,24 @@ public class ControllerMoveBody : PlayerComponent
             {
                 playerMode = PlayerState.LookingBall;
             }
-            switch (playerMode)
-            {
-                case PlayerState.Free:
-                    normalMoviment.EnableScript();
-                    moveFreeBody.DisableScript();
-                    movimentWithPossession.DisableScript();
-                    break;
-                case PlayerState.LookingBall:
-                    normalMoviment.DisableScript();
-                    moveFreeBody.EnableScript();
-                    movimentWithPossession.DisableScript();
-                    break;
-                case PlayerState.WithPossession:
-                    normalMoviment.DisableScript();
-                    moveFreeBody.DisableScript();
-                    movimentWithPossession.EnableScript();
-                    break;
-            }
+        }
+        switch (playerMode)
+        {
+            case PlayerState.Free:
+                normalMoviment.EnableScript();
+                moveFreeBody.DisableScript();
+                movimentWithPossession.DisableScript();
+                break;
+            case PlayerState.LookingBall:
+                normalMoviment.DisableScript();
+                moveFreeBody.EnableScript();
+                movimentWithPossession.DisableScript();
+                break;
+            case PlayerState.WithPossession:
+                normalMoviment.DisableScript();
+                moveFreeBody.DisableScript();
+                movimentWithPossession.EnableScript();
+                break;
         }
     }
 }

@@ -10,6 +10,7 @@ public class TransparencyCtrl : PlayerComponent
     List<Material> list= new List<Material>();
     bool computer=true;
     Color transparencyColor;
+    public bool isTransparent;
     void Start()
     {
         transparencyColor = matTransparent.color;
@@ -40,7 +41,19 @@ public class TransparencyCtrl : PlayerComponent
                     setMaterialPropertyColor(skinnedMeshRenderer, transparencyColor);
                 }
             }
+            isTransparent = true;
             computer = false;
+        }
+    }
+    public void SetTransparency(SkinnedMeshRenderer skinnedMeshRenderer)
+    {
+        if (enable)
+        {
+            if (skinnedMeshRenderer != null)
+            {
+                skinnedMeshRenderer.material = matTransparent;
+                setMaterialPropertyColor(skinnedMeshRenderer, transparencyColor);
+            }
         }
     }
     void setMaterialPropertyColor(Renderer renderer,Color color)
@@ -56,6 +69,8 @@ public class TransparencyCtrl : PlayerComponent
         int i = 0;
         if (enable && !computer)
         {
+
+            isTransparent = false;
             foreach (Transform child in trans)
             {
                 SkinnedMeshRenderer skinnedMeshRenderer = child.GetComponent<SkinnedMeshRenderer>();

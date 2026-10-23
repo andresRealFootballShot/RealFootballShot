@@ -85,10 +85,10 @@ public class MovimentValues : MonoBehaviour
     [Space(5)]
     [Header("Acceleration")]
     [Space(1)]
-    public float forwardAccelerationDistance = 1;public float horizontalAccelerationDistance = 1, backAccelerationDistance = 1;
+    public float startForwardAccelerationDistance = 1;public float horizontalAccelerationDistance = 1, backAccelerationDistance = 1;
     [Space(2)]
     [Header("Deceleration")]
-    public float forwardDecelerationDistance = 1;public float horizontalDecelerationDistance = 1, backDecelerationDistance = 1;
+    public float startForwardDecelerationDistance = 1;public float horizontalDecelerationDistance = 1, backDecelerationDistance = 1;
     [Space(10)]
     public float rotationSpeed=600;
     public float minRotationSpeedWhileRun = 300;
@@ -100,6 +100,8 @@ public class MovimentValues : MonoBehaviour
     public float maxSpeedForReachBall, defaultMaxSpeedForReachBall=2;
     public float maxAngleForRun,maxAngleForRun2;
     public float stopOffset;
+    public float ForwardAccelerationDistance { get; set; }
+    public float ForwardDecelerationDistance { get; set; }
     public enum MovePhase
     {
         Brake,
@@ -114,6 +116,8 @@ public class MovimentValues : MonoBehaviour
         MaximumJumpForce = initMaxJumpForce;
 
         calculateMaxSpeeds();
+        ForwardAccelerationDistance = startForwardAccelerationDistance;
+        ForwardDecelerationDistance = startForwardDecelerationDistance;
         calculateAccelerations();
     }
     void calculateMaxSpeeds()
@@ -123,19 +127,25 @@ public class MovimentValues : MonoBehaviour
         maxForwardSpeed = MaxForwardRunSpeed + MaxForwardSprintSpeed;
         defaultMaxForwardSpeed = maxForwardSpeed;
     }
-    void calculateAccelerations()
+    public void calculateAccelerations()
     {
         /*minAcceleration = (maxSpeed.Value * maxSpeed.Value) / (2 * forwardAccelerationDistance);
         maxAcceleration = (maxSpeed.Value * maxSpeed.Value) / (2 * minAccelerationDistance);
         minDeceleration = (maxSpeed.Value * maxSpeed.Value) / (2 * maxDecelerationDistance);
         maxDeceleration = (maxSpeed.Value * maxSpeed.Value) / (2 * minDecelerationDistance);*/
-        forwardAcceleration = maxForwardSpeed * maxForwardSpeed / (2 * forwardAccelerationDistance);
+        forwardAcceleration = maxForwardSpeed * maxForwardSpeed / (2 * ForwardAccelerationDistance);
         horizontalAcceleration = maxHorizontalSpeed * maxHorizontalSpeed / (2 * horizontalAccelerationDistance);
         backAcceleration = maxBackSpeed * maxBackSpeed / (2 * backAccelerationDistance);
 
-        forwardDeceleration = maxForwardSpeed * maxForwardSpeed / (2 * forwardDecelerationDistance);
+        forwardDeceleration = maxForwardSpeed * maxForwardSpeed / (2 * ForwardDecelerationDistance);
         horizontalDeceleration = maxHorizontalSpeed * maxHorizontalSpeed / (2 * horizontalDecelerationDistance);
         backDeceleration = maxBackSpeed * maxBackSpeed / (2 * backDecelerationDistance);
         
+    }
+    public void RestartAccelerations()
+    {
+        ForwardDecelerationDistance = startForwardDecelerationDistance;
+        ForwardAccelerationDistance = startForwardAccelerationDistance;
+        calculateAccelerations();
     }
 }

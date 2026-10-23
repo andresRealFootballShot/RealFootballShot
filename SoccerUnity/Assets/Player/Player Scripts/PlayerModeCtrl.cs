@@ -68,7 +68,6 @@ public class PlayerModeCtrl : PlayerComponent
         float distance = Vector3.Distance(bodyPos, ballPos);
         if (distance > distanceMaxPossession)
         {
-           
             transparency.SetOpaque(componentsPlayer.transModelo);
              
             if (playerMode == PlayerState.WithPossession)
@@ -78,6 +77,7 @@ public class PlayerModeCtrl : PlayerComponent
         }
         else
         {
+            
           transparency.SetTransparency(componentsPlayer.transModelo);    
         }
     }
@@ -95,7 +95,7 @@ public class PlayerModeCtrl : PlayerComponent
             Vector3 kickDirection = args.kickVelocity;
             if (playerMode == PlayerState.LookingBall || playerMode == PlayerState.WithPossession)
             {
-                if (kickDirection.magnitude < PuppetParameters.maxKickForceToExitWithPossessionState)
+                if (!playerData.passKick && !playerData.shotKick)
                 {
                     playerMode = PlayerState.WithPossession;
                     transparency.SetTransparency(componentsPlayer.transModelo);

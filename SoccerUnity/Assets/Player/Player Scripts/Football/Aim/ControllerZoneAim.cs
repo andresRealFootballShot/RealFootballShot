@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class ControllerZoneAim : MonoBehaviour
 {
     public ControllerSpeedMouse controllerSpeedMouse,ctrlSpeedWithEffect;
     public ControllerDistance controllerDistance;
     public ShotWithEffect shotWithEffect;
+    public PlayerInput playerInput;
     public float adjuctResolution;
     float resolution;
     void Start()
@@ -20,10 +22,9 @@ public class ControllerZoneAim : MonoBehaviour
     {
 
         float mouseX, mouseY;
-        //mouseX = (Input.GetAxis("Mouse X") * controllerSpeedMouse.speedMouseX + Input.GetAxis("RightStickX") * controllerSpeedMouse.speedJoystickX) * resolution * deltaTime;
-        //mouseY = (Input.GetAxis("Mouse Y") * controllerSpeedMouse.speedMouseY - Input.GetAxis("RightStickY") * controllerSpeedMouse.speedJoystickY) * resolution * deltaTime;
-        mouseX = Input.GetAxis("Mouse X") * controllerSpeedMouse.speedMouseX*deltaTime;
-        mouseY = Input.GetAxis("Mouse Y") * controllerSpeedMouse.speedMouseY*deltaTime;
+        Vector2 mouseDelta = playerInput.actions["AimKick"].ReadValue<Vector2>();
+        mouseX = mouseDelta.x * controllerSpeedMouse.speedMouseX * Screen.width * deltaTime;
+        mouseY = mouseDelta.y * controllerSpeedMouse.speedMouseY * Screen.height * deltaTime;
         
         if (isInCircle(position.x + mouseX, position.y + mouseY,radioLimit))
         {

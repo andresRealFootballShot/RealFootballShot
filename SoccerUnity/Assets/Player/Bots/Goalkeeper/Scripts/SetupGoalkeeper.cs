@@ -17,7 +17,7 @@ public class SetupGoalkeeper : MonoBehaviour
     {
         goalkeeperComponents = GetComponent<GoalkeeperComponents>();
         goalkeeperComponents.goalkeeperCtrl.checkEnable();
-        goalkeeperComponents.goalkeeperCtrl.targetPosition = goalkeeperComponents.goalkeeperCtrl.goalKeeperTransform.position;
+        //goalkeeperComponents.goalkeeperCtrl.targetPosition = goalkeeperComponents.goalkeeperCtrl.goalKeeperTransform.position;
         
     }
     public void StartSetup(TypeSetupGoalkeeper typeSetupGoalkeeper)

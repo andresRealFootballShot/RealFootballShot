@@ -5,11 +5,12 @@ using static Photon.Pun.UtilityScripts.PunTeams;
 
 public enum UserMode
 {
-    OnePlayer, AllTeam,OnlyBots
+    OnePlayer, AllTeam,OnlyBots,OnePlayerAutomaticReachBall
 }
 public class ModeCtrl : MonoBehaviour
 {
     public UserMode UserMode;
+    public bool FreeCameraLoseBall=true;
     public TypeFieldPosition.Type startFieldPositionType;
     TypeFieldPosition.Type currentFieldPositionType;
     float startChangePlayerTime;
@@ -22,21 +23,16 @@ public class ModeCtrl : MonoBehaviour
     void Start()
     {
         MatchComponents.ModeCtrl = this;
-        
 
             
         currentFieldPositionType = startFieldPositionType;
 
         //if (startMyTeam) SetMyTeam(startMyTeamName);
     }
-    void Setup()
-    {
-        TypeMatch.SizeFootballField = SizeFootballFieldID.ElevenVSEleven;
-        TypeMatch.typeMatch = TypeMatchID.Playtime;
-    }
     // Update is called once per frame
     void Update()
     {
+
         MatchModeCtrl();
     }
     void MatchModeCtrl()
@@ -45,6 +41,9 @@ public class ModeCtrl : MonoBehaviour
         {
             case UserMode.OnePlayer:
                 OnePlayerMode();
+                break;
+            case UserMode.OnePlayerAutomaticReachBall:
+                OnePlayerAutomaticReachBall();
                 break;
             case UserMode.AllTeam:
                 AllTeamMode();
@@ -57,6 +56,42 @@ public class ModeCtrl : MonoBehaviour
     void OnlyBots()
     {
         changePlayerType(MatchComponents.currentPublicPlayerData, PlayerTypeID.Bot);
+    }
+    void OnePlayerAutomaticReachBall()
+    {
+        if (MatchComponents.currentPublicPlayerData == null)
+        {
+            MatchComponents.myTeam.getPublicPlayerData(currentFieldPositionType, out PublicPlayerData publicPlayerData);
+
+            MatchComponents.currentPublicPlayerData = publicPlayerData;
+        }
+        else
+        {
+            if (MatchComponents.currentPublicPlayerData.fieldPositionType != currentFieldPositionType)
+            {
+                MatchComponents.myTeam.getPublicPlayerData(currentFieldPositionType, out PublicPlayerData publicPlayerData);
+                changePlayerType(MatchComponents.currentPublicPlayerData, PlayerTypeID.Bot);
+                MatchComponents.currentPublicPlayerData = publicPlayerData;
+                changePlayerType(publicPlayerData, PlayerTypeID.Puppet);
+            }
+        }
+        if (MatchComponents.myTeam == null) return;
+        if (MatchComponents.currentPublicPlayerData != null && MatchComponents.currentPublicPlayerData.IsBot)
+        {
+            changePlayerType(MatchComponents.currentPublicPlayerData, PlayerTypeID.Puppet);
+        }
+        if (MatchComponents.currentPublicPlayerData != null && MatchComponents.currentPublicPlayerData.playerData.noPossessionMode == NoPossessionMode.Automatic)
+        {
+            MatchComponents.currentPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Freelance;
+        }
+        if(MatchComponents.currentPublicPlayerData != null && MatchComponents.currentPublicPlayerData.Equals( MatchComponents.myTeam.firstReachBallPublicPlayerData))
+        {
+            MatchComponents.currentPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Automatic;
+        }
+        else
+        {
+            MatchComponents.currentPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Freelance;
+        }
     }
     void OnePlayerMode()
     {
@@ -85,7 +120,6 @@ public class ModeCtrl : MonoBehaviour
             MatchComponents.currentPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Freelance;
         }
     }
-    
     void AllTeamMode()
     {
         if (MatchComponents.currentPublicPlayerData == null)
@@ -102,9 +136,11 @@ public class ModeCtrl : MonoBehaviour
         {
             float timeDiference = firstPublicPlayerData.playerData.ballReachTime - currentPublicPlayer.playerData.ballReachTime;
             bool change1 = firstPublicPlayerData.playerData.ballReachTime < 0.1f && firstPublicPlayerData.playerData.ballReachTime < currentPublicPlayer.playerData.ballReachTime;
-            if ((changeAttackPlayerAvailable && timeDiference <= attackMaxChangePlayerReachTime) || change1)
+            bool change2 = currentPublicPlayer.playerData.playerMode == PlayerState.WithPossession || currentPublicPlayer.ballReachTime < 0.25f;
+            if (!change2&&((changeAttackPlayerAvailable && timeDiference <= attackMaxChangePlayerReachTime) || change1))
             {
                 changeCurrentPlayer(firstPublicPlayerData, currentPublicPlayer);
+                firstPublicPlayerData.ChangeNoPossessionMode(NoPossessionMode.Automatic);
             }
         }
         else
@@ -113,8 +149,8 @@ public class ModeCtrl : MonoBehaviour
             bool change1 = firstPublicPlayerData.playerData.ballReachTime < 0.1f && firstPublicPlayerData.playerData.ballReachTime < currentPublicPlayer.playerData.ballReachTime;
             if ((changeDefensePlayerAvailable && timeDiference <= defenseMaxChangePlayerReachTime) || change1)
             {
-                changeCurrentPlayer(firstPublicPlayerData, currentPublicPlayer);
-                //firstPublicPlayerData.ChangeNoPossessionMode(NoPossessionMode.Freelance);
+                //changeCurrentPlayer(firstPublicPlayerData, currentPublicPlayer);
+                currentPublicPlayer.ChangeNoPossessionMode(NoPossessionMode.Freelance);
             }
         }
     }

@@ -17,13 +17,25 @@ public class PlayerData
     public float HorizontalSpeed { get; set; }
     public float RotationSpeed { get; set; }
     public float Scope { get; set; }
+    public Vector3 TargetOffset { get; set; }
     public float defaultScope { get; set; }
-    public Vector3 ballReachPosition { get; set; }
+    private Vector3 _ballReachPosition;
+    public Vector3 ballReachPosition { get=>validReachPosition?_ballReachPosition:MatchComponents.ballPosition; set=>_ballReachPosition=value; }
     public bool validReachPosition { get; set; }
     private float _ballReachTime;
     public float ballReachTime { get=>validReachPosition? _ballReachTime:Mathf.Infinity; set=> _ballReachTime=value; }
     public NoPossessionMode noPossessionMode { get; set; }
+    
+
     public PlayerState playerMode = PlayerState.LookingBall;
+    public bool onSlowTime { get; set; }
+    public bool onLookAround { get; set; }
+    public bool shotKick { get; set; }
+    public bool loadKick { get; set; }
+    public bool passKick { get; set; }
+    public bool managedKick { get; set; }
+    public bool executeKick { get; set; }
+
     public NoPossessionMode GetNextNoPossessionMode()
     {
         switch (noPossessionMode)

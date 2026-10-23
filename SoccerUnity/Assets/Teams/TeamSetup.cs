@@ -37,7 +37,7 @@ public class TeamSetup : MonoBehaviour {
             PublicPlayerData.fieldPositionType = typeFieldPosition;
             playerGObj.SetActive(true);
 
-            if (typeFieldPosition == MatchComponents.ModeCtrl.startFieldPositionType&& isMyTeam)
+            if (typeFieldPosition == MatchComponents.ModeCtrl.startFieldPositionType&&MatchComponents.ModeCtrl.UserMode!=UserMode.OnlyBots&& isMyTeam)
             {
                 MatchComponents.currentPublicPlayerData = PublicPlayerData;
                 MatchComponents.ModeCtrl.changePlayerType(PublicPlayerData, PlayerTypeID.Puppet);
@@ -72,8 +72,10 @@ public class TeamSetup : MonoBehaviour {
    
     public void SetMyTeam()
     {
-        if(isMyTeam)
-         MatchComponents.myTeam = team;
+        if (isMyTeam)
+            MatchComponents.myTeam = team;
+        else
+            MatchComponents.rivalTeam = team;
 
     }
 

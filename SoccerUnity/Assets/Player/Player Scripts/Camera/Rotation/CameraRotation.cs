@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using NextMove_Algorithm;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraRotation : MonoBehaviour
+public class CameraRotation : PlayerComponent
 {
     public float speedCameraFree=20f, speedCameraLookAtBall, speedCameraTransition, speedStartCameraTransition;
     public GameObject eventsGObj;
@@ -11,7 +12,7 @@ public class CameraRotation : MonoBehaviour
     public ComponentsKeys componentsKeys;
     public float distanceAround,angleMax,angleMin,maxAngle,angleMinPivotmangleMaxPivot,maxDistanceForward;
     float mouseX, mouseY;
-    public PlayerState playerMode;
+    public PlayerState playerState { get => playerData.playerMode; set => playerData.playerMode = value; }
     public FloatTransition transition;
     IEnumerator transitionSpeedCamera;
     public float currentSpeedCamera { get; set; }
@@ -27,36 +28,36 @@ public class CameraRotation : MonoBehaviour
     }
     void showMenu()
     {
-        if (playerMode == PlayerState.WithPossession)
+        if (playerState == PlayerState.WithPossession)
         {
-            playerMode = PlayerState.LookingBall;
+            playerState = PlayerState.LookingBall;
         }
     }
     void Start()
     {
 
         MatchEvents.kick.AddListener(Kick);
-        playerMode = PlayerState.LookingBall;
+        //playerState = PlayerState.LookingBall;
         MatchEvents.losePossession.AddListener(LosePossession);
     }
     public void LosePossession()
     {
-        playerMode = PlayerState.LookingBall;
+        playerState = PlayerState.LookingBall;
     }
     void Kick(KickEventArgs args)
     {
         if (ComponentsPlayer.myMonoPlayerID!=null&&args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerID.ToString()))
         {
             Vector3 kickDirection = args.kickVelocity;
-            if (playerMode == PlayerState.LookingBall || playerMode == PlayerState.WithPossession)
+            if (playerState == PlayerState.LookingBall || playerState == PlayerState.WithPossession)
             {
                 if (kickDirection.magnitude < PuppetParameters.maxKickForceToExitWithPossessionState)
                 {
-                    playerMode = PlayerState.WithPossession;
+                    //playerState = PlayerState.WithPossession;
                 }
                 else
                 {
-                    playerMode = PlayerState.LookingBall;
+                    //playerState = PlayerState.LookingBall;
                 }
             }
         }
@@ -65,9 +66,9 @@ public class CameraRotation : MonoBehaviour
     {
         if (!MenuCtrl.isEnable && (Input.GetKeyDown(ComponentsKeys.keyFreeCamera) || false && Input.GetKeyDown(ComponentsKeys.joyRotateAround)))
         {
-            if (true || playerMode == PlayerState.LookingBall)
+            if (true || playerState == PlayerState.LookingBall)
             {
-                if(playerMode == PlayerState.Free)
+                if(playerState == PlayerState.Free)
                 {
                     Vector3 point = MyFunctions.setYToVector3(componentsPlayer.componentsBall.transCenterBall.position,pivot2CameraTransform.position.y);
                     
@@ -83,23 +84,23 @@ public class CameraRotation : MonoBehaviour
 
                     startTransitionSpeedCameraCoroutine(15, 50, speedCameraFree);
                 }
-                playerMode = PlayerState.Free;
+                //playerState = PlayerState.Free;
                 //startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraFree);
             }
-            else if (playerMode == PlayerState.WithPossession)
+            else if (playerState == PlayerState.WithPossession)
             {
-                playerMode = PlayerState.Free;
+                //playerState = PlayerState.Free;
                 startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraFree);
             }
             else
             {
-                playerMode = PlayerState.Free;
+                //playerState = PlayerState.Free;
                 startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraFree);
             }
         }
         if (!MenuCtrl.isEnable && (Input.GetKeyDown(ComponentsKeys.keyLookingBall) || false && Input.GetKeyDown(ComponentsKeys.joyRotateAround)))
         {
-            if (playerMode == PlayerState.LookingBall)
+            if (playerState == PlayerState.LookingBall)
             {
                 //playerMode = PlayerState.LookingBall;
                 //StopAllCoroutines();
@@ -118,9 +119,9 @@ public class CameraRotation : MonoBehaviour
                 
                 startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraFree);*/
             }
-            else if (playerMode == PlayerState.WithPossession)
+            else if (playerState == PlayerState.WithPossession)
             {
-                playerMode = PlayerState.LookingBall;
+                //playerState = PlayerState.LookingBall;
                 startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraLookAtBall);
                 /*playerMode = PlayerState.Lock;
                 componentsPlayer.scriptsPlayer.cameraPosition.playerMode = PlayerState.Lock;
@@ -133,7 +134,7 @@ public class CameraRotation : MonoBehaviour
                 componentsPlayer.scriptsPlayer.cameraPosition.playerMode = PlayerState.Lock;
                 StopAllCoroutines();
                 StartCoroutine(lookingBallTransition());*/
-                playerMode = PlayerState.LookingBall;
+                //playerState = PlayerState.LookingBall;
                 startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraLookAtBall);
             }
         }
@@ -173,18 +174,19 @@ public class CameraRotation : MonoBehaviour
     }
     public void FixedUpdate()
     {
-        switch (playerMode)
+        if (playerComponents == null) return;
+        switch (playerState)
         {
             case PlayerState.Free:
                 //Importante que FreeLook() lo llame NormalMoviment
                 FreeLook(Time.fixedDeltaTime);
                 break;
             case PlayerState.LookingBall:
-                LookAtBall();
+                //LookAtBall();
                 break;
             case PlayerState.WithPossession:
-                checkDistance();
-                LookAtBall();
+                //checkDistance();
+                //LookAtBall();
                 break;
         }
         //print("Rotation-"+currentSpeedCamera);
@@ -196,18 +198,21 @@ public class CameraRotation : MonoBehaviour
         float distance = Vector3.Distance(bodyPos, ballPos);
         if (distance > PuppetParameters.maxPossessionDistance)
         {
-            playerMode = PlayerState.LookingBall;
+            playerState = PlayerState.LookingBall;
         }
     }
     public void LookAtBall()
     {
-        if(componentsPlayer.transCamera!=null)
-        componentsPlayer.transCamera.rotation = Quaternion.Lerp(componentsPlayer.transCamera.rotation, getTargetRotationLookAtBall(), currentSpeedCamera * Time.deltaTime);
+        if (componentsPlayer.transCamera != null)
+        {
+            //componentsPlayer.transCamera.rotation = Quaternion.Lerp(componentsPlayer.transCamera.rotation, getTargetRotationLookAtBall(), currentSpeedCamera * Time.deltaTime);
+            componentsPlayer.transCamera.rotation = getTargetRotationLookAtBall();
+        }
     }
     public Quaternion getTargetRotationLookAtBall()
     {
         Vector3 posCamera = componentsPlayer.transCamera.position;
-        Vector3 posBall = componentsPlayer.componentsBall.transCenterBall.position;
+        Vector3 posBall = MatchComponents.ballPosition;
         Vector3 targetLook;
         float radio = MatchComponents.ballRadio;
         float screenD = screenLimitYDistance();

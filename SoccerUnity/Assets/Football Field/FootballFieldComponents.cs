@@ -15,4 +15,33 @@ public class FootballFieldComponents
     public Vector3 center { get => transform.position; }
     public float fieldLenght { get; set; }
     public float fieldWidth { get; set; }
+
+    public Vector2 getBallNormalizedPosition(Team team)
+    {
+        FieldPositionsData.HorizontalPositionType horizontalPositionType = FieldPositionsData.HorizontalPositionType.Right;
+        Vector3 position = MatchComponents.ballPosition;
+        SideOfField sideOfField = team.SideOfField;
+        float verticalBallDistance = sideOfField.backPlane.GetDistanceToPoint(position) / fieldLenght;
+        //verticalBallDistance = Mathf.Clamp01(verticalBallDistance);
+        float horizontalBallDistance;
+        if (horizontalPositionType.Equals(FieldPositionsData.HorizontalPositionType.Right))
+        {
+            horizontalBallDistance = sideOfField.rightPlane.GetDistanceToPoint(position) / fieldWidth;
+        }
+        else
+        {
+            horizontalBallDistance = sideOfField.leftPlane.GetDistanceToPoint(position) / fieldWidth;
+        }
+        //horizontalBallDistance = Mathf.Clamp01(horizontalBallDistance);
+
+        return new Vector2(horizontalBallDistance, verticalBallDistance);
+    }
+    public float getBallNormalizedPositionY(Team team)
+    {
+        return getBallNormalizedPosition(team).y;
+    }
+    public float getBallNormalizedPositionX(Team team)
+    {
+        return getBallNormalizedPosition(team).x;
+    }
 }

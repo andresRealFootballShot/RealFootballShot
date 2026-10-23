@@ -43,7 +43,8 @@ public class Team : MonoBehaviour
     public Vector3 goalPosition { get => MyFunctions.setY0ToVector3( SideOfField.goalComponents.transform.position); }
     public PublicPlayerData firstReachBallPublicPlayerData;
     public float firstReachBallTime { get=> firstReachBallPublicPlayerData.ballReachTime; }
-    public Vector3 firstBallReachPosition { get=> firstReachBallPublicPlayerData.ballReachPosition; }
+    public Vector3 firstBallReachPosition { get=> firstReachBallPublicPlayerData == null ? MatchComponents.ballPosition : firstReachBallPublicPlayerData.ballReachPosition; }
+    public bool validReachBall { get=> ValidReachBall(); }
     public TeamSetup teamSetup;
     public bool startAttack { get; set; }
     public string startPressure { get => startAttack ? "Start Attack" : "Start Defense"; }
@@ -64,6 +65,11 @@ public class Team : MonoBehaviour
             goalAddedEvent.AddListener(teamHUD.goalAdded);
         }
         MatchEvents.matchStateChanged.AddListener(matchStateChanged);
+    }
+    bool ValidReachBall()
+    {
+        if (firstReachBallPublicPlayerData == null) return false;
+        else return firstReachBallPublicPlayerData.playerData.validReachPosition;
     }
     void matchStateChanged()
     {

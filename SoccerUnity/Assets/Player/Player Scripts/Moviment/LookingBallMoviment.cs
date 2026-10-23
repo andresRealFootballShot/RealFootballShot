@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 public enum NoPossessionMode
 {
@@ -8,6 +9,7 @@ public enum NoPossessionMode
 public class LookingBallMoviment : Moviment
 {
     public Sprint sprint;
+    public CameraPosition cameraPosition;
     public Vector3 offsetPosition=new Vector3(-0.5f,0,0);
     NoPossessionMode noPossessionMode { get => playerData.noPossessionMode; set => playerData.noPossessionMode = value; }
     float rightOffset = 0.3f;
@@ -17,6 +19,7 @@ public class LookingBallMoviment : Moviment
     
     void Update()
     {
+
         switch (noPossessionMode)
         {
             case NoPossessionMode.Automatic:
@@ -26,7 +29,7 @@ public class LookingBallMoviment : Moviment
                 FreelanceMode();
                 break;
         }
-
+        movementValues.RestartAccelerations();
     }
     void AutomaticMode()
     {
@@ -37,8 +40,12 @@ public class LookingBallMoviment : Moviment
         Vector3 lookDir = reachPosition - bodyPosition;
         lookDir.y = 0;
         LookTarget = true;
-        TargetPosition = reachPosition - bodyRight * rightOffset;
-        ForwardDesiredSpeed = MaxSpeed;
+        if (BodyBallXZDistance > ballScope)
+        {
+            TargetPosition = reachPosition - bodyRight * rightOffset;
+            ForwardDesiredSpeed = MaxSpeed;
+        }
+        
         //DesiredLookDirection = lookDir;
 
         //DesiredDirection = lookDir;
@@ -54,9 +61,7 @@ public class LookingBallMoviment : Moviment
         Transform transModelo = componentsPlayer.transBody;
 
         Transform transCamera = componentsPlayer.transCamera;
-        Vector3 ballPos = componentsPlayer.componentsBall.transBall.position;
-        Vector3 bodyPos = transModelo.position;
-        Vector3 ballPosY0 = MyFunctions.setYToVector3(ballPos, 0);
+        
         /*verticalAxes = movimentValues.velocityCurveSpeed.Evaluate(resistanceController.Value) * Input.GetAxis("Vertical");
         horizontalAxes = movimentValues.velocityCurveSpeed.Evaluate(resistanceController.Value) * Input.GetAxis("Horizontal");
         sprintAxes = movimentValues.velocityCurveSprint.Evaluate(resistanceController.Value) * Input.GetAxis("Fire1");*/
@@ -66,25 +71,44 @@ public class LookingBallMoviment : Moviment
         verticalAxes = Input.GetAxis("Vertical");
         horizontalAxes = Input.GetAxis("Horizontal");
 
-        sprintAxes = resistanceController.resistanceVar.Value * Input.GetAxis("Fire1");
+        sprintAxes = resistanceController.resistanceVar.Value * sprint.sprint;
 
         Rigidbody rigBall = componentsPlayer.componentsBall.rigBall;
         Vector3 ballVelocity = rigBall.velocity;
 
         angle = FindAngle(Vector3.forward, new Vector3(horizontalAxes, 0, verticalAxes));
-        vertical = Mathf.Clamp01(new Vector3(horizontalAxes, 0, verticalAxes).magnitude);
-
+        Vector3 ballPos;
+        if (Mathf.Abs(angle) < 10)
+        {
+            CullPassPoints cullPassPoints = MatchComponents.CullPassPoints;
+            Vector3 ballPosition = MatchComponents.ballPosition;
+            ballPosition.y = 0;
+            Vector3 reachPosition = playerData.validReachPosition ? playerData.ballReachPosition : ballPosition;
+            ballPos = ballPosition;
+            
+            
+        }
+        else
+        {
+            ballPos = MatchComponents.ballPosition;
+            ballPos.y = 0;
+        }
+        Vector3 ballPosY0 = MyFunctions.setYToVector3(ballPos, 0);
+        Vector3 bodyPos = transModelo.position;
+        float axisMagnitude = Mathf.Clamp01(new Vector3(horizontalAxes, 0, verticalAxes).magnitude);
+        vertical = axisMagnitude;
         Vector3 right = Vector3.Cross(Vector3.up, MyFunctions.setY0ToVector3(ballPosY0 - bodyPos));
         right.Normalize();
         TargetPosition = ballPosY0 - right * 0.3f;
         //TargetPosition = ballPosY0 + transCamera.TransformDirection(offsetPosition);
         //float distance = Vector3.Distance(ballPos, bodyPos + transModelo.right * 0.3f) / controllerDistance.maxDistance;
         float offset = radio + 0.3f;
-        float d = Vector3.Distance(MyFunctions.setY0ToVector3(ballPosY0 - right * rightOffset), MyFunctions.setY0ToVector3(bodyPos));
+        float d = BodyTargetXZDistance;
         float distance = Mathf.Clamp01(d - offset) / (controllerDistance.maxDistance);
         distance = distance < 0.001f ? 0 : distance;
-
-        if (Input.GetKeyDown(ComponentsKeys.defensivePosition))
+        float speed = movementValues.defaultMaxForwardSpeed;
+        
+        if (Input.GetKeyDown(KeyCode.X))
         {
             movementValues.isDefensivePosition = !movementValues.isDefensivePosition;
 
@@ -97,16 +121,27 @@ public class LookingBallMoviment : Moviment
         }
         else if (vertical != 0)
         {
-            //speedRotation = Mathf.Lerp(movimentValues.minRotAcceleration, movimentValues.maxRotAcceleration, 1 - (verticalRig / (movimentValues.MaxForwardRunSpeed + movimentValues.MaxForwardSprintSpeed)));
-            //speedRotation = Mathf.Lerp(10, 20, 1 - (verticalRig / (movimentValues.MaxForwardRunSpeed + movimentValues.MaxForwardSprintSpeed)));
-            Vector3 dirRotated = Quaternion.AngleAxis(angle, Vector3.up) * DesiredDirection;
-            //Quaternion transModeloRotation = Quaternion.Lerp(transModelo.rotation, Quaternion.LookRotation(dirRotated), Time.deltaTime *speedRotation);
-            //transModelo.rotation = transModeloRotation;
-            DesiredLookDirection = dirRotated;
-            DesiredDirection = dirRotated;
-
+            //Time.timeScale = 0.5f;
+            if (Mathf.Abs(angle) < 30)
+            {
+                TargetPosition = ballPosY0 + transCamera.TransformDirection(offsetPosition);
+                Vector3 dirRotated = Quaternion.AngleAxis(angle, Vector3.up) * DesiredDirection;
+                DesiredLookDirection = dirRotated;
+                movimentValues.maxSpeedForReachBall = Mathf.Min(MatchComponents.ballXZSpeed, speed);
+            }
+            else
+            {
+                Vector3 dirRotated = Quaternion.AngleAxis(angle, Vector3.up) * DesiredDirection;
+                DesiredLookDirection = dirRotated;
+                DesiredDirection = dirRotated;
+                movimentValues.maxSpeedForReachBall = 0;
+            }
         }
-
+        else
+        {
+            movimentValues.maxSpeedForReachBall = 0;
+        }
+        
         float magnitudeBallVelocity = Mathf.Clamp01(ballVelocity.magnitude / movimentValues.maxVelocityBall);
         targetVelocityBall = Mathf.Lerp(targetVelocityBall, magnitudeBallVelocity, Time.deltaTime * movimentValues.speedChangeVelocityBall);
         curveVelocityEvaluated = movimentValues.curveVelocity.Evaluate(targetVelocityBall);
@@ -115,17 +150,24 @@ public class LookingBallMoviment : Moviment
 
         speedRotation2 = movimentValues.speedRotationCurve.Evaluate((1 - getSpeedRotation1(verticalAxes, horizontalAxes) / 180));
         //verticalRig = speedRotation2 * vertical *Mathf.Lerp(curveVelocityEvaluated * movimentValues.maxVelocityBall, movimentValues.MaxForwardRunSpeed + movimentValues.MaxForwardSprintSpeed * sprintAxes, distance+Mathf.Abs(angle/180));
-        verticalRig = vertical * (playerComponents.getRunSpeed() + playerComponents.getSprintSpeed() * sprintAxes);
 
-
+        if (d < ballScope && Mathf.Abs(angle) < 30)
+        {
+            vertical = 0;
+            verticalRig = Mathf.Min(MatchComponents.ballXZSpeed, speed);
+            movimentValues.maxSpeedForReachBall = Mathf.Min(MatchComponents.ballXZSpeed, speed);
+        }
+        else
+        {
+            verticalRig = vertical * (playerComponents.getRunSpeed() + playerComponents.getSprintSpeed() * sprintAxes);
+        }
+        LookTarget = false;
         ForwardDesiredSpeed = verticalRig;
-
         playerComponents.movementCtrl.rotation(Time.deltaTime);
         playerComponents.movementCtrl.getAdjustedForwardVelocitySpeed(Time.deltaTime);
+        
         playerComponents.movementCtrl.animator(Time.deltaTime);
-
-
-
+        cameraPosition.setPositionLookingBall(Time.deltaTime);
         /*
         forwardAnim = Mathf.Lerp(forwardAnim, (componentsPlayer.playerComponents.playerData.Speed) /movimentValues.MaxForwardRunSpeed,Time.deltaTime*10);
         float horizontalSpeed = getHorizontalSpeed(componentsPlayer.transBody.forward * verticalRig);
@@ -144,9 +186,10 @@ public class LookingBallMoviment : Moviment
             
             //componentsPlayer.rigBody.MovePosition(componentsPlayer.rigBody.position + componentsPlayer.transBody.forward * verticalRig * Time.fixedDeltaTime);
         }
-        if (playerComponents != null&& noPossessionMode==NoPossessionMode.Freelance)
+        if (playerComponents != null)
         {
             playerComponents.movementCtrl.movement(Time.fixedDeltaTime);
+            //playerComponents.movementCtrl.ApplyMovement(Time.fixedDeltaTime);
         }
     }
     

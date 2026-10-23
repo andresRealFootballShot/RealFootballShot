@@ -2,16 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.InputSystem;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class CameraPosition : PlayerComponent
 {
     public ComponentsPlayer componentsPlayer;
     public GameObject eventsGObj;
     public ComponentsKeys componentsKeys;
+    public CameraRotation cameraRotation;
     public AnimationCurve heightCurve, forwardCurve;
     public float minY, maxY,lookBallInterpolation,distanceMin,distanceMax, posYMinLookBall, posYMaxLookBall;
     public float angleOffsetMin,angleOffsetMax,distanceAround, speedCameraWithPossession, distanceMaxPossession, distanceWithPossession;
-    public PlayerState playerMode { get; set; }
+    public PlayerState playerState { get=>playerData.playerMode; set=> playerData.playerMode=value; }
     [HideInInspector]public float posOffsetY;
     float targetRotation;
     public float speedRotationKey,speedRotationJoy,speedCameraTransitionBallDir , speedCameraWithPossesion, speedCamera90Rotation, speedStartCameraTransition, speedCameraTransition, speedCameraFree, speedCameraLookingBall;
@@ -33,7 +36,10 @@ public class CameraPosition : PlayerComponent
     float scope { get => componentsPlayer.playerComponents.scope - scopeAdjust; }
     public float scopeAdjust;
     public ControllerAim controllerAim;
+
+    public PlayerInput playerInput;
     float addAngleRotation;
+    float mouseXSmoothed, mouseXVelocity;
     void Awake()
     {
         //currentSpeedCamera = speedCameraLookingBall;
@@ -43,20 +49,20 @@ public class CameraPosition : PlayerComponent
     }
     void showMenu()
     {
-        if (playerMode == PlayerState.WithPossession)
+        if (playerState == PlayerState.WithPossession)
         {
-            playerMode = PlayerState.LookingBall;
+            playerState = PlayerState.LookingBall;
         }
     }
     void Start()
     {
         MatchEvents.kick.AddListener(Kick);
-        playerMode = PlayerState.LookingBall;
+        //playerMode = PlayerState.LookingBall;
         MatchEvents.losePossession.AddListener(LosePossession);
     }
     public void LosePossession()
     {
-        playerMode = PlayerState.LookingBall;
+        //playerState = PlayerState.LookingBall;
     }
     void Kick(KickEventArgs args)
     {
@@ -64,17 +70,16 @@ public class CameraPosition : PlayerComponent
         if (args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerID.ToString()))
         {
             Vector3 kickDirection = args.kickVelocity;
-            if (playerMode == PlayerState.LookingBall || playerMode == PlayerState.WithPossession)
+            if (playerState == PlayerState.LookingBall || playerState == PlayerState.WithPossession)
             {
-                if (kickDirection.magnitude < PuppetParameters.maxKickForceToExitWithPossessionState)
+                if (!playerData.passKick && !playerData.shotKick)
                 {
-                    playerMode = PlayerState.WithPossession;
                     startTransitionSpeedCameraCoroutine(30, speedCameraTransition, speedCameraWithPossesion);
                     //startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraWithPossesion);
                 }
                 else
                 {
-                    playerMode = PlayerState.LookingBall;
+                    //playerState = PlayerState.LookingBall;
                 }
             }
             if (kickDirection.magnitude == 0)
@@ -99,43 +104,42 @@ public class CameraPosition : PlayerComponent
 
         if ((Input.GetKeyDown(ComponentsKeys.keyFreeCamera) || false && Input.GetKeyDown(ComponentsKeys.joyRotateAround) ))
         {
-            if (playerMode==PlayerState.LookingBall)
+            if (playerState==PlayerState.LookingBall)
             {
-                playerMode = PlayerState.Free;
+                playerState = PlayerState.Free;
                 Vector3 posPivot1 = componentsPlayer.transPivotCamera1.position;
                 //componentsPlayer.transPivotCamera1.position = new Vector3(posPivot1.x, posOffsetY, posPivot1.z);
                 componentsPlayer.transPivotCamera1.position = new Vector3(posPivot1.x, posOffsetY, posPivot1.z);
                 startTransitionSpeedCameraCoroutine(speedStartCameraTransition,speedCameraTransition, speedCameraFree);
             }
-            else if(playerMode == PlayerState.WithPossession || false&&playerMode == PlayerState.Free)
+            else if(playerState == PlayerState.WithPossession || false&&playerState == PlayerState.Free)
             {
-                playerMode = PlayerState.Free;
+                playerState = PlayerState.Free;
                 startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraFree);
             }
         }
         if ((Input.GetKeyDown(ComponentsKeys.keyLookingBall) || false && Input.GetKeyDown(ComponentsKeys.joyRotateAround)))
         {
-            if (playerMode == PlayerState.Free)
+            if (playerState == PlayerState.Free)
             {
                 //playerMode = PlayerState.Lock;
-                playerMode = PlayerState.LookingBall;
+                playerState = PlayerState.LookingBall;
                 startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraLookingBall);
                 /*
-                
                 //Vector3 posPivot1 = componentsPlayer.transPivotCamera1.position;
                 Vector3 posPivot1 = pivot1CameraTransform.position;
                 //componentsPlayer.transPivotCamera1.position = new Vector3(posPivot1.x, posOffsetY, posPivot1.z);
                 pivot1CameraTransform.position = new Vector3(posPivot1.x, posOffsetY, posPivot1.z);
                 startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraFree);*/
             }
-            else if (playerMode == PlayerState.WithPossession || false && playerMode == PlayerState.Free)
+            else if (playerState == PlayerState.WithPossession || false && playerState == PlayerState.Free)
             {
                 //playerMode = PlayerState.Lock;
-                playerMode = PlayerState.LookingBall;
+                playerState = PlayerState.LookingBall;
                 startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraLookingBall);
             }
         }
-        if (playerMode == PlayerState.WithPossession)
+        if (playerState == PlayerState.WithPossession)
         {
             if (Input.GetKeyDown(ComponentsKeys.keyRotRight90))
             {
@@ -147,6 +151,12 @@ public class CameraPosition : PlayerComponent
             }
             
         }
+        if(playerState == PlayerState.LookingBall)
+        {
+            dirBall = componentsPlayer.componentsBall.rigBall.position - componentsPlayer.transCamera.position;
+            dirBallInterpolation = -dirBall;
+        }
+        possessionInputs();
     }
     void myStartCoroutine(float speed,float target)
     {
@@ -186,12 +196,16 @@ public class CameraPosition : PlayerComponent
         }
         setVar(delta);
     }
-    
-    public void FixedUpdate()
+    private void FixedUpdate()
     {
+        CameraMove();
+    }
+    public void CameraMove()
+    {
+        float deltaTime = Time.fixedDeltaTime;   
         //Dejar SetPositionPivot aquí para que al cambiar a FreeLook la camara esté mirando al balón
-
-        switch (playerMode)
+        if (playerComponents == null) return;
+        switch (playerState)
         {
             case PlayerState.Free:
                 //Importante que CameraRotation.FreeLook() llame a SetPositionPivot();
@@ -200,11 +214,13 @@ public class CameraPosition : PlayerComponent
                 currentState = "PlayerState.Free";
                 break;
             case PlayerState.LookingBall:
-                setPositionLookingBall(Time.fixedDeltaTime);
+                //setPositionLookingBall(deltaTime);
                 currentState = "PlayerState.LookingBall";
                 break;
             case PlayerState.WithPossession:
-                positionWithPossession(Time.fixedDeltaTime);
+                
+                positionWithPossession(deltaTime);
+                
                 currentState = "PlayerState.WithPossession";
                 break;
             case PlayerState.Lock:
@@ -222,6 +238,7 @@ public class CameraPosition : PlayerComponent
         setPositionPivot1();*/
         //Debug.DrawLine(componentsPlayer.transBody.position, getTargetLookAtBallPosition());
         componentsPlayer.transCamera.position = Vector3.Lerp(camPos, getTargetLookAtBallPosition(), deltaTime * currentSpeedCamera);
+        cameraRotation.LookAtBall();
     }
     public Vector3 getTargetLookAtBallPosition()
     {
@@ -281,36 +298,37 @@ public class CameraPosition : PlayerComponent
     void positionWithPossession(float delta)
     {
         Transform transCamera = componentsPlayer.transCamera;
-        Vector3 ballPos = componentsPlayer.componentsBall.transBall.position;
+        Vector3 ballPos = MatchComponents.ballRigidbody.position;
         Vector3 bodyPos = componentsPlayer.transBody.position;
         Vector3 cameraPos = transCamera.position;
         //float distance = Vector3.Distance(bodyPos, ballPos);
         float distance = MyFunctions.DistancePointAndFiniteLine(ballPos,bodyPos, headTrans.position + Vector3.up*0.13f);
         if (distance > distanceMaxPossession)
         {
-            if(playerMode!= PlayerState.LookingBall)
+            if(playerState!= PlayerState.LookingBall)
             {
                 startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraLookingBall);
-                playerMode = PlayerState.LookingBall;
+                playerState = PlayerState.LookingBall;
             }
         }
         else
         {
-            //float addAngleRotation = Input.GetAxis("HorizontalKey") * speedRotationKey;
-            addAngleRotation = Input.GetAxis("HorizontalKey") * speedRotationKey;
-            addAngleRotation += Input.GetAxis("HorizontalJoy") * speedRotationJoy;
-            if (Input.GetKey(KeyCode.LeftShift))
-            {
-                addAngleRotation += Input.GetAxis("Mouse X") * speedPossesionMouseRotation;
-            }
+            //addAngleRotation = Input.GetAxis("HorizontalKey") * speedRotationKey;
+            //addAngleRotation += Input.GetAxis("HorizontalJoy") * speedRotationJoy;
             
-            targetRotation += addAngleRotation * delta;
             if (kickWithForce)
             {
-                dirBall = componentsPlayer.componentsBall.rigBall.velocity;
+                dirBall = componentsPlayer.componentsBall.rigBall.velocity.normalized;
+            }
+            
+            if (dirBallInterpolation.Equals(Vector3.zero))
+            {
+                dirBall = ballPosition - componentsPlayer.transCamera.position;
+                dirBallInterpolation = -dirBall;
             }
             dirBall.y = 0;
-            dirBallInterpolation = Vector3.Lerp(dirBallInterpolation, -dirBall, delta * speedCameraTransitionBallDir);
+            dirBallInterpolation = Vector3.Lerp(dirBallInterpolation, -dirBall, delta*speedCameraTransitionBallDir);
+            //dirBallInterpolation = -dirBall;
             
             //print(height);
             //posOffsetY = Mathf.Lerp(0.55f + bodyPos.y, offsetYPositionWithPossesion + bodyPos.y, ((ballPos.y - bodyPos.y) / 1.25f));
@@ -318,16 +336,50 @@ public class CameraPosition : PlayerComponent
             float distanceHeight = Vector3.Distance(bodyPos, ballPos) / lookBallInterpolation;
             //posOffsetY = Mathf.Lerp(posYMinLookBall + bodyPos.y, posYMaxLookBall + bodyPos.y, ((ballPos.y - bodyPos.y) / posYMaxLookBall) + distanceHeight);
             //Vector3 targetPos = Quaternion.AngleAxis(targetRotation, Vector3.up) * dirBallInterpolation.normalized * distanceWithPossession + ballPos;
-            
+
+            //targetRotation = Mathf.Lerp(targetRotation, targetRotation + addAngleRotation,delta * speedPossesionMouseRotation);
+            //targetRotation += 1 * delta * speedPossesionMouseRotation;
             Vector3 targetPos = Quaternion.AngleAxis(targetRotation, Vector3.up) * dirBallInterpolation.normalized * distanceWithPossession + ballPos;
             targetPos.y = posOffsetY;
             //Debido a un error,no se debe utilizar lerp; si no, la camara interpolara en linea recta y no circularmente alrededor del balón
             //transCamera.position = targetPos;
             //print(dirBallInterpolation.magnitude + " | " + dirBall + " " + transCamera.InverseTransformPoint(ballPos) + " " + transCamera.InverseTransformPoint(targetPos) + " " + Vector3.Distance(transCamera.position, ballPos)); ;
             //print("Position | "+ dirBallInterpolation + "| currentSpeedCamera=" + currentSpeedCamera + " | speedCameraTransitionBallDir=" + speedCameraTransitionBallDir+ " | addAngleRotation="+ addAngleRotation);
-            //transCamera.position = Vector3.Lerp(transCamera.position, targetPos, Time.deltaTime * currentSpeedCamera);
-            transCamera.position = Vector3.Lerp(transCamera.position,targetPos, delta * currentSpeedCamera);
+
+            //transCamera.position = Vector3.Lerp(transCamera.position,targetPos, delta * currentSpeedCamera);
+            transCamera.position = targetPos;
+            cameraRotation.LookAtBall();
         }
+    }
+    void possessionInputs()
+    {
+        if (playerData.onLookAround)
+        {
+            bool kickPressed = playerInput.actions["Kick"].IsPressed();
+            bool kickUp = playerInput.actions["Kick"].WasReleasedThisFrame();
+            if (!kickPressed)
+            {
+                Vector2 mouseDelta = playerInput.actions["AimKick"].ReadValue<Vector2>();
+
+                float mouseX = mouseDelta.x*speedPossesionMouseRotation*Time.unscaledDeltaTime;
+                float targetMouseX = mouseDelta.x;
+                
+                float mouseSmoothTime = 0.1f;
+                mouseXSmoothed = Mathf.SmoothDamp(
+                    mouseXSmoothed,
+                    targetMouseX,
+                    ref mouseXVelocity,
+                    mouseSmoothTime,
+                    Mathf.Infinity,
+                    Time.unscaledDeltaTime
+                );
+
+                targetRotation += mouseX;
+                //addAngleRotation = targetRotation;
+            }
+        }
+
+        
     }
     public void SetPositionPivot()
     {

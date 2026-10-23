@@ -11,7 +11,6 @@ public class PruebasTimeScale : MonoBehaviour
     static bool nextFrame;
     void Start()
     {
-        return;
         currentScale = 1;
         Time.timeScale = 1f;
 #if UNITY_EDITOR
@@ -28,12 +27,12 @@ public class PruebasTimeScale : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //check();
+        check();
         
     }
     void check()
     {
-        if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.G))
         {
             currentScale = 1;
             computer = false;
@@ -63,7 +62,7 @@ public class PruebasTimeScale : MonoBehaviour
             computer = false;
             Time.timeScale = 0.05f;
         }
-        if (Input.GetKeyDown(KeyCode.B))
+        if (Input.GetKeyDown(KeyCode.R))
         {
             computer = !computer;
             if (computer)
@@ -91,7 +90,7 @@ public class PruebasTimeScale : MonoBehaviour
     {
         switch (keyCode)
         {
-            case KeyCode.P:
+            case KeyCode.G:
                 currentScale = 1;
                 computer = false;
                 Time.timeScale = 1f;
@@ -116,7 +115,7 @@ public class PruebasTimeScale : MonoBehaviour
                 computer = false;
                 Time.timeScale = 0.05f;
                 break;
-            case KeyCode.B:
+            case KeyCode.R:
                 computer = !computer;
                 if (computer)
                 {

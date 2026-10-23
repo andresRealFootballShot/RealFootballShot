@@ -53,9 +53,11 @@ public class PlayerComponent : MonoBehaviour
     protected Vector3 bodyBallY0Direction { get => MyFunctions.setYToVector3(bodyBallDirection,0); }
     protected Vector3 bodyBallNormalizedDirection { get => bodyBallDirection.normalized; }
     public Vector3 TargetPosition { get => movementValues.TargetPosition; set => movementValues.TargetPosition = value; }
+    public Vector3 TargetOffset { get => playerData.TargetOffset; set => playerData.TargetOffset = value; }
     public float TargetPositionForwardAngle { get =>Vector3.Angle(BodyTargetXZDirection,bodyY0Forward);}
     
     protected float BodyTargetXZDistance { get => Vector3.Distance(MyFunctions.setYToVector3(bodyPosition, 0), MyFunctions.setYToVector3(TargetPosition, 0)); }
+    protected float BodyReachBallXZDistance { get => Vector3.Distance(MyFunctions.setYToVector3(bodyPosition, 0), MyFunctions.setYToVector3(publicPlayerData.ballReachPosition, 0)); }
     protected Vector3 BodyTargetXZDirection { get => MyFunctions.setYToVector3(TargetPosition, 0)- MyFunctions.setYToVector3(bodyPosition, 0); }
     protected float BodyTargetXZScpDistance { get => BodyTargetXZDistance-scope; }
     public float BodyBallXZDistance { get => Vector3.Distance(MyFunctions.setYToVector3(bodyPosition, 0), MyFunctions.setYToVector3(ballPosition, 0)); }

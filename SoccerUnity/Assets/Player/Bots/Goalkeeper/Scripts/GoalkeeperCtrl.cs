@@ -9,7 +9,7 @@ public class GoalkeeperCtrl : MonoBehaviour,ILoad
     private BallComponents componentsBall;
     public List<PublicPlayerData> enemyPlayerDataList = new List<PublicPlayerData>(), partnetPlayerDataList = new List<PublicPlayerData>();
     List<ChaserData> arriveBeforeOthersEnemyPlayerDataList = new List<ChaserData>();
-    public Transform goalKeeperTransform;
+    public Transform goalKeeperTransform{ get => myPublicPlayerData.bodyTransform; }
     Transform goalkeeperBaseTrans { get => wirst1; }
     public Transform wirst1;
     public floatDelegate positionFunction;
@@ -172,8 +172,8 @@ public class GoalkeeperCtrl : MonoBehaviour,ILoad
     {
         //List<ChaserData> enemyChaserDataList = ChaserData.getChaserDataOfPublicPlayerDatas(enemyPlayerDataList);
         if (MatchComponents.firstReachBalPublicPlayerData == null || myPublicPlayerData==null)return false;
-        bool check = MatchComponents.currentPublicPlayerData.playerData.playerMode == PlayerState.WithPossession && myPublicPlayerData.team.Equals(MatchComponents.currentPublicPlayerData.team);
-        return MatchComponents.firstReachBalPublicPlayerData.Equals(myPublicPlayerData)&&!check;
+        
+        return MatchComponents.firstReachBalPublicPlayerData.Equals(myPublicPlayerData);
         if(ChaserData.checkFirstChaserDatas(myChaserData, arriveBeforeOthersEnemyPlayerDataList, 0.1f))
         {
             if (arriveBeforeOthersEnemyPlayerDataList.Count > 0)

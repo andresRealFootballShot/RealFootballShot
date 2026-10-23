@@ -11,6 +11,7 @@ public class MatchComponents : MonoBehaviour
     public static Vector3 ballVelocity { get => ballComponents.rigBall.velocity; set => ballComponents.rigBall.velocity = value; }
     public static Vector3 ballAngularVelocity { get => ballComponents.rigBall.angularVelocity; set => ballComponents.rigBall.angularVelocity = value; }
     public static float ballSpeed { get => ballComponents.rigBall.velocity.magnitude; }
+    public static float ballXZSpeed { get => new Vector3(ballComponents.rigBall.velocity.x,0, ballComponents.rigBall.velocity.z).magnitude; }
     public static Transform ballTransform { get => ballComponents.transBall; }
     public static Vector3 ballPosition { get => ballComponents.transBall.position; set => ballComponents.transBall.position = value; }
     public static float ballRadio { get => ballComponents.radio; }
@@ -28,7 +29,9 @@ public class MatchComponents : MonoBehaviour
     public static Brains Brains;
     public static PublicPlayerData currentPublicPlayerData;
     public static Team myTeam { get; set; }
+    public static Team rivalTeam { get; set; }
     public static Team currentReachBallTeam { get=>Teams.getTeamFromPlayer(firstReachBalPublicPlayerData.playerID); }
+    public static bool isOnlyBots { get => ModeCtrl.UserMode == UserMode.OnlyBots; }
     public static PublicPlayerData firstReachBalPublicPlayerData { get=>CullPassPoints.firstPublicPlayerData; }
     
     public static ModeCtrl ModeCtrl;

@@ -52,6 +52,7 @@ namespace CullPositionPoint
         public int attackReachIndex;
         public float attackReachTime;
         public PassData straightPassData,parabolicPassData;
+        public float distanceDefenseReachBall { get => GetPassData().distanceDefenseReachBall; }
         public LonelyPointElement2(Vector2 position, int index)
         {
             this.position = position;

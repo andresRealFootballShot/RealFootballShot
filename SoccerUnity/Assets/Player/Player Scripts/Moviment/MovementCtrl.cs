@@ -1,11 +1,4 @@
-﻿using DOTS_ChaserDataCalculation;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using TMPro;
-using Unity.Entities.UniversalDelegates;
-using Unity.Mathematics;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 using static MovimentValues;
 
@@ -17,7 +10,7 @@ public class MovementCtrl : MovementPlayerComponent
     Vector3 previousPosition;
     float speed, forwardDesiredSpeed2;
     Vector3 lookDirection;
-    public bool debug,debugMove,debugMoveTimes;
+    public bool debug, debugMove, debugMoveTimes;
     MovePhase previousPhase;
     float previousSpeed;
     [HideInInspector]
@@ -38,7 +31,7 @@ public class MovementCtrl : MovementPlayerComponent
     }
     public void getAdjustedForwardVelocitySpeed(float deltaTime)
     {
-        
+
         testSpeed();
         return;
         if (angleVelocity_DesiredVelocity < maxAngleForRun && angleBodyForward_DesiredLookDirection < maxAngleForRun)
@@ -91,7 +84,6 @@ public class MovementCtrl : MovementPlayerComponent
         UpdateRotation(deltaTime);
         UpdateSpeed(deltaTime);
         calculateBotVelocity(deltaTime);
-        ApplyMovement(deltaTime);
         calculateTimesMove();
     }
 
@@ -99,17 +91,17 @@ public class MovementCtrl : MovementPlayerComponent
     {
         if (DesiredDirection == Vector3.zero)
             return;
-        
+
         float angle = Vector3.Angle(VelocityY0Direction, DesiredY0Direction);
         float angle3 = Vector3.Angle(LookY0Direction, DesiredLookDirection);
-        float angle2 = Vector3.Angle(bodyY0Forward, DesiredY0Direction)-maxAngleForRun;
-        float requiredSpeed = angle > maxAngleForRun2 ? minSpeedForRotate2: minSpeedForRotate;
+        float angle2 = Vector3.Angle(bodyY0Forward, DesiredY0Direction) - maxAngleForRun;
+        float requiredSpeed = angle > maxAngleForRun2 ? minSpeedForRotate2 : minSpeedForRotate;
         string n = publicPlayerData.playerID;
-        if (angle > maxAngleForRun && EndForwardSpeed > requiredSpeed || StopMove && angle3>1&& EndForwardSpeed > requiredSpeed)
+        if (angle > maxAngleForRun && EndForwardSpeed > requiredSpeed || StopMove && angle3 > 1 && EndForwardSpeed > requiredSpeed)
         {
             phase = MovePhase.Brake;
         }
-        else if (angle2 > 0.1f || StopMove&& angle3 > 1)
+        else if (angle2 > 0.1f || StopMove && angle3 > 1)
         {
             phase = MovePhase.Rotate;
         }
@@ -129,12 +121,12 @@ public class MovementCtrl : MovementPlayerComponent
 
                     EndForwardSpeed -= movementValues.forwardDeceleration * dt;
                     EndForwardSpeed = Mathf.Max(EndForwardSpeed, requiredSpeed);
-                    
+
                     break;
                 }
 
             case MovePhase.Rotate:
-                
+
 
             case MovePhase.Move:
                 {
@@ -150,13 +142,13 @@ public class MovementCtrl : MovementPlayerComponent
 
                     if (distance < stopDist)
                     {
-                        
+
                         EndForwardSpeed -= movementValues.forwardDeceleration * dt;
                         EndForwardSpeed = Mathf.Max(EndForwardSpeed, reachBallSpeed);
                     }
                     else
                     {
-                        
+
                         EndForwardSpeed += movementValues.forwardAcceleration * dt;
                         EndForwardSpeed = Mathf.Min(EndForwardSpeed, ForwardDesiredSpeed);
                     }
@@ -181,7 +173,7 @@ public class MovementCtrl : MovementPlayerComponent
 
         float angle = Vector3.Angle(lookDirection, targetDir);
 
-        float rotSpeed = phase==MovePhase.Brake ? 0 : movementValues.rotationSpeed;
+        float rotSpeed = phase == MovePhase.Brake ? 0 : movementValues.rotationSpeed;
 
 
         float maxRadiansThisFrame =
@@ -196,21 +188,22 @@ public class MovementCtrl : MovementPlayerComponent
 
         lookDirection = newDir;
 
-        
+
         bodyTransform.rotation = Quaternion.LookRotation(lookDirection, Vector3.up);
         LookDirection = lookDirection;
     }
 
     void calculateBotVelocity(float deltaTime)
     {
-        Vector3 dir= phase == MovePhase.Brake ? VelocityDirection : DesiredY0Direction;
+        Vector3 dir = phase == MovePhase.Brake ? VelocityDirection : DesiredY0Direction;
         Velocity = dir * EndForwardSpeed;
         previousPosition = bodyPosition;
     }
     public void ApplyMovement(float dt)
     {
+        if (playerComponents == null) return;
         Vector3 dir = phase == MovePhase.Brake ? VelocityDirection : DesiredY0Direction;
-        
+
         Vector3 delta = dir * EndForwardSpeed * dt;
         if (useRigidbody)
         {
@@ -220,20 +213,30 @@ public class MovementCtrl : MovementPlayerComponent
         {
             bodyTransform.Translate(delta, Space.World);
         }
-        
+
     }
     void testSpeed()
     {
-        
-        float maxSpeedForReachBall_rot = angleBodyForward_DesiredLookDirection >= playerComponents.movementValues.maxAngleForRun ? minSpeedForRotate:  reachBallSpeed ;
+        float maxSpeedForReachBall_rot;
+        float desiredSpeed_rot;
+        if (angleBodyForward_DesiredLookDirection >= playerComponents.movementValues.maxAngleForRun || angleVelocity_DesiredVelocity>= playerComponents.movementValues.maxAngleForRun)
+        {
+            maxSpeedForReachBall_rot = minSpeedForRotate;
+            desiredSpeed_rot = minSpeedForRotate;
+        }
+        else
+        {
+            maxSpeedForReachBall_rot = reachBallSpeed;
+            desiredSpeed_rot = ForwardDesiredSpeed;
+        }
         float stopDistance = Mathf.Abs(AccelerationPath.getX2(maxSpeedForReachBall_rot, playerComponents.Speed, playerComponents.movementValues.forwardDeceleration));
-        float desiredSpeed_rot = angleBodyForward_DesiredLookDirection >= playerComponents.movementValues.maxAngleForRun ? minSpeedForRotate : ForwardDesiredSpeed;
         MovimentValues movimentValues = playerComponents.movementValues;
         //print(BodyTargetXZDistance+" "+stopDistance + " "+scope);
         if (BodyTargetXZDistance < stopDistance + scope)
         {
             EndForwardSpeed -= movementValues.forwardDeceleration * Time.deltaTime;
             EndForwardSpeed = Mathf.Clamp(EndForwardSpeed, maxSpeedForReachBall_rot, Mathf.Infinity);
+            
         }
         else
         {
@@ -242,6 +245,7 @@ public class MovementCtrl : MovementPlayerComponent
 
                 EndForwardSpeed += movementValues.forwardAcceleration * Time.deltaTime;
                 EndForwardSpeed = Mathf.Clamp(EndForwardSpeed, 0, desiredSpeed_rot);
+                
             }
             else
             {
@@ -253,7 +257,7 @@ public class MovementCtrl : MovementPlayerComponent
     }
     void printDebug(string message)
     {
-        if(debug)print(message);
+        if (debug) print(message);
     }
     public void rotation(float deltaTime)
     {
@@ -261,20 +265,20 @@ public class MovementCtrl : MovementPlayerComponent
         if (DesiredLookDirection != Vector3.zero)
         {
             float angle = angleBodyForward_DesiredLookDirection;
-            
+
             if (angle < maxAngleForRun)
             {
                 float maxSpeed = movementValues.rotationSpeed;
                 float minSpeed = movementValues.minRotationSpeedWhileRun;
                 float speedRotation = Mathf.Lerp(maxSpeed, minSpeed, EndForwardSpeed / movementValues.maxSpeedWhileRun_AngularLerp);
-               
+
                 bodyRotationSpeed = Mathf.Lerp(0, speedRotation, angleBodyForward_DesiredLookDirection / 1f);
                 Vector3 cross = Vector3.Cross(bodyY0Forward, DesiredLookDirection);
                 bodyRotationSpeed = Mathf.Clamp(bodyRotationSpeed, 0, angleBodyForward_DesiredLookDirection / deltaTime);
                 AngularSpeed = bodyRotationSpeed;
 
 
-               
+
                 bodyTransform.eulerAngles += Mathf.Sign(cross.y) * Vector3.up * bodyRotationSpeed * deltaTime;
 
 
@@ -291,24 +295,27 @@ public class MovementCtrl : MovementPlayerComponent
                 Vector3 cross = Vector3.Cross(bodyY0Forward, DesiredLookDirection);
                 //Debug.LogError("bodyRotationSpeed=" + bodyRotationSpeed+ " | speedRotation=" + speedRotation + " | angle=" + angle + " | EndForwardSpeed=" + EndForwardSpeed + " | maxSpeed=" + maxSpeed + " | ForwardDesiredDirection=" + ForwardDesiredDirection);
                 AngularSpeed = bodyRotationSpeed;
-                
+
                 bodyTransform.eulerAngles += Mathf.Sign(cross.y) * Vector3.up * bodyRotationSpeed * deltaTime;
 
                 //print("b " + speedRotation);
             }
         }
-        
+
         if (DesiredDirection != Vector3.zero)
         {
-            Vector3 targetDirection = TargetPosition- bodyPosition;
+            Vector3 targetDirection = TargetPosition - bodyPosition;
             if (angleVelocity_DesiredVelocity < maxAngleForRun)
             {
                 lookDirection = Vector3.RotateTowards(lookDirection, targetDirection, movementValues.directionRotationSpeed * Mathf.Deg2Rad * deltaTime, 1).normalized;
+                
             }
             else
             {
                 lookDirection = EndForwardSpeed <= movementValues.minSpeedForChangeDirection ? targetDirection : lookDirection;
+                
             }
+            UnityEngine.Debug.DrawRay(bodyPosition + Vector3.up*2, lookDirection, Color.blue);
         }
     }
     public void rotationDeprecated(float deltaTime)
@@ -395,6 +402,7 @@ public class MovementCtrl : MovementPlayerComponent
         float vertical = VerticalSpeed;
         float horizontal = HorizontalSpeed;
         //sprintAnim = Mathf.Lerp(sprintAnim, (movementValues.ForwardDesiredSpeed - movementValues.MaxForwardRunSpeed) / (movementValues.MaxForwardSprintSpeed), deltaTime * GeneralPlayerParameters.speedAnim);
+        
         anim.SetFloat("vertical", vertical, 0.1f, deltaTime * GeneralPlayerParameters.speedAnim);
         anim.SetFloat("horizontal", horizontal, 0.1f, deltaTime * GeneralPlayerParameters.speedAnim);
         //anim.SetFloat("sprint", horizontal, 0.1f, deltaTime * GeneralPlayerParameters.speedAnim2);
@@ -405,7 +413,7 @@ public class MovementCtrl : MovementPlayerComponent
     public void SetTargetPosition(Vector3 targetPosition)
     {
         playerComponents.ForwardDesiredSpeed = publicPlayerData.movimentValues.maxForwardSpeed;
-        
+
         StopMove = false;
         LookTarget = true;
         playerComponents.MinForwardSpeed = 0;
@@ -414,22 +422,22 @@ public class MovementCtrl : MovementPlayerComponent
         startMoveTimes();
 
     }
-    public void SetInstantVelocity(Vector3 dir,float speed)
+    public void SetInstantVelocity(Vector3 dir, float speed)
     {
         playerComponents.ForwardDesiredSpeed = speed;
         EndForwardSpeed = speed;
         playerComponents.LookTarget = true;
         playerComponents.MinForwardSpeed = 0;
-        playerComponents.TargetPosition =bodyPosition + dir*100;
+        playerComponents.TargetPosition = bodyPosition + dir * 100;
         playerComponents.stopOffset = 0;
-        playerComponents.Velocity = dir*speed;
+        playerComponents.Velocity = dir * speed;
     }
     void calculateTimesMove()
     {
         if (!debug) return;
         if (BodyTargetXZDistance <= scope && startMove)
         {
-            print("MovementCtrl"+"\nTotal Time= " + (moveTime + breakTime) + " mT=" + moveTime + " bT=" + breakTime + " rT=" + rotationTime + " Speed="+EndForwardSpeed+" TargetDistance="+ BodyTargetXZScpDistance + " BallDistance=" + BodyBallXZScpDistance);
+            print("MovementCtrl" + "\nTotal Time= " + (moveTime + breakTime) + " mT=" + moveTime + " bT=" + breakTime + " rT=" + rotationTime + " Speed=" + EndForwardSpeed + " TargetDistance=" + BodyTargetXZScpDistance + " BallDistance=" + BodyBallXZScpDistance);
             startMove = false;
             startDecelerate = false;
         }
@@ -487,14 +495,14 @@ public class MovementCtrl : MovementPlayerComponent
             style.fontSize = 10;
             style.normal.textColor = Color.white;
             //string info =i +"-"+ trajectory.times[i].ToString("f2");
-            string info="";
+            string info = "";
             if (debugMove)
             {
-                info = "v=" + Speed.ToString("f1") + " θ=" + angleBodyForwardDesiredVelocity.ToString("f0") + " phase=" + phase + " dT=" + (BodyTargetXZDistance - scope).ToString("f2") + " dB=" + BodyBallXZDistance.ToString("f2")+" LookTarget="+LookTarget+" StopMove="+StopMove;
+                info = "v=" + Speed.ToString("f1") + " θ=" + angleBodyForwardDesiredVelocity.ToString("f0") + " phase=" + phase + " dT=" + (BodyTargetXZDistance - scope).ToString("f2") + " dB=" + BodyBallXZDistance.ToString("f2") + " LookTarget=" + LookTarget + " StopMove=" + StopMove;
             }
             if (debugMoveTimes)
             {
-                info += "Total time=" + (breakTime+ moveTime).ToString("f3")+ " bT=" + breakTime.ToString("f3") + " mT=" + moveTime.ToString("f3") + " rT=" + rotationTime.ToString("f3");
+                info += "Total time=" + (breakTime + moveTime).ToString("f3") + " bT=" + breakTime.ToString("f3") + " mT=" + moveTime.ToString("f3") + " rT=" + rotationTime.ToString("f3");
             }
             Handles.Label(bodyPosition + Vector3.up * 1.5f, info, style);
         }

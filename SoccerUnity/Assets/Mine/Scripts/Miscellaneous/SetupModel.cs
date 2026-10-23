@@ -5,6 +5,7 @@ using UnityEngine;
 public class SetupModel : MonoBehaviour
 {
     public List<SkinnedMeshRenderer> renderers;
+    public TransparencyCtrl transparencyCtrl;
     Equipement equipement;
     public bool isLoaded;
     void Awake()
@@ -13,26 +14,14 @@ public class SetupModel : MonoBehaviour
         {
             //item.material = Instantiate(item.sharedMaterial);
         }
+
         isLoaded = true;
     }
     public void setEquipementColor(Equipement equipement)
     {
         equipement.mainColorVar.VariableChanged += changeEquipementMainColor;
         this.equipement = equipement;
-        foreach (var item in renderers)
-        {
-            //item.sharedMaterial.color = equipement.mainColor;
-            MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
-            item.GetPropertyBlock(materialPropertyBlock);
-            materialPropertyBlock.SetColor("_BaseColor", equipement.mainColor);
-            item.SetPropertyBlock(materialPropertyBlock);
-        }
-    }
-    public void setEquipementColor()
-    {
         
-        if (equipement != null)
-        {
             foreach (var item in renderers)
             {
                 //item.sharedMaterial.color = equipement.mainColor;
@@ -40,8 +29,28 @@ public class SetupModel : MonoBehaviour
                 item.GetPropertyBlock(materialPropertyBlock);
                 materialPropertyBlock.SetColor("_BaseColor", equipement.mainColor);
                 item.SetPropertyBlock(materialPropertyBlock);
+            if (transparencyCtrl != null && transparencyCtrl.isTransparent)
+            {
+                transparencyCtrl.SetTransparency(item);
             }
         }
+        
+    }
+    public void setEquipementColor()
+    {
+            foreach (var item in renderers)
+            {
+                //item.sharedMaterial.color = equipement.mainColor;
+                MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
+                item.GetPropertyBlock(materialPropertyBlock);
+                materialPropertyBlock.SetColor("_BaseColor", equipement.mainColor);
+                item.SetPropertyBlock(materialPropertyBlock);
+                if (transparencyCtrl != null && transparencyCtrl.isTransparent)
+                {
+                    transparencyCtrl.SetTransparency(item);
+                }
+            }
+        
     }
     void changeEquipementMainColor(Color color)
     {

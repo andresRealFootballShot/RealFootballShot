@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ControllerAim : MonoBehaviour
+public class ControllerAim : PlayerComponent
 {
     public string strAim;
     public string strTouchManaged, strJoyStickChangeAim, strJoyManaged;
@@ -26,8 +26,6 @@ public class ControllerAim : MonoBehaviour
     PlayerState playerMode;
     void Start()
     {
-        MatchEvents.kick.AddListener(Kick);
-        playerMode = PlayerState.LookingBall;
         MatchEvents.losePossession.AddListener(LosePossession);
         myRaycast = componentsPlayer.scriptsPlayer.raycastAim;
     }
@@ -40,35 +38,19 @@ public class ControllerAim : MonoBehaviour
     {
         playerMode = PlayerState.LookingBall;
     }
-    void Kick(KickEventArgs args)
-    {
-        if (ComponentsPlayer.myMonoPlayerID!=null&&args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerID.ToString()))
-        {
-            Vector3 kickDirection = args.kickVelocity;
-            if (playerMode == PlayerState.LookingBall || playerMode == PlayerState.WithPossession)
-            {
-                if (kickDirection.magnitude < PuppetParameters.maxKickForceToExitWithPossessionState)
-                    playerMode = PlayerState.WithPossession;
-                else
-                    playerMode = PlayerState.LookingBall;
-            }
-        }
-    }
+   
     void Update()
     {
         if (Input.GetKeyDown(ComponentsKeys.keyFreeCamera) || Input.GetKeyDown(ComponentsKeys.joyRotateAround))
         {
             if (playerMode == PlayerState.LookingBall)
             {
-                //resetPosition(new Vector2(Screen.width/2,Screen.height/2));
-                playerMode = PlayerState.Free;
                 
 
             }
             else
             {
                 checkAimIsClose();
-                playerMode = PlayerState.Free;
             }
             gunSightImage.hideImage();
         }
@@ -76,15 +58,11 @@ public class ControllerAim : MonoBehaviour
         {
             if (playerMode == PlayerState.LookingBall)
             {
-                //resetPosition(new Vector2(Screen.width/2,Screen.height/2));
-                playerMode = PlayerState.LookingBall;
-                //gunSightImage.hideImage();
 
             }
             else
             {
                 checkAimIsClose();
-                playerMode = PlayerState.LookingBall;
             }
 
         }
@@ -103,14 +81,15 @@ public class ControllerAim : MonoBehaviour
         {
             if ((playerMode == PlayerState.LookingBall || playerMode == PlayerState.WithPossession))
             {
-                MoveAim();
+                //MoveAim();
             }
             else
             {
-                MoveAim2();
+                //CenterAim();
             }
 
         }
+        PlaceSight();
     }
     void checkAimIsClose()
     {
@@ -120,6 +99,7 @@ public class ControllerAim : MonoBehaviour
             if (playerMode != PlayerState.Free)
             {
                 gunSightImage.showImage();
+                colorImage.gameObject.SetActive(true);
             }
         }
         else
@@ -128,6 +108,7 @@ public class ControllerAim : MonoBehaviour
             if (playerMode != PlayerState.Free)
             {
                 gunSightImage.hideImage();
+                colorImage.gameObject.SetActive(false);
             }
         }
     }
@@ -162,9 +143,8 @@ public class ControllerAim : MonoBehaviour
                 colorImage.SetColor(colorDisable);
             }
         }
-       
         
-        
+
     }
     void resetPosition(Vector2 pos)
     {
@@ -172,27 +152,35 @@ public class ControllerAim : MonoBehaviour
         ValueChangeEvent?.Invoke(Vector2.zero);
         positionMouse = Vector2.zero;
     }
-    void MoveAim()
+    public void MoveAim()
     {
         Vector3 ballPosScreen = componentsPlayer.camera.WorldToScreenPoint(componentsPlayer.componentsBall.transBall.position);
         float scaleBall = componentsPlayer.componentsBall.transBall.localScale.x;
         Vector3 ballLimitPosScreen = componentsPlayer.camera.WorldToScreenPoint(componentsPlayer.componentsBall.transCenterBall.position+Vector3.up* componentsPlayer.componentsBall.radio);
         float limit = Vector2.Distance(new Vector2(ballPosScreen.x, ballPosScreen.y),new Vector2(ballLimitPosScreen.x,ballLimitPosScreen.y));
-        positionMouse = controllerZoneAim.ControlZoneAim(positionMouse, limit,Time.deltaTime);
+
+
+        positionMouse = controllerZoneAim.ControlZoneAim(positionMouse, limit,Time.unscaledDeltaTime);
         Vector2 centerBall = new Vector2(ballPosScreen.x, ballPosScreen.y) - new Vector2(Screen.width / 2, Screen.height / 2);
 
         ValueChangeEvent?.Invoke(positionMouse + centerBall);
         position = positionMouse + new Vector2(ballPosScreen.x,ballPosScreen.y);
-        gunSightImage.ValueChanged(centerBall);
+        
         
     }
-    void MoveAim2()
+    void PlaceSight()
+    {
+        Vector3 ballPosScreen = componentsPlayer.camera.WorldToScreenPoint(componentsPlayer.componentsBall.transBall.position);
+        Vector2 centerBall = new Vector2(ballPosScreen.x, ballPosScreen.y) - new Vector2(Screen.width / 2, Screen.height / 2);
+        gunSightImage.ValueChanged(centerBall);
+    }
+    public void CenterAim()
     {
         Vector3 ballPosScreen = componentsPlayer.camera.WorldToScreenPoint(componentsPlayer.componentsBall.transCenterBall.position);
         Vector2 centerBall = new Vector2(ballPosScreen.x, ballPosScreen.y) - new Vector2(Screen.width / 2, Screen.height / 2);
         ValueChangeEvent?.Invoke(centerBall);
         position = new Vector2(ballPosScreen.x, ballPosScreen.y);
-
+        positionMouse = Vector2.zero;
 
     }
 

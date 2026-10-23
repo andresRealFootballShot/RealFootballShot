@@ -1174,6 +1174,7 @@ MonoBehaviour:
   matTransparent: {fileID: 2100000, guid: 841586a8ed7e6da4e9da56756b9c9d4a, type: 2}
   setupModel: {fileID: 8589382806464004926}
   enable: 1
+  isTransparent: 0
 --- !u!1 &1323044707987030329
 GameObject:
   m_ObjectHideFlags: 0
@@ -2495,6 +2496,7 @@ GameObject:
   - component: {fileID: 2537257683424695968}
   - component: {fileID: 6880305875130285175}
   - component: {fileID: 5691364794298524021}
+  - component: {fileID: 2040141982424645623}
   m_Layer: 0
   m_Name: Kick
   m_TagString: Untagged
@@ -2523,7 +2525,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2537257683424695998}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 95fcc3e6aa8fd474da5e6e079e7f11ae, type: 3}
   m_Name: 
@@ -2532,11 +2534,11 @@ MonoBehaviour:
   componentsPlayer: {fileID: 865301414014108576}
   controllerAim: {fileID: 7665514520983759315}
   controllerDistance: {fileID: 7665514520983759317}
-  sensibilityShot: 1
+  sensibilityShot: 50
   speedChangeShot: 5
   powShot: 1
-  min: 0.5
-  max: 15
+  min: 2
+  max: 100
   maxDistanceCorrectErr: 50
   kickEvent: {fileID: 6414406623306256055}
   adjustCorrect: 0
@@ -2554,7 +2556,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2537257683424695998}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5e1b990e68cce444cbc8e77147255620, type: 3}
   m_Name: 
@@ -2581,7 +2583,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2537257683424695998}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b121d8573d5175c4a8f91545aabd104b, type: 3}
   m_Name: 
@@ -2709,6 +2711,43 @@ MonoBehaviour:
   maxKickForce: 33
   scopeOffset: 0.25
   passScopeOffset: 0.1
+--- !u!114 &2040141982424645623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2537257683424695998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1a0ad03cdde09e49a7052329bfb303e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noButtonForPass: 1
+  conductionKickParams:
+    min: 2
+    max: 15
+    speed: 15
+  passKickParams:
+    min: 15
+    max: 30
+    speed: 15
+  shotKickParams:
+    min: 25
+    max: 40
+    speed: 15
+  managedKickParams:
+    min: 1
+    max: 30
+    speed: 1
+  controllerDistance: {fileID: 7665514520983759317}
+  controllerAim: {fileID: 7665514520983759315}
+  raycastAim: {fileID: 8645903839200241228}
+  playerInput: {fileID: 2079648792767599615}
+  slashHUD: {fileID: 4870839351584678817}
+  managedKickInputSensibility: 1.5
+  componentsPlayer: {fileID: 865301414014108576}
+  timeScalePass: 1
 --- !u!1 &2559729962654339175
 GameObject:
   m_ObjectHideFlags: 0
@@ -2965,7 +3004,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a160b6cf87acd2429375e65b4bb3fd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kickPeriod: 0.25
 --- !u!114 &2177292173258771815
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16266,6 +16304,7 @@ MonoBehaviour:
   componentsPlayer: {fileID: 865301414014108576}
   eventsGObj: {fileID: 1934643540134202012}
   componentsKeys: {fileID: 5892095905974397469}
+  cameraRotation: {fileID: 7665514520244319722}
   heightCurve:
     serializedVersion: 2
     m_Curve:
@@ -16328,7 +16367,7 @@ MonoBehaviour:
   distanceMaxPossession: 2
   distanceWithPossession: 1.61
   posOffsetY: 0.36890426
-  speedRotationKey: 80
+  speedRotationKey: 400
   speedRotationJoy: 250
   speedCameraTransitionBallDir: 4
   speedCameraWithPossesion: 100
@@ -16337,13 +16376,14 @@ MonoBehaviour:
   speedCameraTransition: 200
   speedCameraFree: 100
   speedCameraLookingBall: 100
-  speedPossesionMouseRotation: 600
+  speedPossesionMouseRotation: 25
   instantRotationAngle: 45
   offsetYPositionWithPossesion: 0.3
   currentSpeedCamera: 100.75957
   targetPositionLookingBall: {x: 46.526054, y: 0.43512774, z: 165.42113}
   scopeAdjust: 0
   controllerAim: {fileID: 7665514520983759315}
+  playerInput: {fileID: 2079648792767599615}
 --- !u!1 &5301575789343543149
 GameObject:
   m_ObjectHideFlags: 0
@@ -16660,6 +16700,7 @@ MonoBehaviour:
   - {fileID: 1774327558975632318}
   - {fileID: 1522896138978986979}
   - {fileID: 4399766939507035030}
+  transparencyCtrl: {fileID: 8160465391256992033}
   isLoaded: 0
 --- !u!114 &883008745318218051
 MonoBehaviour:
@@ -16753,7 +16794,7 @@ MonoBehaviour:
   playerEvents: {fileID: 470479630098790026}
   addPlayerToTeam: {fileID: 4816809672429268861}
   movimentValuesType: ultimate
-  movementValues: {fileID: 0}
+  movementValues: {fileID: 3180006910854916294}
   movementCtrl: {fileID: 487125407641543859}
   soccerPlayerData: {fileID: 5691364794298524021}
   animator: {fileID: 4691889915851426201}
@@ -16880,6 +16921,7 @@ GameObject:
   - component: {fileID: 8685845411182421802}
   - component: {fileID: 5892095905974397469}
   - component: {fileID: 2330480689457196867}
+  - component: {fileID: 2079648792767599615}
   m_Layer: 0
   m_Name: Behaviour
   m_TagString: ComponentsPlayer
@@ -16974,6 +17016,36 @@ MonoBehaviour:
   resistanceController: {fileID: 2973258186981470602}
   velocity: {fileID: 5436889380069774968}
   transparencyCtrl: {fileID: 8160465391256992033}
+--- !u!114 &2079648792767599615
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5892095905974397467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: d12e4863bb6e3af4789f2eb4acafd252, type: 3}
+  m_NotificationBehavior: 0
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents: []
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1 &5926251684717317842
 GameObject:
   m_ObjectHideFlags: 0
@@ -17120,6 +17192,7 @@ MonoBehaviour:
   componentsPlayer: {fileID: 865301414014108576}
   eventsGObj: {fileID: 1934643540134202012}
   componentsKeys: {fileID: 5892095905974397469}
+  cameraRotation: {fileID: 0}
   heightCurve:
     serializedVersion: 2
     m_Curve:
@@ -17198,6 +17271,7 @@ MonoBehaviour:
   targetPositionLookingBall: {x: 0, y: 0, z: 0}
   scopeAdjust: 0
   controllerAim: {fileID: 7665514520983759315}
+  playerInput: {fileID: 0}
 --- !u!1 &6075390975236910814
 GameObject:
   m_ObjectHideFlags: 0
@@ -18520,7 +18594,6 @@ MonoBehaviour:
   maxAngle: 18
   angleMinPivotmangleMaxPivot: 0
   maxDistanceForward: 0
-  playerMode: 0
   lookingBallTransitionDuration: 0.5
   a: 10
   b: 10
@@ -18543,6 +18616,7 @@ GameObject:
   - component: {fileID: 5436889380069774968}
   - component: {fileID: 9208165881097254443}
   - component: {fileID: 6634272875276179424}
+  - component: {fileID: 1900209400110546061}
   m_Layer: 0
   m_Name: Moviment
   m_TagString: Untagged
@@ -18818,13 +18892,13 @@ MonoBehaviour:
   forwardDeceleration: 0
   horizontalDeceleration: 0
   backDeceleration: 0
-  forwardAccelerationDistance: 4
+  startForwardAccelerationDistance: 4
   horizontalAccelerationDistance: 0.5
   backAccelerationDistance: 0.5
-  forwardDecelerationDistance: 1
+  startForwardDecelerationDistance: 2
   horizontalDecelerationDistance: 0.5
   backDecelerationDistance: 0.5
-  rotationSpeed: 800
+  rotationSpeed: 500
   minRotationSpeedWhileRun: 300
   maxSpeedWhileRun_AngularLerp: 4
   minSpeedForRotateBody: 2
@@ -18833,7 +18907,7 @@ MonoBehaviour:
   directionRotationSpeed: 360
   maxSpeedForReachBall: 0
   defaultMaxSpeedForReachBall: 0
-  maxAngleForRun: 95
+  maxAngleForRun: 70
   maxAngleForRun2: 0
   stopOffset: 0
   phase: 0
@@ -18874,7 +18948,6 @@ MonoBehaviour:
   eventsGObj: {fileID: 1934643540134202012}
   keys: {fileID: 5892095905974397469}
   componentsPlayer: {fileID: 865301414014108576}
-  playerMode: 2
   losePossessionEvent: {fileID: 0}
   distanceMaxPossession: 2
   sprintState: {fileID: 9208165881097254443}
@@ -18906,6 +18979,7 @@ MonoBehaviour:
   verticalRig: 0
   vertical: 0
   sprint: {fileID: 9208165881097254443}
+  cameraPosition: {fileID: 1431619878889550400}
   offsetPosition: {x: -0.5, y: 0, z: 0}
 --- !u!114 &2291254789714634948
 MonoBehaviour:
@@ -19030,7 +19104,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   acceleration: 4
-  posOffset: {x: -0.4, y: 0, z: 0}
+  posOffset: {x: -0.4, y: 0, z: -0.3}
 --- !u!114 &2973258186981470602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19162,6 +19236,7 @@ MonoBehaviour:
   state: 0
   sprint: 0
   keys: {fileID: 5892095905974397469}
+  playerInput: {fileID: 1900209400110546061}
 --- !u!114 &6634272875276179424
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19179,6 +19254,36 @@ MonoBehaviour:
     m_Bits: 5120
   tag: All
   componentsPlayer: {fileID: 865301414014108576}
+--- !u!114 &1900209400110546061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7665514520342718205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: d12e4863bb6e3af4789f2eb4acafd252, type: 3}
+  m_NotificationBehavior: 0
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents: []
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1 &7665514520983759342
 GameObject:
   m_ObjectHideFlags: 0
@@ -19273,6 +19378,7 @@ MonoBehaviour:
   ctrlSpeedWithEffect: {fileID: 7665514520983759319}
   controllerDistance: {fileID: 7665514520983759317}
   shotWithEffect: {fileID: 2537257683424695968}
+  playerInput: {fileID: 2079648792767599615}
   adjuctResolution: 0.000001
 --- !u!114 &7665514520983759316
 MonoBehaviour:
@@ -19287,8 +19393,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   info: Normal
-  speedMouseX: 200
-  speedMouseY: 200
+  speedMouseX: 0.05
+  speedMouseY: 0.05
   speedJoystickX: 1500
   speedJoystickY: 1500
   speedMinX: 0
@@ -19670,7 +19776,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8477065534045471466}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8aa40cb418584e49a4d0173b0138cbd, type: 3}
   m_Name: 

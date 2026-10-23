@@ -541,7 +541,7 @@ public class CullPassPoints : MonoBehaviour
                     playerPositionElement.decceleration = publicPlayerData.playerComponents.movementValues.forwardDeceleration;
                     playerPositionElement.maxSpeedRotation = publicPlayerData.playerComponents.movementValues.rotationSpeed;
                     playerPositionElement.maxSpeed = publicPlayerData.playerComponents.MaxSpeed;
-                    playerPositionElement.timePrecision = publicPlayerData.IsBot ? 0.05f : 0.4f;
+                    playerPositionElement.timePrecision = publicPlayerData.IsBot ? 0.2f : 0.2f;
                     if (!publicPlayerData.IsBot)
                     {
                         CullPassPointsComponent.userIndex = j;
@@ -1063,7 +1063,7 @@ public class CullPassPoints : MonoBehaviour
                 if (nextPosition != Vector3.positiveInfinity)
                 {
                     int index = players.IndexOf(publicPlayerData1);
-                    if (index != -1)
+                    if (index != -1&&publicPlayerData1.IsBot)
                     {
                         SetPlayerPosition(node, index, nextPosition, endSpeed1, endDirection1);
                         searchPlayData.SetPlayerTargetPosition(i, index, new Vector2(nextPositionTarget.x, nextPositionTarget.z));
@@ -1072,7 +1072,7 @@ public class CullPassPoints : MonoBehaviour
                 if (nextPosition2 != Vector3.positiveInfinity)
                 {
                     int index = players.IndexOf(publicPlayerData2);
-                    if (index != -1)
+                    if (index != -1 && publicPlayerData1.IsBot)
                     {
                         SetPlayerPosition(node, index, nextPosition2, endSpeed2, endDirection2);
                         searchPlayData.SetPlayerTargetPosition(i, index, new Vector2(nextPositionTarget2.x, nextPositionTarget2.z));

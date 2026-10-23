@@ -58,6 +58,8 @@ public class PublicPlayerData : MonoBehaviour
     public Team team { get; set; }
     public SideOfField SideOfField { get=>team.SideOfField;}
     public Team rivalTeam { get; set; }
+    public bool HasPossession { get=>playerMode==PlayerState.WithPossession;}
+
     public bool canChangeType = true;
     public PlayerType playerType;
     public GameObject puppetBehaviour, botBehaviour;

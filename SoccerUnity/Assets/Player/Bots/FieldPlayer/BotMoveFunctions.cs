@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class BotMoveFunctions : PlayerComponent
 {
-    CullPassPoints CullPassPoints;
+    CullPassPoints CullPassPoints{ get => MatchComponents.CullPassPoints; }
     Team attackTeam { get => CullPassPoints.attackTeam; }
     Team defenseTeam { get => CullPassPoints.defenseTeam; }
     public SearchPlayData searchPlayData { get => CullPassPoints.searchPlayData; }
@@ -17,7 +17,6 @@ public class BotMoveFunctions : PlayerComponent
     void Start()
     {
         MatchEvents.kick.AddListener(SomeOneKickBall);
-        CullPassPoints = MatchComponents.CullPassPoints;
     }
     void SomeOneKickBall(KickEventArgs KickEventArgs)
     {
@@ -41,7 +40,7 @@ public class BotMoveFunctions : PlayerComponent
         available = false;
         goLonelyPoint = true;
         lonelyPointPosition = lonelyPointElement.Get3DPosition(0);
-        if (Vector2.Dot(forward, dir) <= 0 && SegmentLineIntersectionXZ(playerPosition, targetPosition, offsideLine, offsideLine + Vector3.right, out Vector3 offsidePoint)&&false)
+        if (Vector2.Dot(forward, dir) <= 0 && SegmentLineIntersectionXZ(playerPosition, targetPosition, offsideLine, offsideLine + Vector3.right, out Vector3 offsidePoint))
         {
             //Debug.DrawLine(offsidePoint, offsidePoint + Vector3.up * 3, Color.black);
             publicPlayerData.playerComponents.movementCtrl.scope = 0.1f;

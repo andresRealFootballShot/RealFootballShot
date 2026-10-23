@@ -219,7 +219,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soundPoints: {fileID: 0}
-  maxVolume: 0.2
+  maxVolume: 0.05
 --- !u!114 &1322839334424030255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -298,9 +298,10 @@ MonoBehaviour:
   prefixField: -1
   Synchronization: 0
   OwnershipTransfer: 0
+  observableSearch: 0
   ObservedComponents:
   - {fileID: 0}
-  viewIdField: 0
+  sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
 --- !u!114 &-4214749390295709167

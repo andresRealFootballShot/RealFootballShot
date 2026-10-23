@@ -36,6 +36,7 @@ public class MatchEvents : MonoBehaviour,IClearBeforeLoadScene
     public static MyEvent myPlayerIDLoaded = new MyEvent(nameof(myPlayerIDLoaded));
     public static MyEvent<KickEventArgs> kick = new MyEvent<KickEventArgs>(nameof(kick));
     public static MyEvent losePossession = new MyEvent(nameof(losePossession));
+    public static MyEvent changeTeamPossession = new MyEvent(nameof(changeTeamPossession));
     public static MyEvent getPossession = new MyEvent(nameof(getPossession));
     public static MyEvent cameraIsInThirtPersonPosition = new MyEvent(nameof(cameraIsInThirtPersonPosition));
     public static MyEvent endStartingScreen = new MyEvent(nameof(endStartingScreen));

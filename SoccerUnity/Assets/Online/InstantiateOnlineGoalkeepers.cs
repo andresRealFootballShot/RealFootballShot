@@ -150,7 +150,7 @@ public class InstantiateOnlineGoalkeepers : MonoBehaviourPunCallbacks, IOnEventC
     {
         GoalkeeperCtrl goalkeeperCtrl = goalkeeper.GetComponent<GoalkeeperCtrl>();
         //goalkeeperBody.transform.parent = goalkeeper.transform;
-        goalkeeperCtrl.goalKeeperTransform = goalkeeperBody.transform;
+        //goalkeeperCtrl.goalKeeperTransform = goalkeeperBody.transform;
         Transform wirst1 = MyFunctions.FindChildContainsName(goalkeeperBody, "Wirst1", true).transform;
         goalkeeperCtrl.wirst1 = wirst1;
         Transform armature = MyFunctions.FindChildContainsName(goalkeeperBody, "Armature", true).transform;

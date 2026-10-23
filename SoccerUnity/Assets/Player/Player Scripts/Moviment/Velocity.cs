@@ -22,14 +22,14 @@ public class Velocity : MonoBehaviour
     //No cambiar a update.En update se calcula mal la velocidad
     void FixedUpdate()
     {
-        //calculateVelocity(Time.fixedDeltaTime);
+        calculateVelocity(Time.fixedDeltaTime);
     }
     void calculateVelocity(float delta)
     {
         float distanceMoved = Vector3.Distance(componentsPlayer.transBody.position, previousPos) / delta;
         Vector3 dir = previousPos - componentsPlayer.transBody.position;
         //print((dir / delta).magnitude);
-        componentsPlayer.playerComponents.playerData.Velocity= dir/delta;
+        //componentsPlayer.playerComponents.playerData.Velocity= dir/delta;
         textHUD.text.text = componentsPlayer.playerComponents.playerData.Speed.ToString("f1");
         previousPos = componentsPlayer.transBody.position;
     }
