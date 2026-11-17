@@ -62,6 +62,13 @@ public class CameraRotation : PlayerComponent
             }
         }
     }
+    public void ChangeToFree()
+    {
+        Vector3 point = MyFunctions.setYToVector3(componentsPlayer.componentsBall.transCenterBall.position, pivot2CameraTransform.position.y);
+
+        StartCoroutine(freeCameraTransition(point, 10));
+        currentSpeedCamera = 100;
+    }
     void Update()
     {
         if (!MenuCtrl.isEnable && (Input.GetKeyDown(ComponentsKeys.keyFreeCamera) || false && Input.GetKeyDown(ComponentsKeys.joyRotateAround)))
@@ -70,10 +77,7 @@ public class CameraRotation : PlayerComponent
             {
                 if(playerState == PlayerState.Free)
                 {
-                    Vector3 point = MyFunctions.setYToVector3(componentsPlayer.componentsBall.transCenterBall.position,pivot2CameraTransform.position.y);
-                    
-                    StartCoroutine(freeCameraTransition(point, 10));
-                    currentSpeedCamera = 100;
+                    ChangeToFree();
                 }
                 else
                 {

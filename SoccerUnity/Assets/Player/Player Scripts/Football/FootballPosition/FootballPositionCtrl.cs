@@ -157,22 +157,23 @@ public class FootballPositionCtrl : MonoBehaviour
         };
     public static Dictionary<TypeNormalMatch, string> DefensePressureTypeNormalMatch = new Dictionary<TypeNormalMatch, string>() {
              { TypeNormalMatch.FourVsFour,"Default Defense FourVsFour"},
-             { TypeNormalMatch.TenVSTen,"Default"}
+             { TypeNormalMatch.TenVSTen,"Default Defense TenVsTen"}
         };
     public static Dictionary<TypeNormalMatch, string> AttackPressureTypeNormalMatch = new Dictionary<TypeNormalMatch, string>() {
              { TypeNormalMatch.FourVsFour,"Default Attack FourVsFour"},
-             { TypeNormalMatch.TenVSTen,"Default Attack"}
+             { TypeNormalMatch.TenVSTen,"Default Attack TenVsTen"}
         };
     public static Dictionary<TypeNormalMatch, string> StartAttackPressureTypeNormalMatch = new Dictionary<TypeNormalMatch, string>() {
              { TypeNormalMatch.FourVsFour,"Start Attack FourVsFour"},
-             { TypeNormalMatch.TenVSTen,"Start Attack"}
+             { TypeNormalMatch.TenVSTen,"Start Attack TenVsTen"}
         };
     public static Dictionary<TypeNormalMatch, string> StartDefensePressureTypeNormalMatch = new Dictionary<TypeNormalMatch, string>() {
              { TypeNormalMatch.FourVsFour,"Start Defense FourVsFour"},
-             { TypeNormalMatch.TenVSTen,"Start Defense"}
+             { TypeNormalMatch.TenVSTen,"Start Defense TenVsTen"}
         };
     public static Dictionary<TypeNormalMatch, string> CornerPressureTypeNormalMatch = new Dictionary<TypeNormalMatch, string>() {
              { TypeNormalMatch.FourVsFour,"Corner FourVsFour"},
+             { TypeNormalMatch.TenVSTen,"Corner TenVsTen"}
         };
     /* void Start()
     {

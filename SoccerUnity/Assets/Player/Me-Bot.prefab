@@ -2725,29 +2725,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   noButtonForPass: 1
   conductionKickParams:
-    min: 2
+    min: 5
     max: 15
     speed: 15
   passKickParams:
-    min: 15
+    min: 10
     max: 30
     speed: 15
   shotKickParams:
     min: 25
     max: 40
     speed: 15
-  managedKickParams:
+  conductionManagedKickParams:
     min: 1
+    max: 7
+    speed: 1
+    managedKickInputSensibility: 0.04
+    managedKickTimeSensibility: 4
+  passManagedKickParams:
+    min: 10
     max: 30
     speed: 1
+    managedKickInputSensibility: 0.02
+    managedKickTimeSensibility: 2
+  shotManagedParams:
+    min: 25
+    max: 40
+    speed: 1
+    managedKickInputSensibility: 0.02
+    managedKickTimeSensibility: 2
   controllerDistance: {fileID: 7665514520983759317}
   controllerAim: {fileID: 7665514520983759315}
   raycastAim: {fileID: 8645903839200241228}
   playerInput: {fileID: 2079648792767599615}
   slashHUD: {fileID: 4870839351584678817}
-  managedKickInputSensibility: 1.5
   componentsPlayer: {fileID: 865301414014108576}
-  timeScalePass: 1
+  timeScalePass: 0.25
 --- !u!1 &2559729962654339175
 GameObject:
   m_ObjectHideFlags: 0
@@ -18175,7 +18188,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7070614205860097510
 Transform:
   m_ObjectHideFlags: 0
@@ -20009,7 +20022,6 @@ GameObject:
   - component: {fileID: 7566365661870966334}
   - component: {fileID: 3572827051799102899}
   - component: {fileID: 7114702168108000925}
-  - component: {fileID: 5734392482645222742}
   - component: {fileID: 7807146337469972403}
   - component: {fileID: 7289821564369998446}
   - component: {fileID: 4231389848457509844}
@@ -20070,20 +20082,6 @@ MonoBehaviour:
   typePlayer: 0
   onlineActor: 0
   localActor: 0
---- !u!114 &5734392482645222742
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8904833852635740145}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a82e3805e7b09464ba98a14e4c08481a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  myPublicFieldData: {fileID: 883008745318218051}
-  movimentValues: {fileID: 3180006910854916294}
 --- !u!114 &7807146337469972403
 MonoBehaviour:
   m_ObjectHideFlags: 0

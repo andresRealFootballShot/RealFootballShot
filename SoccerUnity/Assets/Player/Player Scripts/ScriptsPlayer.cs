@@ -22,8 +22,5 @@ public class ScriptsPlayer : MonoBehaviour
     public ResistanceController resistanceController;
     public Velocity velocity;
     public TransparencyCtrl transparencyCtrl;
-    private void Awake()
-    {
-        
-    }
+    
 }

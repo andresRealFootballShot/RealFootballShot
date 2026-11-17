@@ -52,6 +52,7 @@ public class LookingBallMoviment : Moviment
         playerComponents.movementCtrl.BotMove(Time.deltaTime);
         //playerComponents.movementCtrl.getAdjustedForwardVelocitySpeed(Time.deltaTime);
         playerComponents.movementCtrl.animator(Time.deltaTime);
+        cameraPosition.setPositionLookingBall(Time.unscaledDeltaTime);
     }
     void FreelanceMode()
     {

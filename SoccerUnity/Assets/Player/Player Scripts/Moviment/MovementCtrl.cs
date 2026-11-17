@@ -422,6 +422,18 @@ public class MovementCtrl : MovementPlayerComponent
         startMoveTimes();
 
     }
+    public void SetTargetPosition(Vector3 targetPosition,float speed)
+    {
+        playerComponents.ForwardDesiredSpeed = speed;
+
+        StopMove = false;
+        LookTarget = true;
+        playerComponents.MinForwardSpeed = 0;
+        playerComponents.TargetPosition = targetPosition;
+        playerComponents.stopOffset = 0;
+        startMoveTimes();
+
+    }
     public void SetInstantVelocity(Vector3 dir, float speed)
     {
         playerComponents.ForwardDesiredSpeed = speed;

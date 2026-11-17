@@ -62,7 +62,7 @@ public class Brains : MonoBehaviour
     float startPassMeTime;
     bool passMeAvailable { get => Time.time - startPassMeTime >= passMePeriod; }
     bool myTeamPossession { get => MatchComponents.currentReachBallTeam.Equals(MatchComponents.myTeam); }
-    
+    float defenseReachBallTime;
     void Start()
     {
         MatchEvents.kick.AddListener(kick);
@@ -78,9 +78,8 @@ public class Brains : MonoBehaviour
     {
         if (enable)
         {
-            Play();
+           Play();
         }
-        
     }
     public void Enable()
     {
@@ -93,8 +92,10 @@ public class Brains : MonoBehaviour
         UpdateNextLonelyPoint();
         GetTeams();
         //checkFirstReachBall();
-        Attack();
-        Defense();
+        if (matchData.inGame){
+            Attack();
+            Defense();
+        }
         //checkReflex();
     }
     public LonelyPointElement2 GetReachableLonelyPoint(int index)
@@ -152,7 +153,7 @@ public class Brains : MonoBehaviour
 
             
         }
-        if (MatchComponents.currentPublicPlayerData != null && MatchComponents.currentPublicPlayerData.playerID.Equals(args.playerID))
+        if (MatchComponents.currentMyPublicPlayerData != null && MatchComponents.currentMyPublicPlayerData.playerID.Equals(args.playerID))
         {
             startPassMeTime = Time.time;
         }
@@ -162,13 +163,13 @@ public class Brains : MonoBehaviour
         }
         if ((angle > 10 || m > 2) && userReflexAvailable)
         {
-            if (MatchComponents.currentPublicPlayerData != null && MatchComponents.currentPublicPlayerData.playerID.Equals(args.playerID))
+            if (MatchComponents.currentMyPublicPlayerData != null && MatchComponents.currentMyPublicPlayerData.playerID.Equals(args.playerID))
             {
                 startUserReflexTime = Time.time;
             }
         }
         
-        if (MatchComponents.currentPublicPlayerData != null && MatchComponents.currentPublicPlayerData.playerID.Equals(args.playerID)&&previousPlayerKicker!=MatchComponents.currentPublicPlayerData.playerID&& userReflexAvailable)
+        if (MatchComponents.currentMyPublicPlayerData != null && MatchComponents.currentMyPublicPlayerData.playerID.Equals(args.playerID)&&previousPlayerKicker!=MatchComponents.currentMyPublicPlayerData.playerID&& userReflexAvailable)
         {
             startUserReflexTime = Time.time;
             userReachBallReflex = firstUserReachBallReflex;
@@ -205,7 +206,7 @@ public class Brains : MonoBehaviour
             publicPlayerData.movimentValues.maxSpeedForReachBall = 0;
             if (reflexAvailable){
                 if (firstDefenseReachBall == null || !firstDefenseReachBall.Equals(publicPlayerData))
-                    publicPlayerData.movimentValues.maxForwardSpeed = publicPlayerData.movimentValues.defaultMaxForwardSpeed;
+                    publicPlayerData.movimentValues.ForwardDesiredSpeed = publicPlayerData.movimentValues.defaultMaxForwardSpeed;
                 Vector3 ballPos = attackTeam.validReachBall ? attackTeam.firstBallReachPosition : MatchComponents.ballPosition;
                 if (!FootballPositionCtrl.GetFieldPositionDataPosition("Default", defenseTeam.pressure, publicPlayerData, ballPos, out Vector3 targetPosition)) continue;
                 
@@ -241,11 +242,14 @@ public class Brains : MonoBehaviour
         bool reflex = attackTeam.firstReachBallPublicPlayerData.IsPuppet? userReflexAvailable : reflexAvailable;
         if (reflex || firstDefenseReachBall.playerID.Equals(previousPlayerKicker))
         {
-            if(!attackTeam.firstReachBallPublicPlayerData.IsBot)
-                firstDefenseReachBall.movimentValues.maxForwardSpeed = firstDefenseReachBall.movimentValues.defaultMaxForwardSpeed;
-            else
-                firstDefenseReachBall.movimentValues.maxForwardSpeed = firstDefenseReachBall.movimentValues.defaultMaxForwardSpeed;
-            firstDefenseReachBall.playerComponents.movementCtrl.SetTargetPosition(ballReachPosition);
+            float posY = MatchComponents.footballField.getBallNormalizedPositionY(defenseTeam);
+            posY = (posY - 0.1f) / 0.6f;
+            float t = Mathf.Lerp(0,1, (defenseReachBallTime-attackTeam.firstReachBallTime)/0.5f);
+
+            float speed = Mathf.Lerp(firstDefenseReachBall.movimentValues.defaultMaxForwardSpeed,firstDefenseReachBall.movimentValues.defaultMaxForwardSpeed * 0.3f,posY);
+             speed = Mathf.Lerp(firstDefenseReachBall.movimentValues.defaultMaxForwardSpeed, speed,t);
+            
+            firstDefenseReachBall.playerComponents.movementCtrl.SetTargetPosition(ballReachPosition, speed);
         }
         
     }
@@ -267,7 +271,7 @@ public class Brains : MonoBehaviour
         foreach (PublicPlayerData publicPlayerData in team.outfieldPublicPlayerDatas)
         {
             if (publicPlayerData.IsPuppet) continue;
-            publicPlayerData.movimentValues.maxForwardSpeed = publicPlayerData.movimentValues.defaultMaxForwardSpeed;
+            publicPlayerData.movimentValues.ForwardDesiredSpeed = publicPlayerData.movimentValues.defaultMaxForwardSpeed;
             //publicPlayerData.movimentValues.maxSpeedForReachBall = 5;
             if(Vector3.Distance(publicPlayerData.playerComponents.TargetPosition,publicPlayerData.position)<publicPlayerData.playerComponents.scope)busyPlayers.Remove(publicPlayerData);
             if (busyPlayers.Contains(publicPlayerData)||publicPlayerData.Equals(passerPublicPlayerData)) continue;
@@ -350,7 +354,7 @@ public class Brains : MonoBehaviour
             return;
         }
         PublicPlayerData publicPlayerData = passerPublicPlayerData;
-        if (!publicPlayerData.playerID.Equals(previousPlayerKicker) || MatchComponents.currentPublicPlayerData !=null&& MatchComponents.currentPublicPlayerData.Equals(publicPlayerData))
+        if (!publicPlayerData.playerID.Equals(previousPlayerKicker) || MatchComponents.currentMyPublicPlayerData !=null&& MatchComponents.currentMyPublicPlayerData.Equals(publicPlayerData))
         {
             publicPlayerData.movimentValues.maxSpeedForReachBall = 0;
         }
@@ -358,7 +362,9 @@ public class Brains : MonoBehaviour
         {
             publicPlayerData.movimentValues.maxSpeedForReachBall = publicPlayerData.playerComponents.TargetPositionForwardAngle>publicPlayerData.playerComponents.playerSkills.MaxAngleControl?0:5;
         }
-        publicPlayerData.movimentValues.maxForwardSpeed = publicPlayerData.movimentValues.defaultMaxForwardSpeed;
+        float posY = MatchComponents.footballField.getBallNormalizedPositionY(defenseTeam);
+
+        publicPlayerData.movimentValues.ForwardDesiredSpeed = publicPlayerData.movimentValues.defaultMaxForwardSpeed;
         if (publicPlayerData.IsBot)
         {
             publicPlayerData.playerComponents.scope = publicPlayerData.playerComponents.movementCtrl != null ? publicPlayerData.playerComponents.movementCtrl.defaultScope : 0;
@@ -379,9 +385,9 @@ public class Brains : MonoBehaviour
         {
             foreach(PublicPlayerData publicPlayerData in CullPassPoints.players)
             {
-                if (publicPlayerData.IsBot)
+                if (publicPlayerData.IsBot&& MatchComponents.currentMyPublicPlayerData!=null)
                 {
-                    if (!MatchComponents.isOnlyBots && myTeamPossession && MatchComponents.currentPublicPlayerData.HasPossession&&publicPlayerData.team.Equals(MatchComponents.myTeam)) continue;
+                    if (!MatchComponents.isOnlyBots && myTeamPossession && MatchComponents.currentMyPublicPlayerData.HasPossession&&publicPlayerData.team.Equals(MatchComponents.myTeam)) continue;
                     if (publicPlayerData.ReachBall())
                     {
                         LonelyPointElement2 lonelyPoint = nextLonelyPoint;
@@ -580,6 +586,7 @@ public class Brains : MonoBehaviour
         int index = Mathf.FloorToInt(Random.Range(0, Mathf.Min(list.Count, randomLonelyPointMax-1)));
         nextLonelyPoint = list[index];
     }
+   
     public void GetCullPassPointData()
     {
         if (!cullPassPointEnable||  CullPassPoints.firstReachLonelyPoints.Count <= passIndex || !changedPass&&false) return;
@@ -594,6 +601,10 @@ public class Brains : MonoBehaviour
         
 
             ballReachPosition =  attackTeam.firstBallReachPosition;
+        if(defenseTeam.firstReachBallPublicPlayerData!=null)
+            defenseReachBallTime = GetTimeToReachPointDOTS.accelerationGetTimeToReachPosition2(defenseTeam.firstReachBallPublicPlayerData, attackTeam.firstBallReachPosition, out Vector3 posAfterBrake, out float tBrake, out float brakeSpeed);
+
+        
             changedPass = false;
 
             if (!thereIsCurrentData)
@@ -652,7 +663,7 @@ public class Brains : MonoBehaviour
             foreach (LonelyPointElement2 lonelyPointElement in CullPassPoints.firstReachLonelyPoints)
             {
                 PublicPlayerData publicPlayerData = CullPassPoints.GetPublicPlayerData(lonelyPointElement.attackReachIndex);
-                if (publicPlayerData!=null&&publicPlayerData.Equals(MatchComponents.currentPublicPlayerData)&&lonelyPointElement.weight>0)
+                if (publicPlayerData!=null&&publicPlayerData.Equals(MatchComponents.currentMyPublicPlayerData)&&lonelyPointElement.weight>0)
                 {
                     nextLonelyPoint = lonelyPointElement;
                     thereIsLonelyPoint = true;

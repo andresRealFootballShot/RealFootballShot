@@ -33,6 +33,7 @@ public class PlayerData
     public bool shotKick { get; set; }
     public bool loadKick { get; set; }
     public bool passKick { get; set; }
+    public bool conductionKick { get; set; }
     public bool managedKick { get; set; }
     public bool executeKick { get; set; }
 

@@ -13,6 +13,7 @@ public class PossessionCtrl : PlayerComponent
     }
     void Kick(KickEventArgs args)
     {
+        if(ComponentsPlayer.myMonoPlayerID!=null)
         if (!args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerID.ToString()))
         {
             if (ownerBall)

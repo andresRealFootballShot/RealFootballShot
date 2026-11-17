@@ -48,7 +48,7 @@ public class ManualChooseFieldPositionCtrl : MonoBehaviour
         Team team;
         chooseFieldPositionCtrl.HideMenu();
         chooseTeamCtrl.HideMenu();
-        if(Teams.getTeamFromPlayer(MatchComponents.currentPublicPlayerData.playerID,out team))
+        if(Teams.getTeamFromPlayer(MatchComponents.currentMyPublicPlayerData.playerID,out team))
         {
             
             TypeFieldPosition.Type typeFieldPosition;

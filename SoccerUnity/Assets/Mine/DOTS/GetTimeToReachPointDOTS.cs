@@ -281,6 +281,96 @@ namespace DOTS_ChaserDataCalculation
             return tBrake + tMove;
         }
         public static float accelerationGetTimeToReachPosition2(
+            PublicPlayerData publicPlayerData,
+            Vector3 targetPosition,
+             out Vector3 posAfterBrake, out float tBrake, out float brakeSpeed)
+        {
+
+            brakeSpeed = publicPlayerData.speed;
+            if (MyFunctions.Vector3IsNan(targetPosition) ||
+                targetPosition.Equals(Vector3.positiveInfinity) ||
+                targetPosition.Equals(Vector3.negativeInfinity))
+            {
+                posAfterBrake = Vector3.positiveInfinity;
+                tBrake = Mathf.Infinity;
+                return Mathf.Infinity;
+            }
+            PlayerComponents playerComponents = publicPlayerData.playerComponents;
+            Vector3 playerPos = publicPlayerData.position;
+            Vector3 playerDir = playerComponents.bodyY0Forward;
+            playerDir.y = 0f;
+            playerDir.Normalize();
+
+            float speed = playerComponents.Speed;
+
+            Vector3 toTargetInitial = targetPosition - playerPos;
+            toTargetInitial.y = 0f;
+
+            float angle = Vector3.Angle(playerDir, toTargetInitial.normalized);
+
+            tBrake = 0f;
+            posAfterBrake = playerPos;
+            // =========================
+            // FASE 0 – FRENO (idéntica)
+            // =========================
+            if (angle > playerComponents.movementValues.maxAngleForRun)
+            {
+                float3 posTmp;
+                float tTmp;
+
+                if (PlayerInterceptionJob.EstimateBrakeMove(
+                    playerPos,
+                    playerDir,
+                    targetPosition,
+                    speed,
+                    playerComponents.movementValues.maxAngleForRun2,
+                    playerComponents.movementValues.minSpeedForRotateBody,
+                    playerComponents.movementValues.forwardDeceleration,
+                    out posTmp,
+                    out tTmp))
+                {
+                    posAfterBrake = posTmp;
+                    tBrake = tTmp;
+                    speed = Mathf.Clamp(playerComponents.movementValues.minSpeedForRotateBody, 0, speed);
+                    brakeSpeed = speed;
+                }
+                else
+                {
+                    float deltaV = Mathf.Clamp(speed - playerComponents.movementValues.minSpeedForRotateBody2, 0, Mathf.Infinity);
+                    tBrake = deltaV / playerComponents.movementValues.forwardDeceleration;
+
+                    float dBrake =
+                        (speed * speed -
+                         playerComponents.movementValues.minSpeedForRotateBody2 * playerComponents.movementValues.minSpeedForRotateBody2) /
+                        (2f * playerComponents.movementValues.forwardDeceleration);
+
+                    posAfterBrake += playerDir * dBrake;
+                    speed = Mathf.Clamp(playerComponents.movementValues.minSpeedForRotateBody2, 0, speed);
+                    brakeSpeed = speed;
+                }
+            }
+
+            // =========================
+            // FASE 2 – DESPLAZAMIENTO
+            // =========================
+            Vector3 toTargetAfterBrake = targetPosition - posAfterBrake;
+            toTargetAfterBrake.y = 0f;
+
+            float distanceToTarget =
+                Mathf.Max(toTargetAfterBrake.magnitude - playerComponents.scope, 0f);
+
+            float tMove = PlayerInterceptionJob.EstimateTimeToReach(
+                distanceToTarget,
+                speed,
+                playerComponents.movementValues.forwardAcceleration,
+                playerComponents.movementValues.forwardDeceleration,
+                playerComponents.MaxSpeed,
+                playerComponents.movementValues.maxSpeedForReachBall
+            );
+
+            return tBrake + tMove;
+        }
+        public static float accelerationGetTimeToReachPosition2(
             Vector3 playerPosition,
             float currentSpeed,
             Vector3 bodyForward,

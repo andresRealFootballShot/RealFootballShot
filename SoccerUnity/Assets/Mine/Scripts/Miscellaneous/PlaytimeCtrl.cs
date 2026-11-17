@@ -22,7 +22,7 @@ public class PlaytimeCtrl : MonoBehaviour
     public bool playIntro=true;
     public void StartProcess()
     {
-        componentsPlayer = FindObjectOfType<ComponentsPlayer>();
+        //componentsPlayer = FindObjectOfType<ComponentsPlayer>();
         //componentsBall = FindObjectOfType<ComponentsBall>();
         //setupBall();
         setupLocalPlayersID();
@@ -30,7 +30,7 @@ public class PlaytimeCtrl : MonoBehaviour
         setupKicks();
         setupGoalkeeperTrigger();
         startingScreen();
-        setupIntro();
+        //setupIntro();
         setupCamera();
         setupPublicPlayerData();
         //Intro();
@@ -151,7 +151,7 @@ public class PlaytimeCtrl : MonoBehaviour
         initCameraPosition = posCamera.position;
         initCameraRotation = posCamera.rotation;
         //losePossessionEvent.Invoke();
-        componentsPlayer.DisableAll();
+        //componentsPlayer.EnableAll();
         MatchEvents.endStartingScreen.AddListenerConsiderInvoked(startPlayerIntro);
     }
     void startPlayerIntro()
@@ -191,7 +191,7 @@ public class PlaytimeCtrl : MonoBehaviour
     {
         cameraLookingBall.end += cameraIsInPosition;
         cameraLookingBall.addCondition(distanceFromCameraToTargetPositionLookingBall);
-
+        
         transition.addFunction(setCameraRotationPosition);
     }
     void setupPublicPlayerData()

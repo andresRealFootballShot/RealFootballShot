@@ -35,13 +35,14 @@ public class ControllerMoveBody : PlayerComponent
     }
     void Kick(KickEventArgs args)
     {
+        if(MatchComponents.currentMyPublicPlayerData!=null)
         if (args.playerID.Equals(ComponentsPlayer.myMonoPlayerID.playerID.ToString()))
         {
 
             Vector3 kickDirection = args.kickVelocity;
             if (playerMode == PlayerState.LookingBall || playerMode == PlayerState.WithPossession)
             {
-                if (kickDirection.magnitude < PuppetParameters.maxKickForceToExitWithPossessionState)
+                if (kickDirection.magnitude < PuppetParameters.maxKickForceToExitWithPossessionState&& !playerData.passKick && !playerData.shotKick)
                     playerMode = PlayerState.WithPossession;
                 else
                 {

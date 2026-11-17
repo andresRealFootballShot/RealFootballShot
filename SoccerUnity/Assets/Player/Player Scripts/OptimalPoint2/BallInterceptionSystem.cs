@@ -288,6 +288,7 @@ public class BallInterceptionSystem : MonoBehaviour
                 Teams.allPlayers[i].playerData.validReachPosition = false;
             }
         }
+        
     }
     void ResizeIfNeeded()
     {

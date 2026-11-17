@@ -98,6 +98,14 @@ public class CameraPosition : PlayerComponent
             speedCameraWithPossession = 10;
         }
     }
+    public void ChangeToFree()
+    {
+        playerState = PlayerState.Free;
+        Vector3 posPivot1 = componentsPlayer.transPivotCamera1.position;
+        //componentsPlayer.transPivotCamera1.position = new Vector3(posPivot1.x, posOffsetY, posPivot1.z);
+        componentsPlayer.transPivotCamera1.position = new Vector3(posPivot1.x, posOffsetY, posPivot1.z);
+        startTransitionSpeedCameraCoroutine(speedStartCameraTransition, speedCameraTransition, speedCameraFree);
+    }
     private void Update()
     {
         if (MenuCtrl.isEnable) return;
@@ -106,11 +114,7 @@ public class CameraPosition : PlayerComponent
         {
             if (playerState==PlayerState.LookingBall)
             {
-                playerState = PlayerState.Free;
-                Vector3 posPivot1 = componentsPlayer.transPivotCamera1.position;
-                //componentsPlayer.transPivotCamera1.position = new Vector3(posPivot1.x, posOffsetY, posPivot1.z);
-                componentsPlayer.transPivotCamera1.position = new Vector3(posPivot1.x, posOffsetY, posPivot1.z);
-                startTransitionSpeedCameraCoroutine(speedStartCameraTransition,speedCameraTransition, speedCameraFree);
+                ChangeToFree();
             }
             else if(playerState == PlayerState.WithPossession || false&&playerState == PlayerState.Free)
             {
@@ -202,7 +206,7 @@ public class CameraPosition : PlayerComponent
     }
     public void CameraMove()
     {
-        float deltaTime = Time.fixedDeltaTime;   
+        float deltaTime = Time.fixedUnscaledDeltaTime;   
         //Dejar SetPositionPivot aquí para que al cambiar a FreeLook la camara esté mirando al balón
         if (playerComponents == null) return;
         switch (playerState)

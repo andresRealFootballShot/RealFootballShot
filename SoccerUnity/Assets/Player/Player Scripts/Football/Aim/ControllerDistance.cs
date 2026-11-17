@@ -22,9 +22,21 @@ public class ControllerDistance : PlayerComponent
         if (playerComponents == null) return false;
         Vector3 bodyPos = componentsPlayer.transBody.position;
         Vector3 ballPos = componentsPlayer.componentsBall.transCenterBall.position;
-        float d = playerMode==PlayerState.Free? BodyBallXZDistance: BodyBallXZDistance;
+        float d = playerMode==PlayerState.Free? BodyBallXZDistance: BodyTargetXZDistance;
         float scope = playerMode == PlayerState.Free ? 0.25f : 1f;
         if ( d<= ballScope+ scope)
+            return true;
+        else
+            return false;
+    }
+    public bool isClose2()
+    {
+        if (playerComponents == null) return false;
+        Vector3 bodyPos = componentsPlayer.transBody.position;
+        Vector3 ballPos = componentsPlayer.componentsBall.transCenterBall.position;
+        float d = playerMode == PlayerState.Free ? BodyBallXZDistance : BodyBallXZDistance;
+        float scope = playerMode == PlayerState.Free ? 0.25f : 1f;
+        if (d <= ballScope + scope)
             return true;
         else
             return false;

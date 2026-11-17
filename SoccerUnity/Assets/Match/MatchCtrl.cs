@@ -13,6 +13,7 @@ public class MatchCtrl : MonoBehaviour
     public float volume = 0.1f;
     public float startTime = 2;
     public MatchData MatchData { get => MatchComponents.MatchData; set => MatchComponents.MatchData = value; }
+    public bool testing;
     void Start()
     {
         MatchComponents.MatchCtrl = this;
@@ -25,8 +26,17 @@ public class MatchCtrl : MonoBehaviour
             MatchComponents.MatchData.possessionTeam = team.startAttack ? team : MatchComponents.MatchData.possessionTeam;
             MatchComponents.MatchData.noPossessionTeam = !team.startAttack ? team : MatchComponents.MatchData.noPossessionTeam;
         }
-        
-        StartContinueMatch();
+        if (testing)
+        {
+            InitialMatch();
+            Invoke(nameof(EnableGame), startTime);
+        }
+        else
+        {
+            StartContinueMatch();
+
+        }
+
         MatchEvents.kick.AddListener(Kick);
     }
 
@@ -52,6 +62,7 @@ public class MatchCtrl : MonoBehaviour
         {
             team.startAttack = team.TeamName == MatchData.startAttackTeamName;
         }
+        MatchData.possessionTeam = MatchData.startAttackTeam;
         InitialMatch();
         MatchComponents.ballPosition = MatchComponents.footballField.center;
         MatchComponents.ballVelocity = Vector3.zero;

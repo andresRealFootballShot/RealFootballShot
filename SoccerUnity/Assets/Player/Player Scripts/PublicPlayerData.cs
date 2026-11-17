@@ -73,7 +73,7 @@ public class PublicPlayerData : MonoBehaviour
        
         playerComponents.defaultScope = playerComponents.ballScope*0.7f;
         playerComponents.scope = playerComponents.defaultScope;
-        if (initPuppet) MatchComponents.currentPublicPlayerData = this;
+        if (initPuppet) MatchComponents.currentMyPublicPlayerData = this;
         if(canChangeType)
             ChangePlayerType(playerType.Value, true);
     }
@@ -192,14 +192,16 @@ public class PublicPlayerData : MonoBehaviour
                     puppetBehaviour.SetActive(false);
                     botBehaviour.SetActive(true);
                     this.playerType.Value = PlayerTypeID.Bot;
+                    
                 break;
             case PlayerTypeID.Puppet:
                     puppetBehaviour.SetActive(true);
                     botBehaviour.SetActive(false);
                     this.playerType.Value = PlayerTypeID.Puppet;
-                    MatchComponents.currentPublicPlayerData = this;
-                    ComponentsPlayer.currentComponentsPlayer = MatchComponents.currentPublicPlayerData.playerComponents.ComponentsPlayer;
-                    ComponentsPlayer.myMonoPlayerID = MatchComponents.currentPublicPlayerData.playerIDMono;
+                    MatchComponents.currentMyPublicPlayerData = this;
+                    ComponentsPlayer.currentComponentsPlayer = MatchComponents.currentMyPublicPlayerData.playerComponents.ComponentsPlayer;
+                    ComponentsPlayer.myMonoPlayerID = MatchComponents.currentMyPublicPlayerData.playerIDMono;
+                    ComponentsPlayer.currentComponentsPlayer.EnableAll();
                 break;
         }
     }
@@ -213,6 +215,27 @@ public class PublicPlayerData : MonoBehaviour
                 break;
             case NoPossessionMode.Automatic:
                 playerData.noPossessionMode = NoPossessionMode.Automatic;
+                break;
+        }
+    }
+    public void ChangePlayerState(PlayerState PlayerState)
+    {
+        if (!canChangeType) return;
+        switch (PlayerState)
+        {
+            case PlayerState.Free:
+                if (playerData.playerMode != PlayerState.Free)
+                {
+                    playerData.playerMode = PlayerState.Free;
+                    playerComponents.ComponentsPlayer.scriptsPlayer.cameraPosition.ChangeToFree();
+                    playerComponents.ComponentsPlayer.scriptsPlayer.cameraRotation.ChangeToFree();
+                }
+                break;
+            case PlayerState.LookingBall:
+                playerData.playerMode = PlayerState.LookingBall;
+                break;
+            case PlayerState.WithPossession:
+                playerData.playerMode = PlayerState.WithPossession;
                 break;
         }
     }

@@ -14,30 +14,40 @@ public class PuppetKick : PlayerComponent
         public float min, max;
         public float speed = 1;
     }
+    [System.Serializable]
+    public class ManagedKickParams
+    {
+        public float min, max;
+        public float speed = 1;
+        public float managedKickInputSensibility = 10;
+        public float managedKickTimeSensibility = 1;
+    }
     public bool noButtonForPass;
-    public KickParams conductionKickParams,passKickParams,shotKickParams,managedKickParams;
-
+    public KickParams conductionKickParams, passKickParams, shotKickParams;
+    public ManagedKickParams conductionManagedKickParams, passManagedKickParams, shotManagedParams;
     public ControllerDistance controllerDistance;
     public ControllerAim controllerAim;
     public MyRaycastHit raycastAim;
     
     KickParams currentKickParams;
+    ManagedKickParams currentManagedKickParams;
     public PlayerInput playerInput;
     public Slash slashHUD;
     bool conductionKickPressed,shotKickPressed;
     float _loadKick;
     float loadKick { get{return _loadKick; } set{ SetLoadKick(value); } }
-    public float managedKickInputSensibility=10;
+    
     public ComponentsPlayer componentsPlayer;
     float kickForce;
     Vector2 ManagedKickDir;
+    float managedKickTime;
     float distanceManagedKickMove;
     private bool ignoreMouseInput;
     public float timeScalePass=0.5f;
     bool inSlowTime{ get => playerData.onSlowTime; set => playerData.onSlowTime = value; }
     bool onLookAround{ get => playerData.onLookAround; set => playerData.onLookAround = value; }
 
-    private bool inputReady = false;
+    private bool inputReady = true;
     bool managedKick;
 
     private IEnumerator Start()
@@ -62,31 +72,38 @@ public class PuppetKick : PlayerComponent
         bool passKickPressed = playerInput.actions["PassKick"].IsPressed();
         bool passKickUp = playerInput.actions["PassKick"].WasReleasedThisFrame();
         bool lookAroundDown = playerInput.actions["LookAround"].WasPressedThisFrame();
+        bool lookAroundPressed = playerInput.actions["LookAround"].IsPressed();
         bool lookAroundUp = playerInput.actions["LookAround"].WasReleasedThisFrame();
         if (conductionKickDown)
         {
             currentKickParams = conductionKickParams;
+            currentManagedKickParams = conductionManagedKickParams;
         }
         if (shotKickDown)
         {
             currentKickParams = shotKickParams;
+            currentManagedKickParams = shotManagedParams;
             SlowDownTime();
             playerData.shotKick = true;
             playerData.passKick = false;
-            playerData.managedKick = false;
+            playerData.conductionKick = false;
+            //playerData.managedKick = false;
             loadKick = 0;
         }
         if (passKickDown)
         {
             currentKickParams = passKickParams;
+            currentManagedKickParams = passManagedKickParams;
             SlowDownTime();
             playerData.passKick = true;
             playerData.shotKick = false;
-            playerData.managedKick = false;
+            playerData.conductionKick = false;
+            //playerData.managedKick = false;
             loadKick = 0;
 
         }
-        if (lookAroundDown)
+        
+        if (lookAroundPressed)
         {
             LookAround();
         }
@@ -111,14 +128,16 @@ public class PuppetKick : PlayerComponent
         }
         if (noButtonForPass)
         {
-            if (!playerData.passKick && !playerData.shotKick)
+            if (!playerData.passKick && !playerData.shotKick&&!playerData.managedKick)
             {
                 currentKickParams = conductionKickParams;
+                currentManagedKickParams = conductionManagedKickParams;
+                playerData.conductionKick = true;
             }
             if (playerData.shotKick && !playerData.passKick)
             {
                 currentKickParams = shotKickParams;
-                
+               
             }
             if (!playerData.shotKick && playerData.passKick)
             {
@@ -177,9 +196,9 @@ public class PuppetKick : PlayerComponent
         {
             controllerAim.MoveAim();
         }
-        else 
+        else if(playerData.onLookAround)
         {
-            //controllerAim.CenterAim();
+            controllerAim.CenterAim();
         }
     }
     void SlowDownTime()
@@ -193,10 +212,16 @@ public class PuppetKick : PlayerComponent
     }
     void LookAround()
     {
-        if (!onLookAround && playerData.playerMode == PlayerState.WithPossession)
+        
+        if (!playerData.managedKick && playerData.playerMode == PlayerState.WithPossession)
         {
             onLookAround = true;
         }
+        else
+        {
+            onLookAround = false;
+        }
+        
     }
     void StopLookAround()
     {
@@ -225,36 +250,46 @@ public class PuppetKick : PlayerComponent
         {
             ManagedKickDir = Vector2.zero;
             distanceManagedKickMove = 0;
+            managedKickTime = 0;
             playerData.managedKick = true;
             playerData.shotKick = false;
             playerData.passKick = false;
             playerData.executeKick = false;
-            RestartScaleTime();
+            
         }
        
         if (playerData.managedKick)
         {
             
-            ManagedKickDir += managedKickMoveDelta * Time.deltaTime;
-            distanceManagedKickMove += managedKickMoveDelta.magnitude*Time.deltaTime;
+            ManagedKickDir += managedKickMoveDelta * Time.unscaledDeltaTime;
+            distanceManagedKickMove += managedKickMoveDelta.magnitude*Time.unscaledDeltaTime;
+            managedKickTime += Time.unscaledDeltaTime ;
         }
         else if (!managedKickStartUp)
         {
             ManagedKickDir = Vector2.zero;
             distanceManagedKickMove = 0;
+            managedKickTime = 0;
         }
         if (managedKickStartUp&& playerData.managedKick)
         {
-            if (controllerDistance.isClose())
+            RestartScaleTime();
+            if (controllerDistance.isClose2())
             {
                 
                 Vector3 normalizedManagedKickDir3D = componentsPlayer.transCamera.TransformDirection(new Vector3(ManagedKickDir.x, 0, ManagedKickDir.y));
                 normalizedManagedKickDir3D.y = 0;
                 normalizedManagedKickDir3D.Normalize();
+                
                 float angle = Vector3.Angle(ballRigidbody.velocity, normalizedManagedKickDir3D);
-                float forceMagnitude = Mathf.Clamp(distanceManagedKickMove * managedKickInputSensibility,distanceManagedKickMove > 0? managedKickParams.min : 0, managedKickParams.max);
+                float timeSensibility= managedKickTime * currentManagedKickParams.managedKickTimeSensibility;
+                float lerp = ((distanceManagedKickMove * currentManagedKickParams.managedKickInputSensibility) + timeSensibility)/2;
+                lerp /= 1;
+                float min = distanceManagedKickMove > 0 ? currentManagedKickParams.min : 0;
+                float forceMagnitude = Mathf.Lerp(min, currentManagedKickParams.max, lerp);
                 Vector3 force = normalizedManagedKickDir3D * forceMagnitude;
-                Vector3 endForce = Vector3.Lerp(ballRigidbody.velocity.magnitude*1.1f * normalizedManagedKickDir3D + force, force, angle / 180);
+                //print(forceMagnitude+" | "+lerp + " | "+ timeSensibility+" | "+(distanceManagedKickMove * currentManagedKickParams.managedKickInputSensibility));
+                Vector3 endForce = Vector3.Lerp(ballRigidbody.velocity.magnitude*0.5f * normalizedManagedKickDir3D + force, force*0.5f, angle / 180);
                 endForce.y = ballRigidbody.velocity.y;
                 KickEventArgs args = new KickEventArgs(force, ballRigidbody.velocity, ballRigidbody.angularVelocity, ballPosition, ComponentsPlayer.myMonoPlayerID.playerID.ToString());
                 ballRigidbody.velocity = endForce;
@@ -281,7 +316,7 @@ public class PuppetKick : PlayerComponent
     }
     void ExecuteKick()
     {
-        if (controllerDistance.isClose())
+        if (controllerDistance.isClose2())
         {
             if (raycastAim.isHitting)
             {
@@ -296,5 +331,15 @@ public class PuppetKick : PlayerComponent
                 MatchEvents.kick.Invoke(args);
             }
         }
+    }
+    private void OnDisable()
+    {
+        playerData.onLookAround = false;
+        playerData.onSlowTime = false;
+        playerData.executeKick = false;
+        playerData.managedKick = false;
+        playerData.loadKick = false;
+        playerData.passKick = false;
+        playerData.shotKick = false;
     }
 }

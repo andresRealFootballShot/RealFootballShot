@@ -27,7 +27,7 @@ public class MatchComponents : MonoBehaviour
     public static GameSounds gameSounds;
     public static CullPassPoints CullPassPoints;
     public static Brains Brains;
-    public static PublicPlayerData currentPublicPlayerData;
+    public static PublicPlayerData currentMyPublicPlayerData;
     public static Team myTeam { get; set; }
     public static Team rivalTeam { get; set; }
     public static Team currentReachBallTeam { get=>Teams.getTeamFromPlayer(firstReachBalPublicPlayerData.playerID); }
@@ -40,4 +40,5 @@ public class MatchComponents : MonoBehaviour
     public static MatchData MatchData;
     public static MatchCtrl MatchCtrl { get; set; }
     public static bool enabledRules { get=> MatchData.enabledRules;}
+    public static Team possessionTeam { get => MatchData.possessionTeam; set => MatchData.possessionTeam = value; }
 }

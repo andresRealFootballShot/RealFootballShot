@@ -26,7 +26,7 @@ public class ModeCtrl : MonoBehaviour
 
             
         currentFieldPositionType = startFieldPositionType;
-
+        MatchEvents.changeTeamPossession.AddListener(ChangePossession);
         //if (startMyTeam) SetMyTeam(startMyTeamName);
     }
     // Update is called once per frame
@@ -55,103 +55,118 @@ public class ModeCtrl : MonoBehaviour
     }
     void OnlyBots()
     {
-        changePlayerType(MatchComponents.currentPublicPlayerData, PlayerTypeID.Bot);
+        changePlayerType(MatchComponents.currentMyPublicPlayerData, PlayerTypeID.Bot);
     }
     void OnePlayerAutomaticReachBall()
     {
-        if (MatchComponents.currentPublicPlayerData == null)
+        if (MatchComponents.currentMyPublicPlayerData == null)
         {
             MatchComponents.myTeam.getPublicPlayerData(currentFieldPositionType, out PublicPlayerData publicPlayerData);
 
-            MatchComponents.currentPublicPlayerData = publicPlayerData;
+            MatchComponents.currentMyPublicPlayerData = publicPlayerData;
         }
         else
         {
-            if (MatchComponents.currentPublicPlayerData.fieldPositionType != currentFieldPositionType)
+            if (MatchComponents.currentMyPublicPlayerData.fieldPositionType != currentFieldPositionType)
             {
                 MatchComponents.myTeam.getPublicPlayerData(currentFieldPositionType, out PublicPlayerData publicPlayerData);
-                changePlayerType(MatchComponents.currentPublicPlayerData, PlayerTypeID.Bot);
-                MatchComponents.currentPublicPlayerData = publicPlayerData;
+                changePlayerType(MatchComponents.currentMyPublicPlayerData, PlayerTypeID.Bot);
+                MatchComponents.currentMyPublicPlayerData = publicPlayerData;
                 changePlayerType(publicPlayerData, PlayerTypeID.Puppet);
             }
         }
         if (MatchComponents.myTeam == null) return;
-        if (MatchComponents.currentPublicPlayerData != null && MatchComponents.currentPublicPlayerData.IsBot)
+        if (MatchComponents.currentMyPublicPlayerData != null && MatchComponents.currentMyPublicPlayerData.IsBot)
         {
-            changePlayerType(MatchComponents.currentPublicPlayerData, PlayerTypeID.Puppet);
+            changePlayerType(MatchComponents.currentMyPublicPlayerData, PlayerTypeID.Puppet);
         }
-        if (MatchComponents.currentPublicPlayerData != null && MatchComponents.currentPublicPlayerData.playerData.noPossessionMode == NoPossessionMode.Automatic)
+        if (MatchComponents.currentMyPublicPlayerData != null && MatchComponents.currentMyPublicPlayerData.playerData.noPossessionMode == NoPossessionMode.Automatic)
         {
-            MatchComponents.currentPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Freelance;
+            MatchComponents.currentMyPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Freelance;
         }
-        if(MatchComponents.currentPublicPlayerData != null && MatchComponents.currentPublicPlayerData.Equals( MatchComponents.myTeam.firstReachBallPublicPlayerData))
+        if(MatchComponents.currentMyPublicPlayerData != null && MatchComponents.currentMyPublicPlayerData.Equals( MatchComponents.myTeam.firstReachBallPublicPlayerData))
         {
-            MatchComponents.currentPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Automatic;
+            MatchComponents.currentMyPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Automatic;
         }
         else
         {
-            MatchComponents.currentPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Freelance;
+            MatchComponents.currentMyPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Freelance;
         }
     }
     void OnePlayerMode()
     {
-        if (MatchComponents.currentPublicPlayerData == null)
+        if (MatchComponents.currentMyPublicPlayerData == null)
         {
             MatchComponents.myTeam.getPublicPlayerData(currentFieldPositionType, out PublicPlayerData publicPlayerData);
             
-            MatchComponents.currentPublicPlayerData = publicPlayerData;
+            MatchComponents.currentMyPublicPlayerData = publicPlayerData;
         }
         else
         {
-            if (MatchComponents.currentPublicPlayerData.fieldPositionType != currentFieldPositionType)
+            if (MatchComponents.currentMyPublicPlayerData.fieldPositionType != currentFieldPositionType)
             {
                 MatchComponents.myTeam.getPublicPlayerData(currentFieldPositionType, out PublicPlayerData publicPlayerData);
-                changePlayerType(MatchComponents.currentPublicPlayerData, PlayerTypeID.Bot);
-                MatchComponents.currentPublicPlayerData = publicPlayerData;
+                changePlayerType(MatchComponents.currentMyPublicPlayerData, PlayerTypeID.Bot);
+                MatchComponents.currentMyPublicPlayerData = publicPlayerData;
                 changePlayerType(publicPlayerData, PlayerTypeID.Puppet);
             }
         }
-        if (MatchComponents.currentPublicPlayerData != null&&MatchComponents.currentPublicPlayerData.IsBot)
+        if (MatchComponents.currentMyPublicPlayerData != null&&MatchComponents.currentMyPublicPlayerData.IsBot)
         {
-            changePlayerType(MatchComponents.currentPublicPlayerData, PlayerTypeID.Puppet);
+            changePlayerType(MatchComponents.currentMyPublicPlayerData, PlayerTypeID.Puppet);
         }
-        if(MatchComponents.currentPublicPlayerData != null && MatchComponents.currentPublicPlayerData.playerData.noPossessionMode==NoPossessionMode.Automatic)
+        if(MatchComponents.currentMyPublicPlayerData != null && MatchComponents.currentMyPublicPlayerData.playerData.noPossessionMode==NoPossessionMode.Automatic)
         {
-            MatchComponents.currentPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Freelance;
+            MatchComponents.currentMyPublicPlayerData.playerData.noPossessionMode = NoPossessionMode.Freelance;
         }
     }
     void AllTeamMode()
     {
-        if (MatchComponents.currentPublicPlayerData == null)
+        if (MatchComponents.currentMyPublicPlayerData == null)
         {
-            if(MatchComponents.myTeam.firstReachBallPublicPlayerData!=null)
+            if (MatchComponents.myTeam.firstReachBallPublicPlayerData != null)
+            {
                 MatchComponents.myTeam.firstReachBallPublicPlayerData.ChangePlayerType(PlayerTypeID.Puppet);
+            }
         }
-        PublicPlayerData currentPublicPlayer = MatchComponents.currentPublicPlayerData;
+        PublicPlayerData currentPublicPlayer = MatchComponents.currentMyPublicPlayerData;
 
         if (currentPublicPlayer==null||currentPublicPlayer.team == null) return;
         PublicPlayerData firstPublicPlayerData = MatchComponents.myTeam.firstReachBallPublicPlayerData;
         if (firstPublicPlayerData == null) return;
-        if (MatchComponents.currentReachBallTeam.Equals(MatchComponents.myTeam))
+        if (MatchComponents.possessionTeam.Equals(MatchComponents.myTeam))
         {
             float timeDiference = firstPublicPlayerData.playerData.ballReachTime - currentPublicPlayer.playerData.ballReachTime;
             bool change1 = firstPublicPlayerData.playerData.ballReachTime < 0.1f && firstPublicPlayerData.playerData.ballReachTime < currentPublicPlayer.playerData.ballReachTime;
-            bool change2 = currentPublicPlayer.playerData.playerMode == PlayerState.WithPossession || currentPublicPlayer.ballReachTime < 0.25f;
-            if (!change2&&((changeAttackPlayerAvailable && timeDiference <= attackMaxChangePlayerReachTime) || change1))
+            bool change2 =  currentPublicPlayer.ballReachTime > 0.5f&& currentPublicPlayer.playerData.playerMode != PlayerState.WithPossession;
+            
+            if (!firstPublicPlayerData.Equals(currentPublicPlayer) &&change2 && (changeAttackPlayerAvailable && timeDiference <= attackMaxChangePlayerReachTime ))
             {
                 changeCurrentPlayer(firstPublicPlayerData, currentPublicPlayer);
+                currentPublicPlayer.ChangePlayerState(PlayerState.LookingBall);
                 firstPublicPlayerData.ChangeNoPossessionMode(NoPossessionMode.Automatic);
+                
             }
         }
         else
         {
+            bool availableChangeDefense = false;
             float timeDiference = firstPublicPlayerData.playerData.ballReachTime - currentPublicPlayer.playerData.ballReachTime;
             bool change1 = firstPublicPlayerData.playerData.ballReachTime < 0.1f && firstPublicPlayerData.playerData.ballReachTime < currentPublicPlayer.playerData.ballReachTime;
-            if ((changeDefensePlayerAvailable && timeDiference <= defenseMaxChangePlayerReachTime) || change1)
+            if (!firstPublicPlayerData.Equals(currentPublicPlayer)&&availableChangeDefense &&((changeDefensePlayerAvailable && timeDiference <= defenseMaxChangePlayerReachTime) || change1))
             {
-                //changeCurrentPlayer(firstPublicPlayerData, currentPublicPlayer);
-                currentPublicPlayer.ChangeNoPossessionMode(NoPossessionMode.Freelance);
+                changeCurrentPlayer(firstPublicPlayerData, currentPublicPlayer);
+                //currentPublicPlayer.ChangeNoPossessionMode(NoPossessionMode.Freelance);
+                firstPublicPlayerData.ChangePlayerState(PlayerState.Free);
             }
+        }
+    }
+    void ChangePossession()
+    {
+        PublicPlayerData currentPublicPlayer = MatchComponents.currentMyPublicPlayerData;
+        if (!MatchComponents.possessionTeam.Equals(MatchComponents.myTeam))
+        {
+            currentPublicPlayer.ChangePlayerState(PlayerState.Free);
         }
     }
     void changeCurrentPlayer(PublicPlayerData firstPublicPlayerData,PublicPlayerData currentPublicPlayer)

@@ -18,9 +18,9 @@ public class PlayerModeCtrl : PlayerComponent
     }
     void Start()
     {
-        MatchEvents.kick.AddListener(Kick);
+        //MatchEvents.kick.AddListener(Kick);
         
-        MatchEvents.losePossession.AddListener(LosePossession);
+        //MatchEvents.losePossession.AddListener(LosePossession);
     }
 
     // Update is called once per frame
@@ -95,7 +95,7 @@ public class PlayerModeCtrl : PlayerComponent
             Vector3 kickDirection = args.kickVelocity;
             if (playerMode == PlayerState.LookingBall || playerMode == PlayerState.WithPossession)
             {
-                if (!playerData.passKick && !playerData.shotKick)
+                if (!playerData.conductionKick)
                 {
                     playerMode = PlayerState.WithPossession;
                     transparency.SetTransparency(componentsPlayer.transModelo);
